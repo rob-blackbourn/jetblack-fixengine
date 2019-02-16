@@ -1,5 +1,4 @@
 import calendar
-import datetime
 import logging
 import os.path
 from aiofix.persistence import FileInitiatorStore
@@ -26,5 +25,5 @@ start_initator_manager(
     SENDER_COMP_ID,
     TARGET_COMP_ID,
     store,
-    session_dow_range=(calendar.MONDAY, calendar.FRIDAY)
+    # session_dow_range=(calendar.MONDAY, calendar.FRIDAY)
 )

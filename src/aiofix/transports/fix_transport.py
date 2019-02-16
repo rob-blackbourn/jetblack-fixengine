@@ -15,6 +15,9 @@ STATE_READ_BODY = 'Body'
 STATE_READ_EOF = 'EOF'
 STATE_HANDLER_COMPLETED = 'handler.completed'
 STATE_HANDLER_CLOSED = 'handler.closed'
+STATE_CANCELLED = 'cancelled'
+
+STATE_READ = (STATE_READ_BEGIN_STRING, STATE_READ_BODY_LENGTH, STATE_READ_BODY)
 
 
 async def _send_event(queue: Queue, event: Event) -> None:
@@ -56,7 +59,12 @@ async def fix_stream_processor(
         handler: Handler,
         shutdown_timeout: float,
         reader: StreamReader,
-        writer: StreamWriter) -> None:
+        writer: StreamWriter,
+        cancellation_token: asyncio.Event
+) -> None:
+    if cancellation_token.is_set():
+        return
+
     read_queue = Queue()
     write_queue = Queue()
 
@@ -75,15 +83,17 @@ async def fix_stream_processor(
     handler_task = asyncio.create_task(handler(send, receive))
     read_task = asyncio.create_task(reader.readuntil(SOH))
     write_task = asyncio.create_task(write_queue.get())
+    cancellation_task = asyncio.create_task(cancellation_token.wait())
 
     # Start the task service loop.
-    while state in (STATE_READ_BEGIN_STRING, STATE_READ_BODY_LENGTH, STATE_READ_BODY):
+    while state in STATE_READ and not cancellation_token.is_set():
 
         # Wait for a task to be completed.
         completed, pending = await asyncio.wait([
             read_task,
             write_task,
-            handler_task
+            handler_task,
+            cancellation_task
         ], return_when=asyncio.FIRST_COMPLETED)
 
         # Handle the completed tasks. The pending tasks are left to become completed.
@@ -92,6 +102,11 @@ async def fix_stream_processor(
             if task == handler_task:
 
                 state = STATE_HANDLER_COMPLETED
+                continue
+
+            elif task == cancellation_task:
+
+                state = STATE_CANCELLED
                 continue
 
             elif task == write_task:

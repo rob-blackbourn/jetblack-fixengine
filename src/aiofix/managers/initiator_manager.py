@@ -2,7 +2,6 @@ import asyncio
 from calendar import day_name
 from datetime import datetime, timedelta, time
 import logging
-import signal
 from ssl import SSLContext
 from typing import Optional, Tuple, Callable
 from ..meta_data import ProtocolMetaData
@@ -11,6 +10,7 @@ from ..middlewares import FixMessageMiddleware, mw
 from ..types import InitiatorStore
 from ..transports import initiate
 from ..utils.date_utils import is_dow_in_range, is_time_in_range
+from ..utils.cancellation import register_cancellation_token
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ class InitiatorManager:
             handler_factory: Callable[[], InitiatorHandler],
             host: str,
             port: int,
+            cancellation_token: asyncio.Event,
             *,
             ssl: Optional[SSLContext] = None,
             session_dow_range: Optional[Tuple[int, int]] = None,
@@ -55,6 +56,7 @@ class InitiatorManager:
         self.host = host
         self.port = port
         self.ssl = ssl
+        self.cancellation_token = cancellation_token
 
     async def sleep_until_session_starts(self) -> Optional[float]:
         now = datetime.now()
@@ -66,8 +68,12 @@ class InitiatorManager:
                 # Wait a till tomorrow then try again.
                 tomorrow = datetime(now.year, now.month, now.day, tzinfo=now.tzinfo) + timedelta(days=1)
                 seconds_till_tomorrow = (tomorrow - now).total_seconds()
-                await asyncio.sleep(seconds_till_tomorrow)
-                now = datetime.now()
+
+                try:
+                    await asyncio.wait_for(self.cancellation_token.wait(), seconds_till_tomorrow)
+                    raise asyncio.CancelledError
+                except asyncio.TimeoutError:
+                    now = datetime.now()
 
         # Wait for session start time.
         if self.session_start is not None and self.session_end is not None:
@@ -80,8 +86,12 @@ class InitiatorManager:
                     tomorrow = now.date() + timedelta(days=1)
                     tomorrow_session_start = tomorrow + self.session_start
                     seconds_till_start_time = (tomorrow_session_start - now).total_seconds()
-                await asyncio.sleep(seconds_till_start_time)
-                now = datetime.now()
+
+                try:
+                    await asyncio.wait_for(self.cancellation_token, seconds_till_start_time)
+                    raise asyncio.CancelledError
+                except asyncio.TimeoutError:
+                    now = datetime.now()
 
         if self.session_end is None:
             return None
@@ -93,9 +103,12 @@ class InitiatorManager:
         return (session_end - now).total_seconds()
 
     async def start(self, shutdown_timeout: float = 10.0) -> None:
-        while True:
-            # Wait for the seeion to start.
-            seconds_till_session_ends = await self.sleep_until_session_starts()
+        while not self.cancellation_token.is_set():
+            try:
+                # Wait for the seeion to start.
+                seconds_till_session_ends = await self.sleep_until_session_starts()
+            except asyncio.CancelledError:
+                continue
 
             # Make a new initiator handler
             handler = self.handler_factory()
@@ -107,6 +120,7 @@ class InitiatorManager:
                         self.host,
                         self.port,
                         handler,
+                        self.cancellation_token,
                         shutdown_timeout=shutdown_timeout,
                         ssl=self.ssl
                     ),
@@ -116,21 +130,13 @@ class InitiatorManager:
                 # After logout we should disconnect.
                 await handler.logout()
                 try:
-                    await asyncio.wait_for(handler, timeout=10)
+                    await asyncio.wait(
+                        [handler(), self.cancellation_token.wait()],
+                        timeout=10,
+                        return_when=asyncio.FIRST_COMPLETED
+                    )
                 except asyncio.TimeoutError:
                     pass
-
-
-def _cancel(signame: str, signum: int, cancellation_token: asyncio.Event) -> None:
-    msg = f'received signal {signame}'
-    logger.info(msg) if signum == signal.SIGINT else logger.warning(msg)
-    cancellation_token.set()
-
-
-def _register_cancellation_token(cancellation_token: asyncio.Event, loop: asyncio.AbstractEventLoop):
-    for signame in ('SIGHUP', 'SIGINT', 'SIGTERM'):
-        signum = getattr(signal, signame)
-        loop.add_signal_handler(signum, _cancel, signame, signum, cancellation_token)
 
 
 def start_initator_manager(
@@ -165,6 +171,7 @@ def start_initator_manager(
         initiator_handler_factory,
         host,
         port,
+        cancellation_token,
         ssl=ssl,
         session_dow_range=session_dow_range,
         session_time_range=session_time_range,
@@ -172,5 +179,5 @@ def start_initator_manager(
     )
 
     loop = asyncio.get_event_loop()
-    _register_cancellation_token(cancellation_token, loop)
+    register_cancellation_token(cancellation_token, loop)
     loop.run_until_complete(manager.start(shutdown_timeout))
