@@ -69,6 +69,18 @@ class InitiatorHandler:
         }
         await self._send_fix_message(message, send_time)
 
+    async def logout(self) -> None:
+        send_time = datetime.utcnow()
+        msg_seq_num = await self._next_outgoing_seqnum()
+        message = {
+            'MsgType': 'LOGOUT',
+            'MsgSeqNum': msg_seq_num,
+            'SenderCompID': self.sender_comp_id,
+            'TargetCompID': self.target_comp_id,
+            'SendingTime': send_time
+        }
+        await self._send_fix_message(message, send_time)
+
     async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
         send_time = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
@@ -149,7 +161,7 @@ class InitiatorHandler:
             return True
         elif message['MsgType'] == 'LOGOUT':
             self.is_logged_on = False
-            return True
+            return False
         else:
             logger.warning(f'unhandled admin message type "{message["MsgType"]}".')
             return True
