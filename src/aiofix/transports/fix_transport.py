@@ -211,15 +211,16 @@ async def fix_stream_processor(
             except asyncio.CancelledError:
                 pass
 
-        logger.info(f'Waiting {shutdown_timeout} seconds for the handler to complete.')
-        try:
-            await asyncio.wait_for(handler_task, timeout=shutdown_timeout)
-        except asyncio.TimeoutError:
-            logger.error('Cancelling the handler')
-            handler_task.cancel()
+        if not handler_task.cancelled():
+            logger.info(f'Waiting {shutdown_timeout} seconds for the handler to complete.')
             try:
-                await handler_task
-            except asyncio.CancelledError:
-                logger.warning('The handler task did not complete and has been cancelled')
+                await asyncio.wait_for(handler_task, timeout=shutdown_timeout)
+            except asyncio.TimeoutError:
+                logger.error('Cancelling the handler')
+                handler_task.cancel()
+                try:
+                    await handler_task
+                except asyncio.CancelledError:
+                    logger.warning('The handler task did not complete and has been cancelled')
 
         logger.debug('Shutdown complete.')
