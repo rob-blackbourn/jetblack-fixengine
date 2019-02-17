@@ -1,29 +1,50 @@
-import calendar
 import logging
 import os.path
+from typing import Optional, Mapping, Any
+from aiofix.transports import InitiatorHandler
 from aiofix.persistence import FileInitiatorStore
 from aiofix.managers import start_initator_manager
 from aiofix.loader import load_protocol
 
 logging.basicConfig(level=logging.DEBUG)
 
+logger = logging.getLogger(__name__)
+
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 etc = os.path.join(root, 'etc')
 
-store = FileInitiatorStore(os.path.join(root, 'store'))
+STORE = FileInitiatorStore(os.path.join(root, 'store'))
 HOST = '127.0.0.1'
 PORT = 10101
 SENDER_COMP_ID = 'CLIENT'
 TARGET_COMP_ID = 'SERVER'
+PROTOCOL = load_protocol(os.path.join(etc, 'FIX44.xml'))
 
-protocol = load_protocol(os.path.join(etc, 'FIX44.xml'))
+
+class MyInitatorHandler(InitiatorHandler):
+
+    async def on_logon(self) -> None:
+        logger.info('on_logon')
+
+    async def on_logout(self) -> None:
+        logger.info('on_logoout')
+
+    async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
+        logger.info(f'on_admin_message {message}')
+        return None
+
+    async def on_application_message(self, message: Mapping[str, Any]) -> bool:
+        logger.info(f'on_application_message {message}')
+        return True
+
 
 start_initator_manager(
+    MyInitatorHandler,
     HOST,
     PORT,
-    protocol,
+    PROTOCOL,
     SENDER_COMP_ID,
     TARGET_COMP_ID,
-    store,
+    STORE,
     # session_dow_range=(calendar.MONDAY, calendar.FRIDAY)
 )
