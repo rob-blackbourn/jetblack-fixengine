@@ -1,3 +1,4 @@
+from datetime import time
 import logging
 import os.path
 import tzlocal
@@ -29,7 +30,7 @@ class MyInitatorHandler(InitiatorHandler):
         logger.info('on_logon')
 
     async def on_logout(self) -> None:
-        logger.info('on_logoout')
+        logger.info('on_logout')
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
         logger.info(f'on_admin_message {message}')
@@ -49,5 +50,6 @@ start_initiator(
     TARGET_COMP_ID,
     STORE,
     HEARTBEAT_TIMEOUT,
-    shutdown_timeout=10
+    shutdown_timeout=10,
+    logon_time_range=(time(13, 2, 0), time(13, 4, 0))
 )

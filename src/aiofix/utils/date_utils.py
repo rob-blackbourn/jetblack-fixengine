@@ -64,7 +64,7 @@ async def wait_for_time_period(
     seconds_to_wait, end_datetime = seconds_for_time_period(now, start_time, end_time)
     if seconds_to_wait:
         try:
-            await asyncio.wait_for(cancellation_token, seconds_to_wait)
+            await asyncio.wait_for(cancellation_token.wait(), timeout=seconds_to_wait)
             raise asyncio.CancelledError
         except asyncio.TimeoutError:
             now = datetime.now()

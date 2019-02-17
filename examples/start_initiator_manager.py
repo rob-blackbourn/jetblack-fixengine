@@ -1,5 +1,6 @@
 import logging
 import os.path
+import tzlocal
 from typing import Optional, Mapping, Any
 from aiofix.transports import InitiatorHandler
 from aiofix.persistence import FileInitiatorStore
@@ -19,6 +20,8 @@ PORT = 10101
 SENDER_COMP_ID = 'CLIENT'
 TARGET_COMP_ID = 'SERVER'
 PROTOCOL = load_protocol(os.path.join(etc, 'FIX44.xml'))
+HEARTBEAT_TIMEOUT = 30
+TZ = tzlocal.get_localzone()
 
 
 class MyInitatorHandler(InitiatorHandler):
@@ -27,7 +30,7 @@ class MyInitatorHandler(InitiatorHandler):
         logger.info('on_logon')
 
     async def on_logout(self) -> None:
-        logger.info('on_logoout')
+        logger.info('on_logout')
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
         logger.info(f'on_admin_message {message}')
@@ -46,5 +49,7 @@ start_initator_manager(
     SENDER_COMP_ID,
     TARGET_COMP_ID,
     STORE,
+    HEARTBEAT_TIMEOUT,
+    tz=TZ
     # session_dow_range=(calendar.MONDAY, calendar.FRIDAY)
 )
