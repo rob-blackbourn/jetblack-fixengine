@@ -237,9 +237,12 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     async def _wait_till_logon_time(self) -> Optional[datetime]:
         if self.logon_time_range:
+            start_time, end_time = self.logon_time_range
+            logger.info(f'Logon from {start_time} to {end_time}')
             end_datetime = await wait_for_time_period(
                 datetime.now(tz=self.tz),
-                *self.logon_time_range,
+                start_time,
+                end_time,
                 cancellation_token=self.cancellation_token
             )
             return end_datetime

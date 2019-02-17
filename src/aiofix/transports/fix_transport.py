@@ -223,4 +223,4 @@ async def fix_stream_processor(
                 except asyncio.CancelledError:
                     logger.warning('The handler task did not complete and has been cancelled')
 
-        logger.debug('Shutdown complete.')
+    logger.debug('Shutdown complete.')

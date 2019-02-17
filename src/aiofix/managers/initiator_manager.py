@@ -1,4 +1,5 @@
 import asyncio
+import calendar
 from datetime import datetime, time, tzinfo
 import logging
 from ssl import SSLContext
@@ -40,15 +41,20 @@ class InitiatorManager:
 
     async def sleep_until_session_starts(self) -> Optional[datetime]:
         if self.session_dow_range:
+            start_dow, end_dow = self.session_dow_range
+            logger.info(f'Session from {calendar.day_name[start_dow]} to {calendar.day_name[end_dow]}')
             await wait_for_day_of_week(
                 datetime.now(tz=self.tz),
                 *self.session_dow_range,
                 cancellation_token=self.cancellation_token)
 
         if self.session_time_range:
+            start_time, end_time = self.session_time_range
+            logger.info(f'Session from {start_time} to {end_time}')
             end_datetime = await wait_for_time_period(
                 datetime.now(tz=self.tz),
-                *self.session_time_range,
+                start_time,
+                end_time,
                 cancellation_token=self.cancellation_token)
 
             return end_datetime

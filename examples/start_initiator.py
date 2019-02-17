@@ -1,7 +1,7 @@
 from datetime import time
 import logging
 import os.path
-import tzlocal
+import pytz
 from typing import Mapping, Any, Optional
 from aiofix.loader import load_protocol
 from aiofix.persistence import FileInitiatorStore
@@ -21,7 +21,7 @@ SENDER_COMP_ID = 'CLIENT'
 TARGET_COMP_ID = 'SERVER'
 HEARTBEAT_TIMEOUT = 30
 PROTOCOL = load_protocol('etc/FIX44.xml')
-TZ = tzlocal.get_localzone()
+TZ = pytz.timezone('Europe/London')
 
 
 class MyInitatorHandler(InitiatorHandler):
@@ -51,5 +51,6 @@ start_initiator(
     STORE,
     HEARTBEAT_TIMEOUT,
     shutdown_timeout=10,
-    logon_time_range=(time(13, 2, 0), time(13, 4, 0))
+    logon_time_range=(time(8, 0, 0), time(17, 0, 0)),
+    tz=TZ
 )

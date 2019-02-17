@@ -25,7 +25,7 @@ def make_datetime(d: date, t: time, tz: tzinfo) -> datetime:
     return datetime(d.year, d.month, d.day, t.hour, t.minute, t.second, t.microsecond, tzinfo=tz)
 
 
-def seconds_for_time_period(now: datetime, start_time: time, end_time: time) -> Tuple[float, datetime]:
+def delay_for_time_period(now: datetime, start_time: time, end_time: time) -> Tuple[timedelta, datetime]:
     if start_time < end_time:
         start_datetime = make_datetime(now.date(), start_time, now.tzinfo)
         end_datetime = make_datetime(now.date(), end_time, now.tzinfo)
@@ -36,8 +36,8 @@ def seconds_for_time_period(now: datetime, start_time: time, end_time: time) -> 
         start_datetime = make_datetime(now.date(), start_time, now.tzinfo)
         end_datetime = make_datetime(now.date(), end_time, now.tzinfo) + timedelta(days=1)
 
-    seconds_till_start = (start_datetime - now).total_seconds() if now < start_datetime else 0
-    return seconds_till_start, end_datetime
+    time_to_wait = (start_datetime - now) if now < start_datetime else timedelta(seconds=0)
+    return time_to_wait, end_datetime
 
 
 async def wait_for_day_of_week(now: datetime, start_dow: int, end_dow: int, cancellation_token: asyncio.Event) -> None:
@@ -61,10 +61,13 @@ async def wait_for_time_period(
         cancellation_token: asyncio.Event
 ) -> datetime:
     # Wait for start time.
-    seconds_to_wait, end_datetime = seconds_for_time_period(now, start_time, end_time)
-    if seconds_to_wait:
+    time_to_wait, end_datetime = delay_for_time_period(now, start_time, end_time)
+    if time_to_wait.total_seconds() == 0:
+        logger.info('No need to wait')
+    else:
+        logger.info(f'Waiting for {time_to_wait}')
         try:
-            await asyncio.wait_for(cancellation_token.wait(), timeout=seconds_to_wait)
+            await asyncio.wait_for(cancellation_token.wait(), timeout=time_to_wait.total_seconds())
             raise asyncio.CancelledError
         except asyncio.TimeoutError:
             now = datetime.now()
