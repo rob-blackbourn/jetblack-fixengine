@@ -1,5 +1,7 @@
 import aiofiles
 import os.path
+from typing import Optional
+from urllib.parse import quote_from_bytes
 from typing import MutableMapping, Tuple
 from ..types import Session, InitiatorStore
 
@@ -10,16 +12,19 @@ class FileSession(Session):
             self,
             directory: str,
             sender_comp_id: str,
-            target_comp_id: str
+            target_comp_id: str,
+            *,
+            message_style: Optional[str] = 'urlencode'
     ) -> None:
-        self.filename = os.path.join(directory, f'{sender_comp_id}-{target_comp_id}-session.txt')
-        if not os.path.exists(self.filename):
-            with open(self.filename, 'wt') as f:
+        # The file for the sequence numbers.
+        self.seqnum_filename = os.path.join(directory, f'{sender_comp_id}-{target_comp_id}-initiator-seqnum.txt')
+        if not os.path.exists(self.seqnum_filename):
+            with open(self.seqnum_filename, 'wt') as f:
                 f.write("0:0\n")
-        elif not os.path.isfile(self.filename):
-            raise RuntimeError(f'session file "{self.filename}" is not a file.')
+        elif not os.path.isfile(self.seqnum_filename):
+            raise RuntimeError(f'session file "{self.seqnum_filename}" is not a file.')
 
-        with open(self.filename) as f:
+        with open(self.seqnum_filename) as f:
             line = f.readline() or '0:0'
             outgoing_seqnum, incoming_seqnum = line.rstrip('\n').split(':')
 
@@ -28,8 +33,12 @@ class FileSession(Session):
         self._outgoing_seqnum = int(outgoing_seqnum)
         self._incoming_seqnum = int(incoming_seqnum)
 
+        # The file for the messages
+        self.message_filename = os.path.join(directory, f'{sender_comp_id}-{target_comp_id}-initiator-message.txt')
+        self.message_style = message_style
+
     async def _save(self) -> None:
-        async with aiofiles.open(self.filename, 'wt') as f:
+        async with aiofiles.open(self.seqnum_filename, 'wt') as f:
             await f.write(f'{self._outgoing_seqnum}:{self._incoming_seqnum}\n')
 
     @property
@@ -61,10 +70,23 @@ class FileSession(Session):
         self._incoming_seqnum = seqnum
         await self._save()
 
+    async def save_message(self, buf: bytes) -> None:
+        async with aiofiles.open(self.message_filename, 'at') as f:
+            if self.message_style == 'urlencode':
+                await f.write(quote_from_bytes(buf) + '\n')
+            else:
+                await f.write(buf)
+            f.flush()
+
 
 class FileInitiatorStore(InitiatorStore):
 
-    def __init__(self, directory: str) -> None:
+    def __init__(
+            self,
+            directory: str,
+            *,
+            message_style: Optional[str] = 'urlencode'
+    ) -> None:
         if not os.path.exists(directory):
             os.makedirs(directory)
         elif not os.path.isdir(directory):
@@ -72,6 +94,7 @@ class FileInitiatorStore(InitiatorStore):
 
         self.directory = directory
         self._sessions: MutableMapping[str, FileSession] = dict()
+        self.message_style = message_style
 
     def get_session(self, sender_comp_id: str, target_comp_id: str) -> Session:
         key = sender_comp_id + '\x01' + target_comp_id
@@ -79,6 +102,6 @@ class FileInitiatorStore(InitiatorStore):
         if key in self._sessions:
             return self._sessions[key]
 
-        session = FileSession(self.directory, sender_comp_id, target_comp_id)
+        session = FileSession(self.directory, sender_comp_id, target_comp_id, message_style=self.message_style)
         self._sessions[key] = session
         return session

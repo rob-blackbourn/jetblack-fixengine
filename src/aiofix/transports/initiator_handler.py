@@ -194,6 +194,7 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     async def _handle_event(self, event: Event) -> bool:
         if event['type'] == 'fix':
+            await self._session.save_message(event['message'])
             if event['message_category'] == 'admin':
                 status = await self._on_admin_message(event['message_contents'])
             else:

@@ -43,6 +43,10 @@ class Session(metaclass=ABCMeta):
     async def set_incoming_seqnum(self, seqnum: int) -> None:
         raise NotImplementedError
 
+    @abstractmethod
+    async def save_message(self, buf: bytes) -> None:
+        raise NotImplementedError
+
 
 class InitiatorStore(metaclass=ABCMeta):
 

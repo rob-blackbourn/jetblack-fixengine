@@ -3,8 +3,8 @@ import sqlite3
 from typing import MutableMapping, Tuple
 from ..types import Session, InitiatorStore
 
-CREATE_TABLE_SQL = """
-CREATE TABLE IF NOT EXISTS sessions
+CREATE_SEQNUM_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS initiator_seqnums
 (
     sender_comp_id VARCHAR(64) NOT NULL,
     target_comp_id VARCHAR(64) NOT NULL,
@@ -14,33 +14,50 @@ CREATE TABLE IF NOT EXISTS sessions
 )
 """
 
-SESSION_QUERY = """
+SEQNUM_QUERY = """
 SELECT outgoing_seqnum, incoming_seqnum
-FROM sessions
+FROM initiator_seqnums
 WHERE sender_comp_id = ? AND target_comp_id = ?
 """
 
-SESSION_INSERT = """
-INSERT INTO sessions(sender_comp_id, target_comp_id, outgoing_seqnum, incomping_seqnum)
+SEQNUM_INSERT = """
+INSERT INTO initiator_seqnums(sender_comp_id, target_comp_id, outgoing_seqnum, incomping_seqnum)
 VALUES ( ?, ?, ?, ?)
 """
 
-SESSION_UPDATE = """
-UPDATE sessions
+SEQNUM_UPDATE = """
+UPDATE initiator_seqnums
 SET outgoing_seqnum = ?, incoming_seqnum = ?
 WHERE sender_comp_id = ? AND target_comp_id = ?
 """
 
-SESSION_UPDATE_OUTGOING = """
-UPDATE sessions
+SEQNUM_UPDATE_OUTGOING = """
+UPDATE initiator_seqnums
 SET outgoing_seqnum = ?
 WHERE sender_comp_id = ? AND target_comp_id = ?
 """
 
-SESSION_UPDATE_INCOMING = """
-UPDATE sessions
+SEQNUM_UPDATE_INCOMING = """
+UPDATE initiator_seqnums
 SET incoming_seqnum = ?
 WHERE sender_comp_id = ? AND target_comp_id = ?
+"""
+
+CREATE_MESSAGE_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS initiator_messages
+(
+    sender_comp_id VARCHAR(64) NOT NULL,
+    target_comp_id VARCHAR(64) NOT NULL,
+    outgoing_seqnum INT NOT NULL,
+    incoming_seqnum INT NOT NULL,
+    message VARCHAR(2048) NOT NULL,
+    PRIMARY KEY (sender_comp_id, target_comp_id)
+)
+"""
+
+MESSAGE_INSERT = """
+INSERT INTO initiator_messages(sender_comp_id, target_comp_id, outgoing_seqnum, incomping_seqnum, message)
+VALUES ( ?, ?, ?, ?, ?)
 """
 
 
@@ -59,12 +76,12 @@ class SqlSession(Session):
         conn = sqlite3.connect(*self.conn_args, **self.conn_kwargs)
         cursor = conn.cursor()
 
-        cursor.execute(SESSION_QUERY, (sender_comp_id, target_comp_id))
+        cursor.execute(SEQNUM_QUERY, (sender_comp_id, target_comp_id))
         result = cursor.fetchone()
         if result:
             self._outgoing_seqnum, self._incoming_seqnum = result
         else:
-            cursor.execute(SESSION_INSERT, (sender_comp_id, target_comp_id, 0, 0))
+            cursor.execute(SEQNUM_INSERT, (sender_comp_id, target_comp_id, 0, 0))
             conn.commit()
             self._outgoing_seqnum, self._incoming_seqnum = 0, 0
 
@@ -86,7 +103,7 @@ class SqlSession(Session):
         self._outgoing_seqnum, self._incoming_seqnum = outgoing_seqnum, incoming_seqnums
         async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
             await db.execute(
-                SESSION_UPDATE,
+                SEQNUM_UPDATE,
                 (self._outgoing_seqnum, self._incoming_seqnum, self.sender_comp_id, self.target_comp_id)
             )
             await db.commit()
@@ -98,7 +115,7 @@ class SqlSession(Session):
         self._outgoing_seqnum = seqnum
         async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
             await db.execute(
-                SESSION_UPDATE_OUTGOING,
+                SEQNUM_UPDATE_OUTGOING,
                 (self._outgoing_seqnum, self.sender_comp_id, self.target_comp_id)
             )
             await db.commit()
@@ -110,8 +127,17 @@ class SqlSession(Session):
         self._incoming_seqnum = seqnum
         async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
             await db.execute(
-                SESSION_UPDATE_INCOMING,
+                SEQNUM_UPDATE_INCOMING,
                 (self._incoming_seqnum, self.sender_comp_id, self.target_comp_id)
+            )
+            await db.commit()
+
+    async def save_message(self, buf: bytes) -> None:
+        async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
+            message = buf.decode('ascii')
+            await db.execute(
+                MESSAGE_INSERT,
+                (self.sender_comp_id, self.target_comp_id, self._outgoing_seqnum, self._incoming_seqnum, message)
             )
             await db.commit()
 
@@ -127,7 +153,8 @@ class SqlInitiatorStore(InitiatorStore):
         self.conn_kwargs = conn_kwargs
         conn = sqlite3.connect(*self.conn_args, **self.conn_kwargs)
         cursor = conn.cursor()
-        cursor.execute(CREATE_TABLE_SQL)
+        cursor.execute(CREATE_SEQNUM_TABLE_SQL)
+        cursor.execute(CREATE_MESSAGE_TABLE_SQL)
         self._sessions: MutableMapping[str, SqlSession] = dict()
 
     def get_session(self, sender_comp_id: str, target_comp_id: str) -> Session:
