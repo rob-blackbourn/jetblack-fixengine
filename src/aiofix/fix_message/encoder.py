@@ -1,47 +1,51 @@
-from typing import Iterator, List, Tuple, MutableMapping
+from typing import Iterator, List, Tuple
 from ..meta_data import (
     message_member_iter,
     MessageMemberMetaData,
-    MessageFieldMetaDataMapping,
+    MessageMetaData,
     ProtocolMetaData,
-    FieldMessageDataMap,
-    FieldMetaData
+    FieldMessageDataMap
 )
 from .errors import EncodingError
-from .common import SOH
+from .common import SOH, encode_value
 
 
-def _encode(
+def _encode_fields(
+        protocol: ProtocolMetaData,
         encoded_message: List[Tuple[bytes, bytes]],
         data: FieldMessageDataMap,
         meta_data: Iterator[MessageMemberMetaData]
 ) -> None:
-    for meta_data_item in meta_data:
+    for meta_datum in meta_data:
         # Check for required fields.
-        if meta_data_item.member not in data:
-            if meta_data_item.is_required:
-                raise EncodingError(f'required field "{meta_data_item.member.name}" is missing')
+        if meta_datum.member.name not in data:
+            if meta_datum.is_required:
+                raise EncodingError(f'required field "{meta_datum.member.name}" is missing')
             continue
 
-        item_data = data[meta_data_item.member]
-        if meta_data_item.type == 'field':
-            encoded_message.append((meta_data_item.member.number, item_data))
-        elif meta_data_item.type == 'group':
-            encoded_message.append((meta_data_item.member.number, str(len(item_data)).encode('ascii')))
+        item_data = data[meta_datum.member.name]
+        if meta_datum.type == 'field':
+            value = encode_value(protocol, meta_datum.member, item_data)
+            encoded_message.append((meta_datum.member.number, value))
+        elif meta_datum.type == 'group':
+            value = encode_value(protocol, meta_datum.member, len(item_data))
+            encoded_message.append((meta_datum.member.number, value))
             for group_item in item_data:
-                _encode(
+                _encode_fields(
+                    protocol,
                     encoded_message,
                     group_item,
-                    message_member_iter(meta_data_item.children.values())
+                    message_member_iter(meta_datum.children.values())
                 )
         else:
-            raise EncodingError(f'unknown type "{meta_data_item.type}" for item "{meta_data_item.member.name}"')
+            raise EncodingError(f'unknown type "{meta_datum.type}" for item "{meta_datum.member.name}"')
 
 
 def _regenerate_integrity(
         protocol: ProtocolMetaData,
         encoded_message: List[Tuple[bytes, bytes]],
-        sep: bytes
+        sep: bytes,
+        convert_sep_for_checkum: bool
 ) -> bytes:
     body = sep.join(field + b'=' + value for field, value in encoded_message[2:-1]) + sep
     body_lengh = len(body)
@@ -55,7 +59,7 @@ def _regenerate_integrity(
     buf = header + body
 
     # Calculate the checksum
-    check_sum = sum(buf if sep == SOH else buf.replace(sep, SOH)) % 256
+    check_sum = sum(buf if sep == SOH or not convert_sep_for_checkum else buf.replace(sep, SOH)) % 256
     buf += protocol.fields_by_name['CheckSum'].number + b'=' + f'{check_sum:#03}'.encode('ascii') + sep
 
     return buf
@@ -63,19 +67,21 @@ def _regenerate_integrity(
 
 def encode(
         protocol: ProtocolMetaData,
-        data: MutableMapping[FieldMetaData, bytes],
-        message_field_meta_data: MessageFieldMetaDataMapping,
+        data: FieldMessageDataMap,
+        meta_data: MessageMetaData,
+        *,
         sep: bytes = SOH,
-        regenerate_integrity: bool = True
+        regenerate_integrity: bool = True,
+        convert_sep_for_checksum: bool = True
 ) -> bytes:
     encoded_message: List[Tuple[bytes, bytes]] = []
 
-    _encode(encoded_message, data, message_member_iter(protocol.header.values()))
-    _encode(encoded_message, data, message_member_iter(message_field_meta_data.values()))
-    _encode(encoded_message, data, message_member_iter(protocol.trailer.values()))
+    _encode_fields(protocol, encoded_message, data, message_member_iter(protocol.header.values()))
+    _encode_fields(protocol, encoded_message, data, message_member_iter(meta_data.fields.values()))
+    _encode_fields(protocol, encoded_message, data, message_member_iter(protocol.trailer.values()))
 
     if regenerate_integrity:
-        buf = _regenerate_integrity(protocol, encoded_message, sep)
+        buf = _regenerate_integrity(protocol, encoded_message, sep, convert_sep_for_checksum)
     else:
         buf = sep.join(field + b'=' + value for field, value in encoded_message) + sep
 

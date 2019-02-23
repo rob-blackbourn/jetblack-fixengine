@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Mapping, Optional, Union, MutableMapping, List
+from typing import Mapping, Optional, Union, MutableMapping, List, Any
 
 
 class FieldMetaData:
@@ -95,4 +95,4 @@ class MessageMemberMetaData:
 
 MessageFieldMetaDataMapping = Mapping[str, Union[MessageMemberMetaData, 'MessageFieldMetaDataMapping']]
 
-FieldMessageDataMap = MutableMapping[FieldMetaData, Union[bytes, List['FieldMessageDataMap']]]
+FieldMessageDataMap = MutableMapping[str, Union[Any, List['FieldMessageDataMap']]]
