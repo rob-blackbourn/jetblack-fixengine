@@ -1,7 +1,7 @@
-from .file_store import FileInitiatorStore
-from .sql_store import SqlInitiatorStore
+from .file_store import FileStore
+from .sql_store import SqlStore
 
 __all__ = [
-    'FileInitiatorStore',
-    'SqlInitiatorStore'
+    'FileStore',
+    'SqlStore'
 ]

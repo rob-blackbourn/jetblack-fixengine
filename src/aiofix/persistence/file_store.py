@@ -3,7 +3,7 @@ import os.path
 from typing import Optional
 from urllib.parse import quote_from_bytes
 from typing import MutableMapping, Tuple
-from ..types import Session, InitiatorStore
+from ..types import Session, Store
 
 
 class FileSession(Session):
@@ -79,7 +79,7 @@ class FileSession(Session):
             f.flush()
 
 
-class FileInitiatorStore(InitiatorStore):
+class FileStore(Store):
 
     def __init__(
             self,

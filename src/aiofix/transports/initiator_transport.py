@@ -3,7 +3,7 @@ from datetime import tzinfo, time
 import logging
 from ssl import SSLContext
 from typing import Optional, Callable, Type, Tuple
-from ..types import Handler, InitiatorStore
+from ..types import Handler, Store
 from ..meta_data import ProtocolMetaData
 from ..utils.cancellation import register_cancellation_token
 from ..middlewares import mw, FixMessageMiddleware
@@ -12,7 +12,7 @@ from .initiator_handler import InitiatorHandler
 
 logger = logging.getLogger(__name__)
 
-InitiatorFactory = Callable[[ProtocolMetaData, str, str, InitiatorStore, int, asyncio.Event], Handler]
+InitiatorFactory = Callable[[ProtocolMetaData, str, str, Store, int, asyncio.Event], Handler]
 
 
 async def initiate(
@@ -37,7 +37,7 @@ def create_initiator(
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
-        store: InitiatorStore,
+        store: Store,
         heartbeat_timeout: int,
         cancellation_token: asyncio.Event,
         *,
@@ -68,7 +68,7 @@ def start_initiator(
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
-        store: InitiatorStore,
+        store: Store,
         heartbeat_timeout: int,
         *,
         ssl: Optional[SSLContext] = None,

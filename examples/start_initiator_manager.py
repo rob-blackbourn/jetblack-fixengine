@@ -5,7 +5,7 @@ import os.path
 import pytz
 from typing import Optional, Mapping, Any
 from aiofix.transports import InitiatorHandler
-from aiofix.persistence import FileInitiatorStore
+from aiofix.persistence import FileStore
 from aiofix.managers import start_initator_manager
 from aiofix.loader import load_protocol
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 etc = os.path.join(root, 'etc')
 
-STORE = FileInitiatorStore(os.path.join(root, 'store'))
+STORE = FileStore(os.path.join(root, 'store'))
 HOST = '127.0.0.1'
 PORT = 10101
 SENDER_COMP_ID = 'CLIENT'

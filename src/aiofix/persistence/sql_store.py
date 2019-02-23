@@ -1,7 +1,7 @@
 import aiosqlite
 import sqlite3
 from typing import MutableMapping, Tuple
-from ..types import Session, InitiatorStore
+from ..types import Session, Store
 
 CREATE_SEQNUM_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS initiator_seqnums
@@ -142,7 +142,7 @@ class SqlSession(Session):
             await db.commit()
 
 
-class SqlInitiatorStore(InitiatorStore):
+class SqlStore(Store):
 
     def __init__(
             self,

@@ -6,7 +6,7 @@ from ssl import SSLContext
 from typing import Optional, Tuple, Callable, Type
 from ..meta_data import ProtocolMetaData
 from ..transports import InitiatorHandler, create_initiator
-from ..types import InitiatorStore
+from ..types import Store
 from ..transports import initiate
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_token
@@ -107,7 +107,7 @@ def start_initator_manager(
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
-        store: InitiatorStore,
+        store: Store,
         heartbeat_timeout: int,
         *,
         ssl: Optional[SSLContext] = None,

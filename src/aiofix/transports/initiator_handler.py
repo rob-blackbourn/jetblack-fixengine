@@ -4,7 +4,7 @@ from datetime import datetime, time, tzinfo
 import logging
 from typing import Mapping, Any, Optional, Tuple
 from ..meta_data import ProtocolMetaData
-from ..types import InitiatorStore, Event
+from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             protocol: ProtocolMetaData,
             sender_comp_id: str,
             target_comp_id: str,
-            store: InitiatorStore,
+            store: Store,
             heartbeat_timeout: int,
             cancellation_token: asyncio.Event,
             *,

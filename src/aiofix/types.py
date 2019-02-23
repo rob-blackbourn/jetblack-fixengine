@@ -48,7 +48,7 @@ class Session(metaclass=ABCMeta):
         raise NotImplementedError
 
 
-class InitiatorStore(metaclass=ABCMeta):
+class Store(metaclass=ABCMeta):
 
     def get_session(self, sender_comp_id: str, target_comp_id: str) -> Session:
         raise NotImplementedError
