@@ -76,6 +76,11 @@ def encode(
 ) -> bytes:
     encoded_message: List[Tuple[bytes, bytes]] = []
 
+    if regenerate_integrity:
+        data['BeginString'] = protocol.begin_string.decode('ascii')
+        data['BodyLength'] = 0
+        data['CheckSum'] = '000'
+
     _encode_fields(protocol, encoded_message, data, message_member_iter(protocol.header.values()))
     _encode_fields(protocol, encoded_message, data, message_member_iter(meta_data.fields.values()))
     _encode_fields(protocol, encoded_message, data, message_member_iter(protocol.trailer.values()))

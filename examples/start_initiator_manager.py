@@ -53,7 +53,7 @@ start_initator_manager(
     STORE,
     HEARTBEAT_TIMEOUT,
     tz=TZ,
-    session_dow_range=(calendar.MONDAY, calendar.FRIDAY),
-    session_time_range=(time(6, 0, 0), time(18, 0, 0)),
-    logon_time_range=(time(8, 0, 0), time(17, 0, 0))
+    # session_dow_range=(calendar.MONDAY, calendar.FRIDAY),
+    # session_time_range=(time(6, 0, 0), time(18, 0, 0)),
+    # logon_time_range=(time(8, 0, 0), time(17, 0, 0))
 )
