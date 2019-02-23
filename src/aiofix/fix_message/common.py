@@ -1,8 +1,14 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import List, Tuple, Any
 from ..meta_data import ProtocolMetaData, FieldMetaData
 
 SOH = b'\x01'
+
+UTCTIMESTAMP_FMT_MILLIS = '%Y%m%d-%H:%M:%S.%f'
+UTCTIMESTAMP_FMT_NO_MILLIS = '%Y%m%d-%H:%M:%S'
+UTCTIMEONLY_FMT_MILLIS = '%H:%M:%S.%f'
+UTCTIMEONLY_FMT_NO_MILLIS = '%H:%M:%S'
 
 
 def calc_checksum(buf: bytes, sep: bytes, convert_sep_to_soh_for_checksum: bool) -> bytes:
@@ -28,15 +34,23 @@ def decode_value(protocol: ProtocolMetaData, meta_data: FieldMetaData, value: by
     elif meta_data.type in ('INT', 'SEQNUM', 'NUMINGROUP', 'LENGTH'):
         return int(value.lstrip(b'0') or b'0')
     elif meta_data.type in ('FLOAT', 'QTY', 'PRICE', 'PRICEOFFSET'):
-        return float(value)
+        return Decimal(value.decode('ascii')) if protocol.is_float_decimal else float(value)
     elif meta_data.type in ('CHAR', 'STRING', 'CURRENCY', 'EXCHANGE'):
         return value.decode('ascii')
     elif meta_data.type == 'BOOLEAN':
         return value == b'Y'
     elif meta_data.type == 'MULTIPLEVALUESTRING':
         return value.decode('ascii').split(' ')
-    elif meta_data.type in ('UTCTIMESTAMP', 'UTCTIMEONLY'):
-        return datetime.strptime(value.decode('ascii'), protocol.formats[meta_data.type])
+    elif meta_data.type == 'UTCTIMESTAMP':
+        if protocol.is_millisecond_time:
+            return datetime.strptime(value.decode('ascii'), UTCTIMESTAMP_FMT_MILLIS)
+        else:
+            return datetime.strptime(value.decode('ascii'), UTCTIMESTAMP_FMT_NO_MILLIS)
+    elif meta_data.type == 'UTCTIMEONLY':
+        if protocol.is_millisecond_time:
+            return datetime.strptime(value.decode('ascii'), UTCTIMEONLY_FMT_MILLIS)
+        else:
+            return datetime.strptime(value.decode('ascii'), UTCTIMEONLY_FMT_NO_MILLIS)
     elif meta_data.type in ('LOCALMKTDATE', 'UTCDATE'):
         return datetime.strptime(value.decode('ascii'), '%Y%m%d')
     elif meta_data.type == 'MONTHYEAR':
@@ -53,15 +67,28 @@ def encode_value(protocol: ProtocolMetaData, meta_data: FieldMetaData, value: An
     elif meta_data.type in ('INT', 'SEQNUM', 'NUMINGROUP', 'LENGTH'):
         return str(value).encode()
     elif meta_data.type in ('FLOAT', 'QTY', 'PRICE', 'PRICEOFFSET', 'AMT'):
-        return str(value).encode()
+        if isinstance(value, Decimal):
+            return str(value).encode()
+        elif value != int(value):
+            return str(int(value)).encode()
+        else:
+            return str(value).encode()
     elif meta_data.type in ('CHAR', 'STRING', 'CURRENCY', 'EXCHANGE'):
         return value.encode()
     elif meta_data.type == 'BOOLEAN':
         return b'Y' if value else b'N'
     elif meta_data.type == 'MULTIPLEVALUESTRING':
         return ' '.join(value).encode()
-    elif meta_data.type in ('UTCTIMESTAMP', 'UTCTIMEONLY'):
-        return value.strftime(protocol.formats[meta_data.type]).encode()
+    elif meta_data.type == 'UTCTIMESTAMP':
+        if protocol.is_millisecond_time:
+            return value.strftime(UTCTIMESTAMP_FMT_MILLIS)[:-3].encode()
+        else:
+            return value.strftime(UTCTIMESTAMP_FMT_NO_MILLIS).encode()
+    elif meta_data.type == 'UTCTIMEONLY':
+        if protocol.is_millisecond_time:
+            return value.strftime(UTCTIMEONLY_FMT_MILLIS).encode()
+        else:
+            return value.strftime(UTCTIMEONLY_FMT_NO_MILLIS).encode()
     elif meta_data.type in ('LOCALMKTDATE', 'UTCDATE'):
         return value.strftime('%Y%m%d').encode()
     elif meta_data.type == 'MONTHYEAR':

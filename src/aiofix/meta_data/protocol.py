@@ -2,11 +2,6 @@ from typing import Mapping
 from .message_member import FieldMetaData, ComponentMetaData, MessageMemberMetaData
 from .message import MessageMetaData
 
-DEFAULT_FORMATS = {
-    'UTCTIMESTAMP': '%Y%m%d-%H:%M:%S.%f',
-    'UTCTIMEONLY': '%H:%M:%S.%f'
-}
-
 
 class ProtocolMetaData:
 
@@ -19,7 +14,9 @@ class ProtocolMetaData:
             messages: Mapping[str, MessageMetaData],
             header: Mapping[str, MessageMemberMetaData],
             trailer: Mapping[str, MessageMemberMetaData],
-            formats: Mapping[str, str] = DEFAULT_FORMATS
+            *,
+            is_millisecond_time: bool = True,
+            is_float_decimal=False
     ) -> None:
         self._version = version
         self._begin_string = begin_string
@@ -30,7 +27,8 @@ class ProtocolMetaData:
         self._messages_by_type = {message.msgtype: message for message in messages.values()}
         self._header = header
         self._trailer = trailer
-        self._formats = formats
+        self._is_millisecond_time = is_millisecond_time
+        self._is_float_decimal = is_float_decimal
 
     @property
     def version(self) -> str:
@@ -69,8 +67,12 @@ class ProtocolMetaData:
         return self._trailer
 
     @property
-    def formats(self) -> Mapping[str, str]:
-        return self._formats
+    def is_millisecond_time(self) -> bool:
+        return self._is_millisecond_time
+
+    @property
+    def is_float_decimal(self) -> bool:
+        return self._is_float_decimal
 
     def __str__(self) -> str:
         return f'<ProtocolMetaData: version="{self.version}", begin_string={self.begin_string}'

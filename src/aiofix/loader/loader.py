@@ -101,7 +101,12 @@ def process_root(node) -> dict:
     return protocol
 
 
-def load_protocol(filename) -> ProtocolMetaData:
+def load_protocol(
+        filename,
+        *,
+        is_millisecond_time: bool = True,
+        is_float_decimal: bool = False
+) -> ProtocolMetaData:
     document = minidom.parse(filename)
     config = process_root(document.documentElement)
 
@@ -113,4 +118,14 @@ def load_protocol(filename) -> ProtocolMetaData:
     header = parse_header(config['header'], fields, components)
     trailer = parse_header(config['trailer'], fields, components)
 
-    return ProtocolMetaData(version, begin_string, fields, components, messages, header, trailer)
+    return ProtocolMetaData(
+        version,
+        begin_string,
+        fields,
+        components,
+        messages,
+        header,
+        trailer,
+        is_millisecond_time=is_millisecond_time,
+        is_float_decimal=is_float_decimal
+    )
