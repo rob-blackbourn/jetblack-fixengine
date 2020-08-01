@@ -1,3 +1,5 @@
+"""The initiator manager"""
+
 import asyncio
 import calendar
 from datetime import datetime, time, tzinfo
@@ -42,7 +44,8 @@ class InitiatorManager:
     async def sleep_until_session_starts(self) -> Optional[datetime]:
         if self.session_dow_range:
             start_dow, end_dow = self.session_dow_range
-            logger.info(f'Session from {calendar.day_name[start_dow]} to {calendar.day_name[end_dow]}')
+            logger.info(
+                f'Session from {calendar.day_name[start_dow]} to {calendar.day_name[end_dow]}')
             await wait_for_day_of_week(
                 datetime.now(tz=self.tz),
                 *self.session_dow_range,
@@ -74,7 +77,8 @@ class InitiatorManager:
 
             try:
                 # Start the initiator for the duration of the session.
-                session_timeout = (end_datetime - datetime.now(tz=self.tz)).total_seconds() if end_datetime else None
+                session_timeout = (
+                    end_datetime - datetime.now(tz=self.tz)).total_seconds() if end_datetime else None
                 await asyncio.wait_for(
                     initiate(
                         self.host,
@@ -100,7 +104,7 @@ class InitiatorManager:
                     pass
 
 
-def start_initator_manager(
+def start_initiator_manager(
         klass: Type[InitiatorHandler],
         host: str,
         port: int,

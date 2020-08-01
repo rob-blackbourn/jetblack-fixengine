@@ -1,3 +1,5 @@
+"""FIX Message meta data"""
+
 from .message_member import (
     FieldMetaData,
     ComponentMetaData,

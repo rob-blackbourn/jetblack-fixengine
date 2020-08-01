@@ -1,3 +1,5 @@
+"""Loader"""
+
 from collections import OrderedDict
 import xml.dom.minidom as minidom
 import xml.dom as dom

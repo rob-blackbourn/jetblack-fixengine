@@ -1,3 +1,5 @@
+"""Components"""
+
 from typing import Mapping, Any, Optional
 from ..meta_data import FieldMetaData, ComponentMetaData
 from .messages import _to_message_member_meta_data
@@ -14,5 +16,9 @@ def parse_components(
     components = {name: ComponentMetaData(name, None) for name in info.keys()}
     for name, data in info.items():
         component: ComponentMetaData = components[name]
-        component._members = _to_message_member_meta_data(data, field_meta_data, components)
+        component._members = _to_message_member_meta_data(
+            data,
+            field_meta_data,
+            components
+        )
     return components

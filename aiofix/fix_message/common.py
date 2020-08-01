@@ -1,3 +1,5 @@
+"""Common Code"""
+
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Tuple, Any
@@ -11,7 +13,27 @@ UTCTIMEONLY_FMT_MILLIS = '%H:%M:%S.%f'
 UTCTIMEONLY_FMT_NO_MILLIS = '%H:%M:%S'
 
 
-def calc_checksum(buf: bytes, sep: bytes, convert_sep_to_soh_for_checksum: bool) -> bytes:
+def calc_checksum(
+        buf: bytes,
+        sep: bytes = SOH,
+        convert_sep_to_soh_for_checksum: bool = False
+) -> bytes:
+    """Calculate the FIX message checksum.
+
+    In production the separator is always SOH (ascii 0x01). For diagnostics the
+    '|' charactor is often used to allow the message to be printed. As this will
+    give a different checksum a flag is provided to convert the separator to SOH
+    if required.
+
+    Args:
+        buf (bytes): The FIX message buffer.
+        sep (bytes, optional): The separator. Defaults to SOH.
+        convert_sep_to_soh_for_checksum (bool, optional): If true convert the
+            separator to SOH before calculating the checksum. Defaults to False.
+
+    Returns:
+        bytes: The checksum.
+    """
     if sep != SOH and convert_sep_to_soh_for_checksum:
         buf = buf.replace(sep, SOH)
 
@@ -19,14 +41,45 @@ def calc_checksum(buf: bytes, sep: bytes, convert_sep_to_soh_for_checksum: bool)
     return f'{check_sum:#03}'.encode('ascii')
 
 
-def calc_body_length(buf: bytes, encoded_message: List[Tuple[bytes, bytes]], sep: bytes = SOH) -> int:
-    header = sep.join([b'='.join(field_value) for field_value in encoded_message[:2]]) + sep
+def calc_body_length(
+        buf: bytes,
+        encoded_message: List[Tuple[bytes, bytes]],
+        sep: bytes = SOH
+) -> int:
+    """Calculate the body length
+
+    Args:
+        buf (bytes): The FIX message buffer
+        encoded_message (List[Tuple[bytes, bytes]]): The encoded FIX message
+        sep (bytes, optional): The message separator. Defaults to SOH.
+
+    Returns:
+        int: The length of the body.
+    """
+    header = sep.join([
+        b'='.join(field_value)
+        for field_value in encoded_message[:2]
+    ]) + sep
     trailer = b'='.join(encoded_message[-1]) + sep
     body_length = len(buf) - len(header) - len(trailer)
     return body_length
 
 
-def decode_value(protocol: ProtocolMetaData, meta_data: FieldMetaData, value: bytes) -> Any:
+def decode_value(
+        protocol: ProtocolMetaData,
+        meta_data: FieldMetaData,
+        value: bytes
+) -> Any:
+    """Decoide the value of a field
+
+    Args:
+        protocol (ProtocolMetaData): The FIX protocol
+        meta_data (FieldMetaData): The field meta data
+        value (bytes): The value of the field
+
+    Returns:
+        Any: [description]
+    """
     if not value:
         return None
     elif meta_data.values and value in meta_data.values:
@@ -59,7 +112,21 @@ def decode_value(protocol: ProtocolMetaData, meta_data: FieldMetaData, value: by
         return value.decode('ascii')
 
 
-def encode_value(protocol: ProtocolMetaData, meta_data: FieldMetaData, value: Any) -> bytes:
+def encode_value(
+        protocol: ProtocolMetaData,
+        meta_data: FieldMetaData,
+        value: Any
+) -> bytes:
+    """Encode a field value
+
+    Args:
+        protocol (ProtocolMetaData): The FIX protocol meta data
+        meta_data (FieldMetaData): The field meta data
+        value (Any): The value to encode
+
+    Returns:
+        bytes: The encoded field value
+    """
     if value is None:
         return b''
     elif meta_data.values_by_name and value in meta_data.values_by_name:

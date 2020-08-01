@@ -1,3 +1,5 @@
+"""Tests for date utils"""
+
 from datetime import time, datetime
 import pytz
 from aiofix.utils.date_utils import is_dow_in_range, is_time_in_range, delay_for_time_period

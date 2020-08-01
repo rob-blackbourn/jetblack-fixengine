@@ -6,7 +6,7 @@ import pytz
 from typing import Optional, Mapping, Any
 from aiofix.transports import InitiatorHandler
 from aiofix.persistence import FileStore
-from aiofix.managers import start_initator_manager
+from aiofix.managers import start_initiator_manager
 from aiofix.loader import load_protocol
 
 logging.basicConfig(level=logging.DEBUG)
@@ -43,7 +43,7 @@ class MyInitatorHandler(InitiatorHandler):
         return True
 
 
-start_initator_manager(
+start_initiator_manager(
     MyInitatorHandler,
     HOST,
     PORT,

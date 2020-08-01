@@ -1,3 +1,5 @@
+"""Header"""
+
 from typing import Mapping, Any
 from ..meta_data import FieldMetaData, ComponentMetaData, MessageMemberMetaData
 from .messages import _to_message_member_meta_data

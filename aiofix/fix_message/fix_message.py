@@ -1,3 +1,5 @@
+"""Parsing FX messages"""
+
 from __future__ import annotations
 from ..meta_data import (
     ProtocolMetaData,
