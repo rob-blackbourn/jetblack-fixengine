@@ -1,17 +1,18 @@
 """Loader"""
 
 from collections import OrderedDict
+from typing import Any, Dict
 import xml.dom.minidom as minidom
 import xml.dom as dom
+
 from ..meta_data import ProtocolMetaData
+
 from .fields import parse_fields
-from .messages import parse_messages
-from .header import parse_header
-from .components import parse_components
+from .messages import parse_messages, parse_header, parse_components
 
 
-def process_members(node) -> dict:
-    members = OrderedDict()
+def process_members(node: Any) -> Dict[str, Any]:
+    members: Dict[str, Any] = OrderedDict()
     for child in node.childNodes:
         if child.nodeType != dom.Node.ELEMENT_NODE:
             continue
@@ -37,7 +38,7 @@ def process_members(node) -> dict:
     return members
 
 
-def process_message(node) -> dict:
+def process_message(node: Any) -> Dict[str, Any]:
     return {
         'msgtype': node.attributes['msgtype'].value,
         'msgcat': node.attributes['msgcat'].value,
@@ -45,7 +46,7 @@ def process_message(node) -> dict:
     }
 
 
-def process_field(node) -> dict:
+def process_field(node: Any) -> Dict[str, Any]:
     return {
         'number': node.attributes['number'].value,
         'type': node.attributes['type'].value,
@@ -56,31 +57,34 @@ def process_field(node) -> dict:
     }
 
 
-def process_messages(node) -> dict:
+def process_messages(node: Any) -> Dict[str, Any]:
     return {
         child.attributes['name'].value: process_message(child)
         for child in node.childNodes if child.nodeType == dom.Node.ELEMENT_NODE and child.nodeName == 'message'
     }
 
 
-def process_components(node) -> dict:
+def process_components(node: Any) -> Dict[str, Any]:
     return {
         child.attributes['name'].value: process_members(child)
         for child in node.childNodes if child.nodeType == dom.Node.ELEMENT_NODE and child.nodeName == 'component'
     }
 
 
-def process_fields(node) -> dict:
+def process_fields(node: Any) -> Dict[str, Any]:
     return {
         child.attributes['name'].value: process_field(child)
-        for child in node.childNodes if child.nodeType == dom.Node.ELEMENT_NODE and child.nodeName == 'field'
+        for child in node.childNodes
+        if child.nodeType == dom.Node.ELEMENT_NODE and child.nodeName == 'field'
     }
 
 
-def process_root(node) -> dict:
+def process_root(node: Any) -> Dict[str, Any]:
+    version = node.attributes['major'].value + \
+        '.' + node.attributes['minor'].value
     protocol = {
-        'version': node.attributes['major'].value + '.' + node.attributes['minor'].value,
-        'beginString': 'FIX.' + node.attributes['major'].value + '.' + node.attributes['minor'].value,
+        'version': version,
+        'beginString': 'FIX.' + version,
     }
 
     for child in node.childNodes:
@@ -104,7 +108,7 @@ def process_root(node) -> dict:
 
 
 def load_protocol(
-        filename,
+        filename: str,
         *,
         is_millisecond_time: bool = True,
         is_float_decimal: bool = False

@@ -1,16 +1,17 @@
 """Messages"""
 
-from typing import Mapping, Any, Optional
 from collections import OrderedDict
+from typing import Any, Mapping, MutableMapping, Optional
+
 from ..meta_data import FieldMetaData, ComponentMetaData, MessageMemberMetaData, MessageMetaData
 
 
 def _to_message_member_meta_data(
         info: Mapping[str, Any],
         field_meta_data: Mapping[str, FieldMetaData],
-        component_meta_data: Optional[Mapping[str, ComponentMetaData]]
+        component_meta_data: Mapping[str, ComponentMetaData]
 ) -> Mapping[str, MessageMemberMetaData]:
-    member = OrderedDict()
+    member: MutableMapping[str, MessageMemberMetaData] = OrderedDict()
 
     for name, value in info.items():
         if value['type'] == 'field':
@@ -32,6 +33,7 @@ def _to_message_member_meta_data(
                 component, value['type'], value['required'])
         else:
             raise RuntimeError(f'unknown type "{value["type"]}"')
+
     return member
 
 
@@ -60,3 +62,33 @@ def parse_messages(
             name, info, field_meta_data, component_meta_data)
         for name, info in messages.items()
     }
+
+
+def parse_header(
+        info: Mapping[str, Any],
+        field_meta_data: Mapping[str, FieldMetaData],
+        component_meta_data: Mapping[str, ComponentMetaData]
+) -> Mapping[str, MessageMemberMetaData]:
+    return _to_message_member_meta_data(info, field_meta_data, component_meta_data)
+
+
+def parse_components(
+        info: Optional[Mapping[str, Any]],
+        field_meta_data: Mapping[str, FieldMetaData]
+) -> Mapping[str, ComponentMetaData]:
+    if info is None:
+        return dict()
+
+    # Declare components first to handle forward references.
+    components = {
+        name: ComponentMetaData(name, {})
+        for name in info.keys()
+    }
+    for name, data in info.items():
+        component = components[name]
+        component.members = _to_message_member_meta_data(
+            data,
+            field_meta_data,
+            components
+        )
+    return components

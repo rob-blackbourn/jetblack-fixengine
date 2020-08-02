@@ -24,7 +24,7 @@ class Session(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    async def set_seqnums(self, outgoing_seqnum: int, incoming_seqnum: int) -> int:
+    async def set_seqnums(self, outgoing_seqnum: int, incoming_seqnum: int) -> None:
         raise NotImplementedError
 
     @abstractmethod

@@ -1,6 +1,8 @@
 """Encode a FIX message"""
 
-from typing import Iterator, List, Tuple
+from aiofix.meta_data.message_member import FieldMetaData
+from typing import Iterator, List, Tuple, cast
+
 from ..meta_data import (
     message_member_iter,
     MessageMemberMetaData,
@@ -28,12 +30,16 @@ def _encode_fields(
 
         item_data = data[meta_datum.member.name]
         if meta_datum.type == 'field':
-            value = encode_value(protocol, meta_datum.member, item_data)
-            encoded_message.append((meta_datum.member.number, value))
+            field_member = cast(FieldMetaData, meta_datum.member)
+            value = encode_value(protocol, field_member, item_data)
+            encoded_message.append((field_member.number, value))
         elif meta_datum.type == 'group':
-            value = encode_value(protocol, meta_datum.member, len(item_data))
-            encoded_message.append((meta_datum.member.number, value))
-            for group_item in item_data:
+            field_member = cast(FieldMetaData, meta_datum.member)
+            item_list = cast(List[FieldMessageDataMap], item_data)
+            value = encode_value(protocol, field_member, len(item_list))
+            encoded_message.append((field_member.number, value))
+            assert meta_datum.children is not None
+            for group_item in item_list:
                 _encode_fields(
                     protocol,
                     encoded_message,

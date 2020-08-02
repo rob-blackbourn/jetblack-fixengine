@@ -16,15 +16,17 @@ class ProtocolMetaData:
             trailer: Mapping[str, MessageMemberMetaData],
             *,
             is_millisecond_time: bool = True,
-            is_float_decimal=False
+            is_float_decimal: bool = False
     ) -> None:
         self._version = version
         self._begin_string = begin_string
         self._fields_by_name = fields
-        self._fields_by_number = {field.number: field for field in fields.values()}
+        self._fields_by_number = {
+            field.number: field for field in fields.values()}
         self._components = components
         self._messages_by_name = messages
-        self._messages_by_type = {message.msgtype: message for message in messages.values()}
+        self._messages_by_type = {
+            message.msgtype: message for message in messages.values()}
         self._header = header
         self._trailer = trailer
         self._is_millisecond_time = is_millisecond_time

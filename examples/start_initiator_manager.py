@@ -1,3 +1,5 @@
+"""Sart the initiator manager"""
+
 import calendar
 from datetime import time
 import logging

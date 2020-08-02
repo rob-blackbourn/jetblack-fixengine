@@ -12,7 +12,8 @@ from .initiator_handler import InitiatorHandler
 
 logger = logging.getLogger(__name__)
 
-InitiatorFactory = Callable[[ProtocolMetaData, str, str, Store, int, asyncio.Event], Handler]
+InitiatorFactory = Callable[[ProtocolMetaData,
+                             str, str, Store, int, asyncio.Event], Handler]
 
 
 async def initiate(
@@ -24,12 +25,22 @@ async def initiate(
         ssl: Optional[SSLContext] = None,
         shutdown_timeout: float = 10.0
 ) -> None:
-    logger.info(f'connecting to {host}:{port}{" over ssl" if ssl else ""}')
+    logger.info(
+        'connecting to %s:%s%s',
+        host,
+        port,
+        " over ssl" if ssl else ""
+    )
 
     reader, writer = await asyncio.open_connection(host, port, ssl=ssl)
     await fix_stream_processor(handler, shutdown_timeout, reader, writer, cancellation_token)
 
-    logger.info(f'disconnected from {host}:{port}{" over ssl" if ssl else ""}')
+    logger.info(
+        'disconnected from {host}:{port}{" over ssl" if ssl else ""}',
+        host,
+        port,
+        " over ssl" if ssl else ""
+    )
 
 
 def create_initiator(
@@ -43,9 +54,9 @@ def create_initiator(
         *,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: tzinfo = None
+        tz: Optional[tzinfo] = None
 ) -> InitiatorHandler:
-    handler: Handler = klass(
+    handler = klass(
         protocol,
         sender_comp_id,
         target_comp_id,
@@ -75,7 +86,7 @@ def start_initiator(
         shutdown_timeout: float = 10.0,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: tzinfo = None
+        tz: Optional[tzinfo] = None
 
 ) -> None:
     cancellation_token = asyncio.Event()

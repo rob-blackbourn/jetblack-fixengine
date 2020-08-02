@@ -1,7 +1,8 @@
 """Fix message decodes"""
 
-from typing import MutableMapping, Tuple, Optional, List, Iterator
+from typing import MutableMapping, Tuple, Optional, List, Iterator, cast
 from collections import OrderedDict
+
 from ..meta_data import (
     ProtocolMetaData,
     FieldMetaData,
@@ -20,7 +21,7 @@ def _assert_field_value_matches(field: FieldMetaData, expected: bytes, received:
 
 
 def _split_item(item: bytes) -> Tuple[bytes, bytes]:
-    field_id, _sep, field_value = item.partition(b'=')
+    field_id, _, field_value = item.partition(b'=')
     return field_id, field_value
 
 
@@ -41,7 +42,9 @@ def _find_next_member(
     while True:
         try:
             meta_datum = next(meta_data)
-            if meta_datum.member.number == received_field.number:
+            # TODO: Always field?
+            field = cast(FieldMetaData, meta_datum.member)
+            if field.number == received_field.number:
                 return meta_datum
 
             if meta_datum.is_required and strict:
@@ -73,8 +76,14 @@ def _decode_fields_in_order(
         index += 1
 
         if meta_datum.type == 'group':
-            _decoded_groups, index = _decode_group(
-                protocol, encoded_message, index, meta_datum, int(value), strict)
+            _, index = _decode_group(
+                protocol,
+                encoded_message,
+                index,
+                meta_datum,
+                int(value),
+                strict
+            )
             decoded_message[received_field.name] = value
         else:
             decoded_message[received_field.name] = decode_value(
@@ -96,7 +105,7 @@ def _decode_fields_any_order(
         protocol: ProtocolMetaData,
         encoded_message: List[Tuple[bytes, bytes]],
         index: int,
-        meta_data: MutableMapping[str, MessageMemberMetaData],
+        meta_data: MutableMapping[bytes, MessageMemberMetaData],
         decoded_message: FieldMessageDataMap,
         strict: bool = True
 ) -> int:
@@ -138,9 +147,10 @@ def _decode_group(
         count: int,
         strict: bool
 ) -> Tuple[List[FieldMessageDataMap], int]:
+    assert meta_data.children is not None
     decoded_groups: List[FieldMessageDataMap] = []
-    for i in range(int(count)):
-        decoded_group = OrderedDict()
+    for _ in range(int(count)):
+        decoded_group: FieldMessageDataMap = OrderedDict()
         index = _decode_fields_in_order(
             protocol,
             encoded_message,
@@ -175,7 +185,10 @@ def _decode_header(
         protocol,
         encoded_message,
         index,
-        {member.member.number: member for member in header_fields[3:]},
+        {
+            cast(FieldMetaData, message_member.member).number: message_member
+            for message_member in header_fields[3:]
+        },
         decoded_message,
         strict
     )
@@ -196,8 +209,10 @@ def _decode_body(
         protocol,
         encoded_message,
         index,
-        {member.member.number: member for member in message_member_iter(
-            meta_data.fields.values())},
+        {
+            cast(FieldMetaData, message_member.member).number: message_member
+            for message_member in message_member_iter(meta_data.fields.values())
+        },
         decoded_message,
         strict
     )
@@ -218,7 +233,10 @@ def _decode_trailer(
         protocol,
         encoded_message,
         index,
-        {member.member.number: member for member in trailer_fields[:-1]},
+        {
+            cast(FieldMetaData, message_member.member).number: message_member
+            for message_member in trailer_fields[:-1]
+        },
         decoded_message,
         strict
     )
@@ -260,7 +278,7 @@ def assert_message_valid(
         body_length_value,
         encode_value(protocol, body_length_field, body_length))
 
-    # Calculate the checkum.
+    # Calculate the checksum.
     check_sum_field = protocol.fields_by_name['CheckSum']
     check_sum_value = encode_value(
         protocol, check_sum_field, decoded_message[check_sum_field.name])

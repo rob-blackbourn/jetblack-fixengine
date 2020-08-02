@@ -1,6 +1,10 @@
+"""FIX Transport"""
+
 import asyncio
 from asyncio import Queue, StreamReader, StreamWriter
 import logging
+from typing import cast
+
 from ..types import Handler, Event
 
 logger = logging.getLogger(__name__)
@@ -20,25 +24,25 @@ STATE_CANCELLED = 'cancelled'
 STATE_READ = (STATE_READ_BEGIN_STRING, STATE_READ_BODY_LENGTH, STATE_READ_BODY)
 
 
-async def _send_event(queue: Queue, event: Event) -> None:
+async def _send_event(queue: "Queue[Event]", event: Event) -> None:
     await queue.put(event)
 
 
-async def _send_event_connected(queue: Queue) -> None:
+async def _send_event_connected(queue: "Queue[Event]") -> None:
     event = {
         'type': 'connected'
     }
     await _send_event(queue, event)
 
 
-async def _send_event_disconnect(queue: Queue) -> None:
+async def _send_event_disconnect(queue: "Queue[Event]") -> None:
     event = {
         'type': 'disconnect'
     }
     await _send_event(queue, event)
 
 
-async def _send_event_error(queue: Queue, reason: str, message: bytes) -> None:
+async def _send_event_error(queue: "Queue[Event]", reason: str, message: bytes) -> None:
     event = {
         'type': 'error',
         'reason': reason,
@@ -47,7 +51,7 @@ async def _send_event_error(queue: Queue, reason: str, message: bytes) -> None:
     await _send_event(queue, event)
 
 
-async def _send_event_fix(queue: Queue, message: bytes) -> None:
+async def _send_event_fix(queue: "Queue[Event]", message: bytes) -> None:
     event = {
         'type': 'fix',
         'message': message
@@ -65,8 +69,8 @@ async def fix_stream_processor(
     if cancellation_token.is_set():
         return
 
-    read_queue = Queue()
-    write_queue = Queue()
+    read_queue: "Queue[Event]" = Queue()
+    write_queue: "Queue[Event]" = Queue()
 
     async def receive() -> Event:
         return await read_queue.get()
@@ -89,7 +93,7 @@ async def fix_stream_processor(
     while state in STATE_READ and not cancellation_token.is_set():
 
         # Wait for a task to be completed.
-        completed, pending = await asyncio.wait([
+        completed, _ = await asyncio.wait([
             read_task,
             write_task,
             handler_task,
@@ -112,27 +116,27 @@ async def fix_stream_processor(
             elif task == write_task:
 
                 # Fetch the event sent by the handler.
-                event: Event = task.result()
+                event = cast(Event, task.result())
 
                 if event['type'] == 'fix':
                     # Send data to the handler and renew the write task.
-                    logger.debug(f'Sending "{event["message"]}"')
+                    logger.debug('Sending "%s"', event["message"])
                     writer.write(event['message'])
                     await writer.drain()
                     write_task = asyncio.create_task(write_queue.get())
                 elif event['type'] == 'close':
                     # Close the connection and exit the task service loop.
-                    await writer.close()
+                    writer.close()
                     state = STATE_HANDLER_CLOSED
                     continue
                 else:
-                    logger.debug(f'Invalid event "{event["type"]}"')
+                    logger.debug('Invalid event "%s"', event["type"])
                     raise RuntimeError(f'Invalid event "{event["type"]}"')
 
             elif task == read_task:
 
                 try:
-                    result: bytes = task.result()
+                    result = cast(bytes, task.result())
                 except asyncio.IncompleteReadError:
                     result = None
 
@@ -166,10 +170,11 @@ async def fix_stream_processor(
                     # The total length includes the checksum.
                     total_length = body_length + CHECKSUM_LENGTH
                     # Read the rest of the message.
-                    read_task = asyncio.create_task(reader.readexactly(total_length))
+                    read_task = asyncio.create_task(
+                        reader.readexactly(total_length))
                     state = STATE_READ_BODY
                 elif state == STATE_READ_BODY:
-                    logger.debug(f'Received "{message}"')
+                    logger.debug('Received "%s"', message)
                     # Notify the client and reset the state.
                     await _send_event_fix(read_queue, message)
                     message = b''
@@ -212,7 +217,10 @@ async def fix_stream_processor(
                 pass
 
         if not handler_task.cancelled():
-            logger.info(f'Waiting {shutdown_timeout} seconds for the handler to complete.')
+            logger.info(
+                'Waiting %s seconds for the handler to complete.',
+                shutdown_timeout
+            )
             try:
                 await asyncio.wait_for(handler_task, timeout=shutdown_timeout)
             except asyncio.TimeoutError:
@@ -221,6 +229,7 @@ async def fix_stream_processor(
                 try:
                     await handler_task
                 except asyncio.CancelledError:
-                    logger.warning('The handler task did not complete and has been cancelled')
+                    logger.warning(
+                        'The handler task did not complete and has been cancelled')
 
     logger.debug('Shutdown complete.')

@@ -1,6 +1,6 @@
 import aiosqlite
 import sqlite3
-from typing import MutableMapping, Tuple
+from typing import Any, List, Mapping, MutableMapping, Tuple
 from ..types import Session, Store
 
 CREATE_SEQNUM_TABLE_SQL = """
@@ -65,8 +65,8 @@ class SqlSession(Session):
 
     def __init__(
             self,
-            conn_args,
-            conn_kwargs,
+            conn_args: List[Any],
+            conn_kwargs: Mapping[str, Any],
             sender_comp_id: str,
             target_comp_id: str
     ) -> None:
@@ -81,7 +81,8 @@ class SqlSession(Session):
         if result:
             self._outgoing_seqnum, self._incoming_seqnum = result
         else:
-            cursor.execute(SEQNUM_INSERT, (sender_comp_id, target_comp_id, 0, 0))
+            cursor.execute(
+                SEQNUM_INSERT, (sender_comp_id, target_comp_id, 0, 0))
             conn.commit()
             self._outgoing_seqnum, self._incoming_seqnum = 0, 0
 
@@ -99,12 +100,13 @@ class SqlSession(Session):
     async def get_seqnums(self) -> Tuple[int, int]:
         return self._outgoing_seqnum, self._incoming_seqnum
 
-    async def set_seqnums(self, outgoing_seqnum: int, incoming_seqnums: int) -> None:
-        self._outgoing_seqnum, self._incoming_seqnum = outgoing_seqnum, incoming_seqnums
+    async def set_seqnums(self, outgoing_seqnum: int, incoming_seqnum: int) -> None:
+        self._outgoing_seqnum, self._incoming_seqnum = outgoing_seqnum, incoming_seqnum
         async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
             await db.execute(
                 SEQNUM_UPDATE,
-                (self._outgoing_seqnum, self._incoming_seqnum, self.sender_comp_id, self.target_comp_id)
+                (self._outgoing_seqnum, self._incoming_seqnum,
+                 self.sender_comp_id, self.target_comp_id)
             )
             await db.commit()
 
@@ -137,7 +139,8 @@ class SqlSession(Session):
             message = buf.decode('ascii')
             await db.execute(
                 MESSAGE_INSERT,
-                (self.sender_comp_id, self.target_comp_id, self._outgoing_seqnum, self._incoming_seqnum, message)
+                (self.sender_comp_id, self.target_comp_id,
+                 self._outgoing_seqnum, self._incoming_seqnum, message)
             )
             await db.commit()
 
@@ -146,8 +149,8 @@ class SqlStore(Store):
 
     def __init__(
             self,
-            conn_args,
-            conn_kwargs
+            conn_args: List[Any],
+            conn_kwargs: Mapping[str, Any]
     ) -> None:
         self.conn_args = conn_args
         self.conn_kwargs = conn_kwargs
@@ -163,6 +166,7 @@ class SqlStore(Store):
         if key in self._sessions:
             return self._sessions[key]
 
-        session = SqlSession(self.conn_args, self.conn_kwargs, sender_comp_id, target_comp_id)
+        session = SqlSession(self.conn_args, self.conn_kwargs,
+                             sender_comp_id, target_comp_id)
         self._sessions[key] = session
         return session
