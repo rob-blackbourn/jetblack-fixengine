@@ -1,19 +1,28 @@
+"""Initiator transport"""
+
 import asyncio
 from datetime import tzinfo, time
 import logging
 from ssl import SSLContext
-from typing import Optional, Callable, Type, Tuple
+from typing import Optional, Callable, Type, Tuple, cast
+
 from ..types import Handler, Store
 from ..meta_data import ProtocolMetaData
 from ..utils.cancellation import register_cancellation_token
 from ..middlewares import mw, FixMessageMiddleware
+from ..fix_message import SOH
+
 from .fix_transport import fix_stream_processor
+from .fix_read_buffer import FixReadBuffer
+from .fix_reader_async import fix_read_async
 from .initiator_handler import InitiatorHandler
 
 logger = logging.getLogger(__name__)
 
-InitiatorFactory = Callable[[ProtocolMetaData,
-                             str, str, Store, int, asyncio.Event], Handler]
+InitiatorFactory = Callable[
+    [ProtocolMetaData, str, str, Store, int, asyncio.Event],
+    Handler
+]
 
 
 async def initiate(
@@ -23,7 +32,11 @@ async def initiate(
         cancellation_token: asyncio.Event,
         *,
         ssl: Optional[SSLContext] = None,
-        shutdown_timeout: float = 10.0
+        shutdown_timeout: float = 10.0,
+        sep: bytes = SOH,
+        convert_sep_to_soh_for_checksum: bool = False,
+        validate: bool = True
+
 ) -> None:
     logger.info(
         'connecting to %s:%s%s',
@@ -33,10 +46,18 @@ async def initiate(
     )
 
     reader, writer = await asyncio.open_connection(host, port, ssl=ssl)
-    await fix_stream_processor(handler, shutdown_timeout, reader, writer, cancellation_token)
+    read_buffer = FixReadBuffer(sep, convert_sep_to_soh_for_checksum, validate)
+    buffered_reader = fix_read_async(read_buffer, reader)
+    await fix_stream_processor(
+        handler,
+        shutdown_timeout,
+        buffered_reader,
+        writer,
+        cancellation_token
+    )
 
     logger.info(
-        'disconnected from {host}:{port}{" over ssl" if ssl else ""}',
+        'disconnected from %s:%s%s',
         host,
         port,
         " over ssl" if ssl else ""
@@ -68,7 +89,8 @@ def create_initiator(
         tz=tz
     )
     middleware = FixMessageMiddleware(protocol)
-    handler: InitiatorHandler = mw([middleware], handler=handler)
+    handler: InitiatorHandler = cast(
+        InitiatorHandler, mw([middleware], handler=handler))
     return handler
 
 
