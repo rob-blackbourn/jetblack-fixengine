@@ -20,7 +20,7 @@ class FixState(IntEnum):
 
 
 async def _cancel_await(
-        task: Task[Any],
+        task: "Task[Any]",
         callback: Optional[Callable[[], None]] = None
 ) -> None:
     task.cancel()

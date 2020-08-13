@@ -14,9 +14,12 @@ def test_messages():
 
     ]
 
-    protocol = load_protocol(os.path.join(root, 'etc', 'FIX44.xml'), is_millisecond_time=True, is_float_decimal=True)
+    protocol = load_protocol(os.path.join(
+        root, 'etc', 'FIX44.yaml'), is_millisecond_time=True, is_float_decimal=True)
 
     for buf in messages:
-        msg = FixMessage.decode(protocol, buf, sep=b'|', strict=True, validate=True, convert_sep_for_checksum=True)
-        round_trip = msg.encode(sep=b'|', regenerate_integrity=True, convert_sep_for_checksum=True)
+        msg = FixMessage.decode(
+            protocol, buf, sep=b'|', strict=True, validate=True, convert_sep_for_checksum=True)
+        round_trip = msg.encode(
+            sep=b'|', regenerate_integrity=True, convert_sep_for_checksum=True)
         assert buf == round_trip

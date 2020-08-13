@@ -1,9 +1,11 @@
 """Loader"""
 
-from collections import OrderedDict
+# from collections import OrderedDict
 from typing import Any, Dict
 import xml.dom.minidom as minidom
 import xml.dom as dom
+
+from ruamel.yaml import YAML
 
 from ..meta_data import ProtocolMetaData
 
@@ -12,7 +14,7 @@ from .messages import parse_messages, parse_header, parse_components
 
 
 def process_members(node: Any) -> Dict[str, Any]:
-    members: Dict[str, Any] = OrderedDict()
+    members: Dict[str, Any] = {}  # OrderedDict()
     for child in node.childNodes:
         if child.nodeType != dom.Node.ELEMENT_NODE:
             continue
@@ -80,11 +82,21 @@ def process_fields(node: Any) -> Dict[str, Any]:
 
 
 def process_root(node: Any) -> Dict[str, Any]:
-    version = node.attributes['major'].value + \
-        '.' + node.attributes['minor'].value
+    major = node.attributes['major'].value
+    minor = node.attributes['minor'].value
+    servicepack = node.attributes['servicepack'].value
     protocol = {
-        'version': version,
-        'beginString': 'FIX.' + version,
+        'version': {
+            'major': major,
+            'minor': minor,
+            'servicepack': servicepack
+        },
+        'beginString': 'FIX.' + major + '.' + minor,
+        'fields': {},
+        'components': {},
+        'header': {},
+        'trailer': {},
+        'messages': {}
     }
 
     for child in node.childNodes:
@@ -107,16 +119,28 @@ def process_root(node: Any) -> Dict[str, Any]:
     return protocol
 
 
+def convert_xml_file_to_dict(filename: str) -> Dict[str, Any]:
+    document = minidom.parse(filename)
+    config = process_root(document.documentElement)
+    return config
+
+
 def load_protocol(
         filename: str,
         *,
         is_millisecond_time: bool = True,
         is_float_decimal: bool = False
 ) -> ProtocolMetaData:
-    document = minidom.parse(filename)
-    config = process_root(document.documentElement)
+    if filename.endswith('.xml'):
+        config: Dict[str, Any] = convert_xml_file_to_dict(filename)
+    elif filename.endswith('yaml') or filename.endswith('yml'):
+        yaml = YAML()
+        with open(filename, 'rt') as file_ptr:
+            config = yaml.load(file_ptr)
+    else:
+        raise Exception('Unhandled file type')
 
-    version = config['version']
+    version = config['version']['major'] + '.' + config['version']['minor']
     begin_string = config['beginString'].encode('ascii')
     fields = parse_fields(config['fields'])
     components = parse_components(config['components'], fields)
