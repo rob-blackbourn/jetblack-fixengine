@@ -1,7 +1,8 @@
 """FIX read buffer"""
 
+from collections import deque
 from enum import IntEnum
-from typing import Callable, Mapping, Optional, Tuple
+from typing import Callable, Deque, Optional, Tuple
 
 from ..fix_message import SOH, calc_checksum
 
@@ -14,23 +15,29 @@ from .fix_events import (
 )
 
 
+class InputState(IntEnum):
+
+    EMPTY = 1
+    HAS_DATA = 2
+    EOF = 3
+
+
 class ReadState(IntEnum):
 
     PROTOCOL_ERROR = 0x01
     STATE_ERROR = 0x02
-    CLOSED = 0x04
+    CLOSED = 0x03
     DONE = 0x0f
 
-    END_OF_FILE = 0x10
+    IDLE = 0x10
     EXPECT_BEGIN_STRING = 0x20
-    EXPECT_BODY_LENGTH = 0x40
-    EXPECT_BODY = 0x80
+    EXPECT_BODY_LENGTH = 0x30
+    EXPECT_BODY = 0x40
+    END_OF_FILE = 0x50
     EXPECT = 0xf0
 
 
 StateResponse = Tuple[Optional[FixReadEvent], bool]
-StateHandler = Callable[[], StateResponse]
-Transition = Tuple[StateHandler, ReadState]
 
 
 class FixReadBuffer:
@@ -47,40 +54,72 @@ class FixReadBuffer:
 
         self._sep_length = len(sep)
         self._checksum_length = len(b'10=000') + self._sep_length
-        self._buf = b''
+        self._queue: Deque[bytes] = deque()
+        self._buf: bytes = b''
         self._index = 0
         self._required_length = -1
 
-        self._state = ReadState.EXPECT_BEGIN_STRING
-        self._transitions: Mapping[ReadState, Transition] = {
-            ReadState.EXPECT_BEGIN_STRING: (
-                self._handle_expect_begin_string,
-                ReadState.EXPECT_BODY_LENGTH
+        self._state = ReadState.IDLE
+        self._transitions = {
+
+            (ReadState.IDLE, InputState.EMPTY): (
+                self._request_data,
+                ReadState.IDLE
             ),
-            ReadState.EXPECT_BODY_LENGTH: (
-                self._handle_expect_body_length,
-                ReadState.EXPECT_BODY
-            ),
-            ReadState.EXPECT_BODY: (
-                self._handle_expect_body,
+            (ReadState.IDLE, InputState.HAS_DATA): (
+                self._proceed_to_next_state,
                 ReadState.EXPECT_BEGIN_STRING
             ),
-            ReadState.END_OF_FILE: (
+            (ReadState.IDLE, InputState.EOF): (
+                self._handle_end_of_file,
+                ReadState.END_OF_FILE
+            ),
+
+            (ReadState.EXPECT_BEGIN_STRING, InputState.EMPTY): (
+                self._request_data,
+                ReadState.EXPECT_BEGIN_STRING
+            ),
+            (ReadState.EXPECT_BEGIN_STRING, InputState.HAS_DATA): (
+                self._process_begin_string,
+                ReadState.EXPECT_BODY_LENGTH
+            ),
+
+            (ReadState.EXPECT_BODY_LENGTH, InputState.EMPTY): (
+                self._request_data,
+                ReadState.EXPECT_BODY_LENGTH
+            ),
+            (ReadState.EXPECT_BODY_LENGTH, InputState.HAS_DATA): (
+                self._process_body_length,
+                ReadState.EXPECT_BODY
+            ),
+
+            (ReadState.EXPECT_BODY, InputState.EMPTY): (
+                self._request_data,
+                ReadState.EXPECT_BODY
+            ),
+
+            (ReadState.EXPECT_BODY, InputState.HAS_DATA): (
+                self._process_body,
+                ReadState.IDLE
+            ),
+
+            (ReadState.END_OF_FILE, InputState.EOF): (
                 self._handle_end_of_file,
                 ReadState.CLOSED
             )
         }
 
-    def receive(self, buf: Optional[bytes]):
-        if buf:
-            # Accumulate the result.
-            self._buf += buf
-        elif self._state != ReadState.EXPECT_BEGIN_STRING:
-            # It's an error if the connection is terminated while reading a message.
-            self._state = ReadState.PROTOCOL_ERROR
+    @property
+    def input_state(self) -> InputState:
+        if len(self._queue) == 0:
+            return InputState.EMPTY
+        elif not self._queue[0]:
+            return InputState.EOF
         else:
-            # Ok
-            self._state = ReadState.END_OF_FILE
+            return InputState.HAS_DATA
+
+    def receive(self, buf: bytes):
+        self._queue.append(buf)
 
     def next_event(self) -> FixReadEvent:
 
@@ -88,9 +127,10 @@ class FixReadBuffer:
 
         while self._state & ReadState.EXPECT:
             try:
-                func, next_state = self._transitions[self._state]
+                transition = (self._state, self.input_state)
+                func, next_state = self._transitions[transition]
             except KeyError:
-                raise FixReadError('Unknown state')
+                raise FixReadError('Unknown transition')
             else:
                 event, is_complete = func()
                 if is_complete:
@@ -101,8 +141,21 @@ class FixReadBuffer:
 
         raise FixReadError('Invalid state')
 
-    def _handle_expect_begin_string(self) -> StateResponse:
+    def _requeue_unprocessed(self) -> None:
+        if len(self._buf) > self._index:
+            self._queue.appendleft(self._buf[self._index:])
+            self._buf = self._buf[:self._index]
+
+    def _proceed_to_next_state(self) -> StateResponse:
+        return None, True
+
+    def _request_data(self) -> StateResponse:
+        return FixReadNeedsMoreData(), False
+
+    def _process_begin_string(self) -> StateResponse:
         assert self._index == 0
+
+        self._buf += self._queue.popleft()
 
         # Find the SOH field separator.
         soh_index = self._buf.find(self.sep)
@@ -112,16 +165,17 @@ class FixReadBuffer:
 
         # Should start with the BeginString tag: e.g. b'8=FIX.4.2\x01'.
         if not self._buf.startswith(b'8='):
-            self._state = ReadState.PROTOCOL_ERROR
             raise FixReadError('Expected BeginString')
 
         # Advance the index and expect body length.
         self._index = soh_index + 1
-        self._state = ReadState.EXPECT_BODY_LENGTH
+        self._requeue_unprocessed()
 
         return None, True
 
-    def _handle_expect_body_length(self) -> StateResponse:
+    def _process_body_length(self) -> StateResponse:
+        self._buf += self._queue.popleft()
+
         # Find the net SOH field separator.
         soh_index = self._buf.find(self.sep, self._index)
         if soh_index == -1:
@@ -130,7 +184,6 @@ class FixReadBuffer:
 
         # We expect the BodyLength tag: e.g. b'9=129\x01'.
         if not self._buf[self._index: soh_index].startswith(b'9='):
-            self._state = ReadState.PROTOCOL_ERROR
             raise FixReadError('Expected BodyLength')
 
         value = self._buf[self._index+2:soh_index]
@@ -144,11 +197,14 @@ class FixReadBuffer:
 
         # Advance the index and expect the body.
         self._index = soh_index + 1
-        self._state = ReadState.EXPECT_BODY
+
+        self._requeue_unprocessed()
 
         return None, True
 
-    def _handle_expect_body(self) -> StateResponse:
+    def _process_body(self) -> StateResponse:
+        self._buf += self._queue.popleft()
+
         # Have we got enough data?
         if len(self._buf) < self._required_length:
             # We can supply a hint for how much data we need.
@@ -162,7 +218,6 @@ class FixReadBuffer:
         if self.validate:
             checksum = data[-self._checksum_length:-self._sep_length]
             if not checksum.startswith(b'10='):
-                self._state = ReadState.PROTOCOL_ERROR
                 raise FixReadError('No terminating checksum')
 
             checksum_value = checksum[3:]
@@ -175,10 +230,10 @@ class FixReadBuffer:
                 raise FixReadError("Wrong checksum")
 
         # Reset state
-        self._buf = self._buf[self._required_length:]
+        self._queue.appendleft(self._buf[self._required_length:])
+        self._buf = b''
         self._index = 0
         self._required_length = 0
-        self._state = ReadState.EXPECT_BEGIN_STRING
 
         return FixReadDataReady(data), True
 

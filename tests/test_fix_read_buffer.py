@@ -37,8 +37,8 @@ def test_read_valid_buffer():
         input_buf += message
 
     writer = bytes_writer(input_buf, 200)
-    buf = next(writer)
-    reader.receive(buf)
+    # buf = next(writer)
+    # reader.receive(buf)
     done = False
     message_index = 0
     while not done:
