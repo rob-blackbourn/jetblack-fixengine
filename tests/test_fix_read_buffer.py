@@ -21,6 +21,7 @@ def bytes_writer(buf: bytes, chunk_size: int = -1) -> Iterator[bytes]:
 
 def test_fix_read_buffer():
     """Test for read"""
+
     reader = FixReadBuffer(
         sep=b'|',
         convert_sep_to_soh_for_checksum=True,
