@@ -17,7 +17,6 @@ async def fix_read_async(
     done = False
     while not done:
         fix_event = read_buffer.next_event()
-        assert fix_event.event_type != FixReadEventType.ERROR
         if fix_event.event_type == FixReadEventType.EOF:
             done = True
         elif fix_event.event_type == FixReadEventType.NEEDS_MORE_DATA:

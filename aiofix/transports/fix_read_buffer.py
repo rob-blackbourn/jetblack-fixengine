@@ -208,7 +208,8 @@ class FixReadBuffer:
         # Have we got enough data?
         if len(self._buf) < self._required_length:
             # We can supply a hint for how much data we need.
-            return FixReadNeedsMoreData(self._required_length - len(self._buf)), False
+            bytes_required = self._required_length - len(self._buf)
+            return FixReadNeedsMoreData(bytes_required), False
 
         # We have the full message.
         data = bytes(self._buf[:self._required_length])
