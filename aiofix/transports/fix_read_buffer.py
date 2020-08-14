@@ -2,7 +2,7 @@
 
 from collections import deque
 from enum import IntEnum
-from typing import Callable, Deque, Optional, Tuple
+from typing import Deque, Optional, Tuple, Union
 
 from ..fix_message import SOH, calc_checksum
 
@@ -54,8 +54,8 @@ class FixReadBuffer:
 
         self._sep_length = len(sep)
         self._checksum_length = len(b'10=000') + self._sep_length
-        self._queue: Deque[bytes] = deque()
-        self._buf: bytes = b''
+        self._queue: Deque[Union[bytes, bytearray]] = deque()
+        self._buf = bytearray()
         self._index = 0
         self._required_length = -1
 
@@ -211,7 +211,7 @@ class FixReadBuffer:
             return FixReadNeedsMoreData(self._required_length - len(self._buf)), False
 
         # We have the full message.
-        data = self._buf[:self._required_length]
+        data = bytes(self._buf[:self._required_length])
         if not data .endswith(self.sep):
             raise FixReadError('No terminating separator')
 
@@ -231,7 +231,7 @@ class FixReadBuffer:
 
         # Reset state
         self._queue.appendleft(self._buf[self._required_length:])
-        self._buf = b''
+        self._buf = bytearray()
         self._index = 0
         self._required_length = 0
 
