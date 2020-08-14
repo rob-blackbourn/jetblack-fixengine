@@ -1,7 +1,8 @@
 """Test the loader"""
 
+from ruamel.yaml import YAML  # type: ignore
+
 from aiofix.loader.loader import load_protocol, convert_xml_file_to_dict
-from ruamel.yaml import YAML
 
 
 def test_loader():
@@ -14,6 +15,5 @@ def test_xml():
         dct = convert_xml_file_to_dict('etc/' + name + '.xml')
         assert dct is not None
         with open('etc/' + name + '.yaml', 'wt') as file_ptr:
-            yaml = YAML()
-            yaml.dump(dct, file_ptr)
-        pass
+            yaml = YAML()  # type: ignore
+            yaml.dump(dct, file_ptr)  # type: ignore

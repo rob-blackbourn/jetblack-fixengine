@@ -1,7 +1,13 @@
 """Fields"""
 
-from typing import Mapping, Any
+from typing import Mapping, Any, Union
 from ..meta_data import FieldMetaData
+
+
+def _to_number_as_bytes(number: Union[str, int]) -> bytes:
+    if isinstance(number, int):
+        number = str(number)
+    return number.encode('ascii')
 
 
 def _to_field_meta_data(name: str, info: Mapping[str, Any]) -> FieldMetaData:
@@ -9,7 +15,12 @@ def _to_field_meta_data(name: str, info: Mapping[str, Any]) -> FieldMetaData:
         value.encode('ascii'): description
         for value, description in info['values'].items()
     } if 'values' in info and info['values'] else None
-    return FieldMetaData(name, info['number'].encode('ascii'), info['type'], values)
+    return FieldMetaData(
+        name,
+        _to_number_as_bytes(info['number']),
+        info['type'],
+        values
+    )
 
 
 def parse_fields(fields: Mapping[str, Any]) -> Mapping[str, FieldMetaData]:
