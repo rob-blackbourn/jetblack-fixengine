@@ -71,15 +71,16 @@ class FixReadBuffer:
             )
         }
 
-    def receive(self, buf: Optional[bytes]) -> bool:
-        if not buf:
-            # An empty read indicates the connection has closed.
+    def receive(self, buf: Optional[bytes]):
+        if buf:
+            # Accumulate the result.
+            self._buf += buf
+        elif self._state != ReadState.EXPECT_BEGIN_STRING:
+            # It's an error if the connection is terminated while reading a message.
+            self._state = ReadState.PROTOCOL_ERROR
+        else:
+            # Ok
             self._state = ReadState.END_OF_FILE
-            return False
-
-        # Accumulate the result.
-        self._buf += buf
-        return True
 
     def next_event(self) -> FixReadEvent:
 
@@ -89,8 +90,7 @@ class FixReadBuffer:
             try:
                 func, next_state = self._transitions[self._state]
             except KeyError:
-                self._state = ReadState.STATE_ERROR
-                event = FixReadError('Unknown state')
+                raise FixReadError('Unknown state')
             else:
                 event, is_complete = func()
                 if is_complete:
@@ -99,7 +99,7 @@ class FixReadBuffer:
             if event is not None:
                 return event
 
-        return FixReadError('Invalid state')
+        raise FixReadError('Invalid state')
 
     def _handle_expect_begin_string(self) -> StateResponse:
         assert self._index == 0
@@ -113,7 +113,7 @@ class FixReadBuffer:
         # Should start with the BeginString tag: e.g. b'8=FIX.4.2\x01'.
         if not self._buf.startswith(b'8='):
             self._state = ReadState.PROTOCOL_ERROR
-            return FixReadError('Expected BeginString'), False
+            raise FixReadError('Expected BeginString')
 
         # Advance the index and expect body length.
         self._index = soh_index + 1
@@ -131,7 +131,7 @@ class FixReadBuffer:
         # We expect the BodyLength tag: e.g. b'9=129\x01'.
         if not self._buf[self._index: soh_index].startswith(b'9='):
             self._state = ReadState.PROTOCOL_ERROR
-            return FixReadError('Expected BodyLength'), False
+            raise FixReadError('Expected BodyLength')
 
         value = self._buf[self._index+2:soh_index]
         # It is within the specification for the length to be zero padded.
@@ -157,13 +157,13 @@ class FixReadBuffer:
         # We have the full message.
         data = self._buf[:self._required_length]
         if not data .endswith(self.sep):
-            return FixReadError('No terminating separator'), False
+            raise FixReadError('No terminating separator')
 
         if self.validate:
             checksum = data[-self._checksum_length:-self._sep_length]
             if not checksum.startswith(b'10='):
                 self._state = ReadState.PROTOCOL_ERROR
-                return FixReadError('No terminating checksum'), False
+                raise FixReadError('No terminating checksum')
 
             checksum_value = checksum[3:]
             expected = calc_checksum(
@@ -172,7 +172,7 @@ class FixReadBuffer:
                 self.convert_sep_to_soh_for_checksum
             )
             if checksum_value != expected:
-                return FixReadError("Wrong checksum"), False
+                raise FixReadError("Wrong checksum")
 
         # Reset state
         self._buf = self._buf[self._required_length:]

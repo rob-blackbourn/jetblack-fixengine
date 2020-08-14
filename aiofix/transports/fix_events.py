@@ -6,10 +6,9 @@ from enum import IntEnum
 
 class FixReadEventType(IntEnum):
     """The fix read event type"""
-    ERROR = 1
-    NEEDS_MORE_DATA = 2
-    DATA_READY = 3
-    EOF = 4
+    NEEDS_MORE_DATA = 1
+    DATA_READY = 2
+    EOF = 3
 
 
 class FixReadEvent(metaclass=ABCMeta):
@@ -44,17 +43,6 @@ class FixReadDataReady(FixReadEvent):
         return f'<FixReadDataReadEvent: {super().__str__()}, data={self.data}>'
 
 
-class FixReadError(FixReadEvent):
-    """An event indicating an error has occurred"""
-
-    def __init__(self, reason: str) -> None:
-        super().__init__(FixReadEventType.ERROR)
-        self.reason = reason
-
-    def __str__(self) -> str:
-        return f'<FixErrorEvent: {super().__str__()}, reason={self.reason}>'
-
-
 class FixReadEndOfFile(FixReadEvent):
     """Event indicating the read has reaced the end of the input stream"""
 
@@ -63,3 +51,7 @@ class FixReadEndOfFile(FixReadEvent):
 
     def __str__(self) -> str:
         return f'<FixReadEndOfFile: {super().__str__()}>'
+
+
+class FixReadError(Exception):
+    ...

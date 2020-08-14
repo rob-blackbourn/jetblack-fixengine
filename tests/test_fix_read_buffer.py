@@ -3,7 +3,7 @@
 from typing import Iterator, cast
 
 from aiofix.transports.fix_events import (
-    FixReadEventType,
+    FixReadError, FixReadEventType,
     FixReadDataReady
 )
 from aiofix.transports.fix_read_buffer import FixReadBuffer
@@ -19,7 +19,7 @@ def bytes_writer(buf: bytes, chunk_size: int = -1) -> Iterator[bytes]:
             start, end = end, end + chunk_size
 
 
-def test_fix_read_buffer():
+def test_read_valid_buffer():
     """Test for read"""
 
     reader = FixReadBuffer(
@@ -43,7 +43,6 @@ def test_fix_read_buffer():
     message_index = 0
     while not done:
         fix_event = reader.next_event()
-        assert fix_event.event_type != FixReadEventType.ERROR
         if fix_event.event_type == FixReadEventType.EOF:
             done = True
         elif fix_event.event_type == FixReadEventType.NEEDS_MORE_DATA:
@@ -58,3 +57,41 @@ def test_fix_read_buffer():
             message_index += 1
         else:
             assert False
+
+
+def test_read_corrupt_buffer():
+    """Test for read"""
+
+    reader = FixReadBuffer(
+        sep=b'|',
+        convert_sep_to_soh_for_checksum=True,
+        validate=True
+    )
+
+    input_buf = b'8=FIX.4.4|9=94|35=3|49=A|56=AB|128=B1|34=214|50=U1|52=201003'
+
+    writer = bytes_writer(input_buf, 200)
+    buf = next(writer)
+    reader.receive(buf)
+    done = False
+    try:
+        while not done:
+            fix_event = reader.next_event()
+            if fix_event.event_type == FixReadEventType.EOF:
+                done = True
+            elif fix_event.event_type == FixReadEventType.NEEDS_MORE_DATA:
+                try:
+                    buf = next(writer)
+                    reader.receive(buf)
+                except StopIteration:
+                    reader.receive(b'')
+            elif fix_event.event_type == FixReadEventType.DATA_READY:
+                continue
+            else:
+                assert False
+    except FixReadError as error:
+        assert True
+    except BaseException as error:
+        assert False
+    else:
+        assert False
