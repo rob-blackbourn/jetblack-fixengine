@@ -1,6 +1,6 @@
 """Fix message decoder"""
 
-from typing import MutableMapping, Tuple, Optional, List, Iterator, cast
+from typing import Iterator, List, MutableMapping, Optional, Set, Tuple, cast
 
 from ..meta_data import (
     ProtocolMetaData,
@@ -10,11 +10,16 @@ from ..meta_data import (
     FieldMessageDataMap,
     MessageMetaData
 )
+
 from .errors import FieldValueError, DecodingError
 from .common import SOH, calc_checksum, calc_body_length, decode_value, encode_value
 
 
-def _assert_field_value_matches(field: FieldMetaData, expected: bytes, received: bytes) -> None:
+def _assert_field_value_matches(
+        field: FieldMetaData,
+        expected: bytes,
+        received: bytes
+) -> None:
     if expected != received:
         raise FieldValueError(field, expected, received)
 
@@ -48,7 +53,8 @@ def _find_next_member(
 
             if meta_datum.is_required and strict:
                 raise DecodingError(
-                    f'required field missing {meta_datum.member.name}')
+                    f'required field missing {meta_datum.member.name}'
+                )
 
         except StopIteration:
             return None
@@ -68,7 +74,8 @@ def _decode_fields_in_order(
         received_field = protocol.fields_by_number.get(field_number)
         if not received_field:
             raise DecodingError(
-                f'received unknown field "{field_number}" of value "{value}"')
+                f'received unknown field "{field_number}" of value "{value}"'
+            )
         meta_datum = _find_next_member(received_field, meta_data, strict)
         if not meta_datum:
             break
@@ -86,7 +93,10 @@ def _decode_fields_in_order(
             decoded_message[received_field.name] = value
         else:
             decoded_message[received_field.name] = decode_value(
-                protocol, received_field, value)
+                protocol,
+                received_field,
+                value
+            )
 
     # Check if any members are required.
     required_fields = [
@@ -108,7 +118,7 @@ def _decode_fields_any_order(
         decoded_message: FieldMessageDataMap,
         strict: bool = True
 ) -> int:
-    field_names_found = set()
+    field_names_found: Set[str] = set()
     while index < len(encoded_message):
 
         field_number, value = encoded_message[index]
@@ -116,16 +126,26 @@ def _decode_fields_any_order(
         meta_datum = meta_data.get(field_number)
         if not meta_datum:
             break
+
         field_names_found.add(received_field.name)
         index += 1
 
         if meta_datum.type == 'group':
             decoded_groups, index = _decode_group(
-                protocol, encoded_message, index, meta_datum, int(value), strict)
+                protocol,
+                encoded_message,
+                index,
+                meta_datum,
+                int(value),
+                strict
+            )
             decoded_message[received_field.name] = decoded_groups
         else:
             decoded_message[received_field.name] = decode_value(
-                protocol, received_field, value)
+                protocol,
+                received_field,
+                value
+            )
 
     required_members = [
         meta_datum.member.name
@@ -263,29 +283,43 @@ def assert_message_valid(
 ) -> None:
     begin_string_field = protocol.fields_by_name['BeginString']
     begin_string_value = encode_value(
-        protocol, begin_string_field, decoded_message[begin_string_field.name])
+        protocol,
+        begin_string_field,
+        decoded_message[begin_string_field.name]
+    )
     _assert_field_value_matches(
-        begin_string_field, protocol.begin_string, begin_string_value)
+        begin_string_field,
+        protocol.begin_string,
+        begin_string_value
+    )
 
     # Calculate the body length.
     body_length_field = protocol.fields_by_name['BodyLength']
     body_length_value = encode_value(
-        protocol, body_length_field, decoded_message[body_length_field.name])
+        protocol,
+        body_length_field,
+        decoded_message[body_length_field.name]
+    )
     body_length = calc_body_length(buf, encoded_message, sep)
     _assert_field_value_matches(
         body_length_field,
         body_length_value,
-        encode_value(protocol, body_length_field, body_length))
+        encode_value(protocol, body_length_field, body_length)
+    )
 
     # Calculate the checksum.
     check_sum_field = protocol.fields_by_name['CheckSum']
     check_sum_value = encode_value(
-        protocol, check_sum_field, decoded_message[check_sum_field.name])
+        protocol,
+        check_sum_field,
+        decoded_message[check_sum_field.name]
+    )
     check_sum = calc_checksum(buf, sep, convert_sep_to_soh_for_checksum)
     _assert_field_value_matches(
         check_sum_field,
         check_sum,
-        check_sum_value)
+        check_sum_value
+    )
 
 
 def find_message_meta_data(
@@ -293,8 +327,11 @@ def find_message_meta_data(
         decoded_message: FieldMessageDataMap
 ) -> MessageMetaData:
     msgtype_field = protocol.fields_by_name['MsgType']
-    msgtype = encode_value(protocol, msgtype_field,
-                           decoded_message[msgtype_field.name])
+    msgtype = encode_value(
+        protocol,
+        msgtype_field,
+        decoded_message[msgtype_field.name]
+    )
     meta_data = protocol.messages_by_type[msgtype]
     return meta_data
 
@@ -311,14 +348,39 @@ def decode(
     encoded_message = _to_encoded_message(buf, sep)
     decoded_message: FieldMessageDataMap = {}
 
-    index = _decode_header(protocol, encoded_message, decoded_message, strict)
+    index = _decode_header(
+        protocol,
+        encoded_message,
+        decoded_message,
+        strict
+    )
     meta_data = find_message_meta_data(protocol, decoded_message)
-    index = _decode_body(protocol, encoded_message, index,
-                         meta_data, decoded_message, strict)
-    _decode_trailer(protocol, encoded_message, index, decoded_message, strict)
+
+    index = _decode_body(
+        protocol,
+        encoded_message,
+        index,
+        meta_data,
+        decoded_message,
+        strict
+    )
+
+    _decode_trailer(
+        protocol,
+        encoded_message,
+        index,
+        decoded_message,
+        strict
+    )
 
     if validate:
-        assert_message_valid(protocol, buf, encoded_message,
-                             decoded_message, sep, convert_sep_for_checksum)
+        assert_message_valid(
+            protocol,
+            buf,
+            encoded_message,
+            decoded_message,
+            sep,
+            convert_sep_for_checksum
+        )
 
     return decoded_message, meta_data

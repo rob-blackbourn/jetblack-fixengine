@@ -1,7 +1,9 @@
 """Parsing FX messages"""
 
 from __future__ import annotations
+
 from copy import deepcopy
+from typing import Optional
 
 from ..meta_data import (
     ProtocolMetaData,
@@ -10,7 +12,7 @@ from ..meta_data import (
 )
 
 from .encoder import encode, SOH
-from .decoder import decode
+from .decoder import decode, find_message_meta_data
 
 
 class FixMessage:
@@ -19,11 +21,11 @@ class FixMessage:
             self,
             protocol: ProtocolMetaData,
             data: FieldMessageDataMap,
-            meta_data: MessageMetaData
+            meta_data: Optional[MessageMetaData] = None
     ) -> None:
         self.protocol = protocol
         self.data = deepcopy(data)
-        self.meta_data = meta_data
+        self.meta_data = meta_data or find_message_meta_data(protocol, data)
 
     @classmethod
     def decode(

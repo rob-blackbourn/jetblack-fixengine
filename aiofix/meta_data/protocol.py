@@ -16,21 +16,27 @@ class ProtocolMetaData:
             trailer: Mapping[str, MessageMemberMetaData],
             *,
             is_millisecond_time: bool = True,
-            is_float_decimal: bool = False
+            is_float_decimal: bool = False,
+            is_bool_enum: bool = False
     ) -> None:
         self._version = version
         self._begin_string = begin_string
         self._fields_by_name = fields
         self._fields_by_number = {
-            field.number: field for field in fields.values()}
+            field.number: field
+            for field in fields.values()
+        }
         self._components = components
         self._messages_by_name = messages
         self._messages_by_type = {
-            message.msgtype: message for message in messages.values()}
+            message.msgtype: message
+            for message in messages.values()
+        }
         self._header = header
         self._trailer = trailer
-        self._is_millisecond_time = is_millisecond_time
-        self._is_float_decimal = is_float_decimal
+        self.is_millisecond_time = is_millisecond_time
+        self.is_float_decimal = is_float_decimal
+        self.is_bool_enum = is_bool_enum
 
     @property
     def version(self) -> str:
@@ -67,14 +73,6 @@ class ProtocolMetaData:
     @property
     def trailer(self) -> Mapping[str, MessageMemberMetaData]:
         return self._trailer
-
-    @property
-    def is_millisecond_time(self) -> bool:
-        return self._is_millisecond_time
-
-    @property
-    def is_float_decimal(self) -> bool:
-        return self._is_float_decimal
 
     def __str__(self) -> str:
         return f'<ProtocolMetaData: version="{self.version}", begin_string={self.begin_string}'

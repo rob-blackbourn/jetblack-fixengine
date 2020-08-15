@@ -128,7 +128,8 @@ def load_protocol(
         filename: str,
         *,
         is_millisecond_time: bool = True,
-        is_float_decimal: bool = False
+        is_float_decimal: bool = False,
+        is_bool_enum: bool = False
 ) -> ProtocolMetaData:
     if filename.endswith('.xml'):
         config: Dict[str, Any] = convert_xml_file_to_dict(filename)
@@ -156,5 +157,6 @@ def load_protocol(
         header,
         trailer,
         is_millisecond_time=is_millisecond_time,
-        is_float_decimal=is_float_decimal
+        is_float_decimal=is_float_decimal,
+        is_bool_enum=is_bool_enum
     )

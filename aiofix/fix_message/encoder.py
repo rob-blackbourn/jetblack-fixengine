@@ -135,7 +135,9 @@ def encode(
         data['BodyLength'] = body_length
         data['CheckSum'] = checksum
     else:
-        buf = sep.join(field + b'=' + value for field,
-                       value in encoded_message) + sep
+        buf = sep.join(
+            field + b'=' + value
+            for field, value in encoded_message
+        ) + sep
 
     return buf
