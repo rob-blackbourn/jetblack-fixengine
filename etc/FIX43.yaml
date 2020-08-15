@@ -70,12 +70,12 @@ fields:
     number: 13
     type: CHAR
     values:
-      '6': PER_BOND
-      '1': PER_SHARE
-      '2': PERCENTAGE
-      '3': ABSOLUTE
-      '5': '5'
-      '4': '4'
+      6: PER_BOND
+      1: PER_SHARE
+      2: PERCENTAGE
+      3: ABSOLUTE
+      5: '5'
+      4: '4'
 
   CumQty:
     number: 14
@@ -108,14 +108,14 @@ fields:
       W: PEGVWAP
       X: TRADEALONG
       D: PERCVOL
-      '0': STAYOFFER
-      '2': WORK
-      '4': OVERDAY
-      '5': HELD
-      '6': PARTNOTINIT
-      '7': STRICTSCALE
-      '8': TRYTOSCALE
-      '9': STAYBID
+      0: STAYOFFER
+      2: WORK
+      4: OVERDAY
+      5: HELD
+      6: PARTNOTINIT
+      7: STRICTSCALE
+      8: TRYTOSCALE
+      9: STAYBID
       A: NOCROSS
       O: OPENPEG
       C: CALLFIRST
@@ -128,9 +128,9 @@ fields:
       J: RESTATEONTRADINGHALT
       K: CANCELONTRADINGHALT
       L: LASTPEG
-      '3': GOALONG
+      3: GOALONG
       B: OKCROSS
-      '1': NOTHELD
+      1: NOTHELD
 
   ExecRefID:
     number: 19
@@ -140,29 +140,29 @@ fields:
     number: 21
     type: CHAR
     values:
-      '1': AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION
-      '2': AUTOMATED_EXECUTION_ORDER_PUBLIC_BROKER_INTERVENTION_OK
-      '3': MANUAL_ORDER_BEST_EXECUTION
+      1: AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION
+      2: AUTOMATED_EXECUTION_ORDER_PUBLIC_BROKER_INTERVENTION_OK
+      3: MANUAL_ORDER_BEST_EXECUTION
 
   SecurityIDSource:
     number: 22
     type: STRING
     values:
       E: SICOVAM
-      '2': SEDOL
-      '1': CUSIP
-      '3': QUIK
+      2: SEDOL
+      1: CUSIP
+      3: QUIK
       F: BELGIAN
       D: VALOREN
       C: DUTCH
       B: WERTPAPIER
       A: BLOOMBERG_SYMBOL
-      '9': CONSOLIDATED_TAPE_ASSOCIATION
-      '8': EXCHANGE_SYMBOL
-      '7': ISO_COUNTRY_CODE
-      '6': ISO_CURRENCY_CODE
-      '5': RIC_CODE
-      '4': ISIN_NUMBER
+      9: CONSOLIDATED_TAPE_ASSOCIATION
+      8: EXCHANGE_SYMBOL
+      7: ISO_COUNTRY_CODE
+      6: ISO_CURRENCY_CODE
+      5: RIC_CODE
+      4: ISIN_NUMBER
       G: COMMON
 
   IOIid:
@@ -201,10 +201,10 @@ fields:
     number: 29
     type: CHAR
     values:
-      '4': PRINCIPAL
-      '3': CROSS_AS_PRINCIPAL
-      '1': AGENT
-      '2': CROSS_AS_AGENT
+      4: PRINCIPAL
+      3: CROSS_AS_PRINCIPAL
+      1: AGENT
+      2: CROSS_AS_AGENT
 
   LastMkt:
     number: 30
@@ -230,16 +230,16 @@ fields:
     number: 35
     type: STRING
     values:
-      '0': HEARTBEAT
-      '1': TEST_REQUEST
-      '2': RESEND_REQUEST
-      '3': REJECT
-      '4': SEQUENCE_RESET
-      '5': LOGOUT
-      '6': INDICATION_OF_INTEREST
-      '7': ADVERTISEMENT
-      '8': EXECUTION_REPORT
-      '9': ORDER_CANCEL_REJECT
+      0: HEARTBEAT
+      1: TEST_REQUEST
+      2: RESEND_REQUEST
+      3: REJECT
+      4: SEQUENCE_RESET
+      5: LOGOUT
+      6: INDICATION_OF_INTEREST
+      7: ADVERTISEMENT
+      8: EXECUTION_REPORT
+      9: ORDER_CANCEL_REJECT
       a: QUOTE_STATUS_REQUEST
       A: LOGON
       AA: DERIVATIVE_SECURITY_LIST
@@ -315,37 +315,37 @@ fields:
     number: 39
     type: CHAR
     values:
-      '0': NEW
-      '1': PARTIALLY_FILLED
-      '5': REPLACED
-      '2': FILLED
-      '6': PENDING_CANCEL
-      '7': STOPPED
-      '8': REJECTED
-      '9': SUSPENDED
+      0: NEW
+      1: PARTIALLY_FILLED
+      5: REPLACED
+      2: FILLED
+      6: PENDING_CANCEL
+      7: STOPPED
+      8: REJECTED
+      9: SUSPENDED
       A: PENDING_NEW
       B: CALCULATED
       C: EXPIRED
       D: ACCEPTED_FOR_BIDDING
       E: PENDING_REPLACE
-      '3': DONE_FOR_DAY
-      '4': CANCELED
+      3: DONE_FOR_DAY
+      4: CANCELED
 
   OrdType:
     number: 40
     type: CHAR
     values:
       D: PREVIOUSLY_QUOTED
-      '2': LIMIT
-      '3': STOP
-      '4': STOP_LIMIT
-      '5': MARKET_ON_CLOSE
-      '6': WITH_OR_WITHOUT
-      '7': LIMIT_OR_BETTER
-      '8': LIMIT_WITH_OR_WITHOUT
-      '9': ON_BASIS
+      2: LIMIT
+      3: STOP
+      4: STOP_LIMIT
+      5: MARKET_ON_CLOSE
+      6: WITH_OR_WITHOUT
+      7: LIMIT_OR_BETTER
+      8: LIMIT_WITH_OR_WITHOUT
+      9: ON_BASIS
       A: ON_CLOSE
-      '1': MARKET
+      1: MARKET
       C: FOREX_C
       F: FOREX_F
       E: PREVIOUSLY_INDICATED
@@ -434,18 +434,18 @@ fields:
     number: 54
     type: CHAR
     values:
-      '6': SELL_SHORT_EXEMPT
+      6: SELL_SHORT_EXEMPT
       B: AS_DEFINED
       C: OPPOSITE
-      '8': CROSS
-      '9': CROSS_SHORT
-      '1': BUY
-      '2': SELL
-      '3': BUY_MINUS
-      '4': SELL_PLUS
+      8: CROSS
+      9: CROSS_SHORT
+      1: BUY
+      2: SELL
+      3: BUY_MINUS
+      4: SELL_PLUS
       A: CROSS_SHORT_EXEMPT
-      '5': SELL_SHORT
-      '7': UNDISCLOSED
+      5: SELL_SHORT
+      7: UNDISCLOSED
 
   Symbol:
     number: 55
@@ -467,14 +467,14 @@ fields:
     number: 59
     type: CHAR
     values:
-      '7': AT_THE_CLOSE
-      '0': DAY
-      '1': GOOD_TILL_CANCEL
-      '2': AT_THE_OPENING
-      '3': IMMEDIATE_OR_CANCEL
-      '4': FILL_OR_KILL
-      '5': GOOD_TILL_CROSSING
-      '6': GOOD_TILL_DATE
+      7: AT_THE_CLOSE
+      0: DAY
+      1: GOOD_TILL_CANCEL
+      2: AT_THE_OPENING
+      3: IMMEDIATE_OR_CANCEL
+      4: FILL_OR_KILL
+      5: GOOD_TILL_CROSSING
+      6: GOOD_TILL_DATE
 
   TransactTime:
     number: 60
@@ -484,9 +484,9 @@ fields:
     number: 61
     type: CHAR
     values:
-      '1': FLASH
-      '2': BACKGROUND
-      '0': NORMAL
+      1: FLASH
+      2: BACKGROUND
+      0: NORMAL
 
   ValidUntilTime:
     number: 62
@@ -496,17 +496,17 @@ fields:
     number: 63
     type: CHAR
     values:
-      '5': T_PLUS_4
+      5: T_PLUS_4
       A: T_PLUS_1
-      '6': FUTURE
-      '3': T_PLUS_2
-      '2': NEXT_DAY
-      '8': SELLERS_OPTION
-      '1': CASH
-      '7': WHEN_AND_IF_ISSUED
-      '0': REGULAR
-      '9': T_PLUS_5
-      '4': T_PLUS_3
+      6: FUTURE
+      3: T_PLUS_2
+      2: NEXT_DAY
+      8: SELLERS_OPTION
+      1: CASH
+      7: WHEN_AND_IF_ISSUED
+      0: REGULAR
+      9: T_PLUS_5
+      4: T_PLUS_3
 
   FutSettDate:
     number: 64
@@ -540,12 +540,12 @@ fields:
     number: 71
     type: CHAR
     values:
-      '5': CALCULATED_WITHOUT_PRELIMINARY
-      '4': CALCULATED
-      '3': PRELIMINARY
-      '2': CANCEL
-      '1': REPLACE
-      '0': NEW
+      5: CALCULATED_WITHOUT_PRELIMINARY
+      4: CALCULATED
+      3: PRELIMINARY
+      2: CANCEL
+      1: REPLACE
+      0: NEW
 
   RefAllocID:
     number: 72
@@ -588,13 +588,13 @@ fields:
     number: 81
     type: CHAR
     values:
-      '6': PLAN_SPONSOR
-      '0': REGULAR
-      '1': SOFT_DOLLAR
-      '2': STEP_IN
-      '3': STEP_OUT
-      '4': SOFT_DOLLAR_STEP_IN
-      '5': SOFT_DOLLAR_STEP_OUT
+      6: PLAN_SPONSOR
+      0: REGULAR
+      1: SOFT_DOLLAR
+      2: STEP_IN
+      3: STEP_OUT
+      4: SOFT_DOLLAR_STEP_IN
+      5: SOFT_DOLLAR_STEP_OUT
 
   NoRpts:
     number: 82
@@ -612,23 +612,23 @@ fields:
     number: 87
     type: INT
     values:
-      '1': REJECTED
-      '2': PARTIAL_ACCEPT
-      '3': RECEIVED
-      '0': ACCEPTED
+      1: REJECTED
+      2: PARTIAL_ACCEPT
+      3: RECEIVED
+      0: ACCEPTED
 
   AllocRejCode:
     number: 88
     type: INT
     values:
-      '0': UNKNOWN_ACCOUNT
-      '6': UNKNOWN_LISTID
-      '3': UNKNOWN_EXECUTING_BROKER_MNEMONIC
-      '5': UNKNOWN_ORDERID
-      '7': OTHER
-      '4': COMMISSION_DIFFERENCE
-      '1': INCORRECT_QUANTITY
-      '2': INCORRECT_AVERAGE_PRICE
+      0: UNKNOWN_ACCOUNT
+      6: UNKNOWN_LISTID
+      3: UNKNOWN_EXECUTING_BROKER_MNEMONIC
+      5: UNKNOWN_ORDERID
+      7: OTHER
+      4: COMMISSION_DIFFERENCE
+      1: INCORRECT_QUANTITY
+      2: INCORRECT_AVERAGE_PRICE
 
   Signature:
     number: 89
@@ -650,9 +650,9 @@ fields:
     number: 94
     type: CHAR
     values:
-      '0': NEW
-      '1': REPLY
-      '2': ADMIN_REPLY
+      0: NEW
+      1: REPLY
+      2: ADMIN_REPLY
 
   RawDataLength:
     number: 95
@@ -673,13 +673,13 @@ fields:
     number: 98
     type: INT
     values:
-      '2': DES
-      '6': PEM_DES_MD5
-      '5': PGP_DES_MD5
-      '3': PKCS_DES
-      '0': NONE
-      '1': PKCS
-      '4': PGP_DES
+      2: DES
+      6: PEM_DES_MD5
+      5: PGP_DES_MD5
+      3: PKCS_DES
+      0: NONE
+      1: PKCS
+      4: PGP_DES
 
   StopPx:
     number: 99
@@ -693,31 +693,31 @@ fields:
     number: 102
     type: INT
     values:
-      '1': UNKNOWN_ORDER
-      '0': TOO_LATE_TO_CANCEL
-      '6': DUPLICATE_CLORDID_RECEIVED
-      '5': ORIGORDMODTIME_DID_NOT_MATCH_LAST_TRANSACTTIME_OF_ORDER
-      '4': UNABLE_TO_PROCESS_ORDER_MASS_CANCEL_REQUEST
-      '3': ORDER_ALREADY_IN_PENDING_CANCEL_OR_PENDING_REPLACE_STATUS
-      '2': BROKER
+      1: UNKNOWN_ORDER
+      0: TOO_LATE_TO_CANCEL
+      6: DUPLICATE_CLORDID_RECEIVED
+      5: ORIGORDMODTIME_DID_NOT_MATCH_LAST_TRANSACTTIME_OF_ORDER
+      4: UNABLE_TO_PROCESS_ORDER_MASS_CANCEL_REQUEST
+      3: ORDER_ALREADY_IN_PENDING_CANCEL_OR_PENDING_REPLACE_STATUS
+      2: BROKER
 
   OrdRejReason:
     number: 103
     type: INT
     values:
-      '2': EXCHANGE_CLOSED
-      '1': UNKNOWN_SYMBOL
-      '3': ORDER_EXCEEDS_LIMIT
-      '4': TOO_LATE_TO_ENTER
-      '5': UNKNOWN_ORDER
-      '7': DUPLICATE_OF_A_VERBALLY_COMMUNICATED_ORDER
-      '9': TRADE_ALONG_REQUIRED
-      '10': INVALID_INVESTOR_ID
-      '6': DUPLICATE_ORDER
-      '11': UNSUPPORTED_ORDER_CHARACTERISTIC
-      '12': SURVEILLENCE_OPTION
-      '0': BROKER
-      '8': STALE_ORDER
+      2: EXCHANGE_CLOSED
+      1: UNKNOWN_SYMBOL
+      3: ORDER_EXCEEDS_LIMIT
+      4: TOO_LATE_TO_ENTER
+      5: UNKNOWN_ORDER
+      7: DUPLICATE_OF_A_VERBALLY_COMMUNICATED_ORDER
+      9: TRADE_ALONG_REQUIRED
+      10: INVALID_INVESTOR_ID
+      6: DUPLICATE_ORDER
+      11: UNSUPPORTED_ORDER_CHARACTERISTIC
+      12: SURVEILLENCE_OPTION
+      0: BROKER
+      8: STALE_ORDER
 
   IOIQualifier:
     number: 104
@@ -891,15 +891,15 @@ fields:
     number: 139
     type: CHAR
     values:
-      '3': LOCAL_COMMISSION
-      '4': EXCHANGE_FEES
-      '5': STAMP
-      '6': LEVY
-      '7': OTHER
-      '8': MARKUP
-      '9': CONSUMPTION_TAX
-      '1': REGULATORY
-      '2': TAX
+      3: LOCAL_COMMISSION
+      4: EXCHANGE_FEES
+      5: STAMP
+      6: LEVY
+      7: OTHER
+      8: MARKUP
+      9: CONSUMPTION_TAX
+      1: REGULATORY
+      2: TAX
 
   PrevClosePx:
     number: 140
@@ -948,14 +948,14 @@ fields:
     number: 150
     type: CHAR
     values:
-      '6': PENDING_CANCEL
-      '0': NEW
-      '1': PARTIAL_FILL
-      '2': FILL
-      '4': CANCELED
-      '5': REPLACE
-      '8': REJECTED
-      '9': SUSPENDED
+      6: PENDING_CANCEL
+      0: NEW
+      1: PARTIAL_FILL
+      2: FILL
+      4: CANCELED
+      5: REPLACE
+      8: REJECTED
+      9: SUSPENDED
       A: PENDING_NEW
       B: CALCULATED
       C: EXPIRED
@@ -965,8 +965,8 @@ fields:
       G: TRADE_CORRECT
       H: TRADE_CANCEL
       I: ORDER_STATUS
-      '3': DONE_FOR_DAY
-      '7': STOPPED
+      3: DONE_FOR_DAY
+      7: STOPPED
 
   LeavesQty:
     number: 151
@@ -1010,11 +1010,11 @@ fields:
     number: 160
     type: CHAR
     values:
-      '0': DEFAULT
-      '4': SPECIFIC_ORDER_FOR_A_SINGLE_ACCOUNT
-      '3': SPECIFIC_ALLOCATION_ACCOUNT_STANDING
-      '1': STANDING_INSTRUCTIONS_PROVIDED
-      '2': SPECIFIC_ALLOCATION_ACCOUNT_OVERRIDING
+      0: DEFAULT
+      4: SPECIFIC_ORDER_FOR_A_SINGLE_ACCOUNT
+      3: SPECIFIC_ALLOCATION_ACCOUNT_STANDING
+      1: STANDING_INSTRUCTIONS_PROVIDED
+      2: SPECIFIC_ALLOCATION_ACCOUNT_OVERRIDING
 
   AllocText:
     number: 161
@@ -1040,9 +1040,9 @@ fields:
     number: 165
     type: CHAR
     values:
-      '2': INSTITUTIONS_INSTRUCTIONS
-      '3': INVESTOR
-      '1': BROKERS_INSTRUCTIONS
+      2: INSTITUTIONS_INSTRUCTIONS
+      3: INVESTOR
+      1: BROKERS_INSTRUCTIONS
 
   SecurityType:
     number: 167
@@ -1139,10 +1139,10 @@ fields:
     number: 169
     type: INT
     values:
-      '0': OTHER
-      '1': DTC_SID
-      '3': A_GLOBAL_CUSTODIAN
-      '2': THOMSON_ALERT
+      0: OTHER
+      1: DTC_SID
+      3: A_GLOBAL_CUSTODIAN
+      2: THOMSON_ALERT
 
   StandInstDbName:
     number: 170
@@ -1156,8 +1156,8 @@ fields:
     number: 172
     type: INT
     values:
-      '1': FREE
-      '0': VERSUS_PAYMENT
+      1: FREE
+      0: VERSUS_PAYMENT
 
   SettlDepositoryCode:
     number: 173
@@ -1259,8 +1259,8 @@ fields:
     number: 197
     type: INT
     values:
-      '0': F_X_NETTING
-      '1': F_X_SWAP
+      0: F_X_NETTING
+      1: F_X_SWAP
 
   SecondaryOrderID:
     number: 198
@@ -1282,8 +1282,8 @@ fields:
     number: 203
     type: INT
     values:
-      '1': UNCOVERED
-      '0': COVERED
+      1: UNCOVERED
+      0: COVERED
 
   OptAttribute:
     number: 206
@@ -1304,9 +1304,9 @@ fields:
     number: 209
     type: INT
     values:
-      '3': FORWARD_AND_MATCH
-      '2': FORWARD
-      '1': MATCH
+      3: FORWARD_AND_MATCH
+      2: FORWARD
+      1: MATCH
 
   MaxShow:
     number: 210
@@ -1336,10 +1336,10 @@ fields:
     number: 216
     type: INT
     values:
-      '1': TARGET_FIRM
-      '2': TARGET_LIST
-      '3': BLOCK_FIRM
-      '4': BLOCK_LIST
+      1: TARGET_FIRM
+      2: TARGET_LIST
+      3: BLOCK_FIRM
+      4: BLOCK_LIST
 
   RoutingID:
     number: 217
@@ -1353,15 +1353,15 @@ fields:
     number: 219
     type: CHAR
     values:
-      '5': OLD_10
-      '1': CURVE
-      '2': 5_YR
-      '4': 10_YR
-      '6': 30_YR
-      '7': OLD_30
-      '8': 3_MO_LIBOR
-      '9': 6_MO_LIBOR
-      '3': OLD_5
+      5: OLD_10
+      1: CURVE
+      2: 5_YR
+      4: 10_YR
+      6: 30_YR
+      7: OLD_30
+      8: 3_MO_LIBOR
+      9: 6_MO_LIBOR
+      3: OLD_5
 
   BenchmarkCurveCurrency:
     number: 220
@@ -1612,9 +1612,9 @@ fields:
     number: 263
     type: CHAR
     values:
-      '1': SNAPSHOT_PLUS_UPDATES
-      '2': DISABLE_PREVIOUS_SNAPSHOT_PLUS_UPDATE_REQUEST
-      '0': SNAPSHOT
+      1: SNAPSHOT_PLUS_UPDATES
+      2: DISABLE_PREVIOUS_SNAPSHOT_PLUS_UPDATE_REQUEST
+      0: SNAPSHOT
 
   MarketDepth:
     number: 264
@@ -1624,8 +1624,8 @@ fields:
     number: 265
     type: INT
     values:
-      '0': FULL_REFRESH
-      '1': INCREMENTAL_REFRESH
+      0: FULL_REFRESH
+      1: INCREMENTAL_REFRESH
 
   AggregatedBook:
     number: 266
@@ -1646,17 +1646,17 @@ fields:
     number: 269
     type: CHAR
     values:
-      '7': TRADING_SESSION_HIGH_PRICE
-      '1': OFFER
+      7: TRADING_SESSION_HIGH_PRICE
+      1: OFFER
       A: IMBALANCE
-      '9': TRADING_SESSION_VWAP_PRICE
-      '8': TRADING_SESSION_LOW_PRICE
-      '5': CLOSING_PRICE
-      '4': OPENING_PRICE
-      '0': BID
-      '2': TRADE
-      '3': INDEX_VALUE
-      '6': SETTLEMENT_PRICE
+      9: TRADING_SESSION_VWAP_PRICE
+      8: TRADING_SESSION_LOW_PRICE
+      5: CLOSING_PRICE
+      4: OPENING_PRICE
+      0: BID
+      2: TRADE
+      3: INDEX_VALUE
+      6: SETTLEMENT_PRICE
 
   MDEntryPx:
     number: 270
@@ -1678,10 +1678,10 @@ fields:
     number: 274
     type: CHAR
     values:
-      '0': PLUS_TICK
-      '1': ZERO_PLUS_TICK
-      '2': MINUS_TICK
-      '3': ZERO_MINUS_TICK
+      0: PLUS_TICK
+      1: ZERO_PLUS_TICK
+      2: MINUS_TICK
+      3: ZERO_MINUS_TICK
 
   MDMkt:
     number: 275
@@ -1731,9 +1731,9 @@ fields:
     number: 279
     type: CHAR
     values:
-      '0': NEW
-      '1': CHANGE
-      '2': DELETE
+      0: NEW
+      1: CHANGE
+      2: DELETE
 
   MDEntryRefID:
     number: 280
@@ -1743,19 +1743,19 @@ fields:
     number: 281
     type: CHAR
     values:
-      '7': UNSUPPORTED_AGGREGATEDBOOK
-      '1': DUPLICATE_MDREQID
+      7: UNSUPPORTED_AGGREGATEDBOOK
+      1: DUPLICATE_MDREQID
       C: UNSUPPORTED_MDIMPLICITDELETE
       B: UNSUPPORTED_OPENCLOSESETTLEFLAG
       A: UNSUPPORTED_SCOPE
-      '9': UNSUPPORTED_TRADINGSESSIONID
-      '8': UNSUPPORTED_MDENTRYTYPE
-      '6': UNSUPPORTED_MDUPDATETYPE
-      '5': UNSUPPORTED_MARKETDEPTH
-      '4': UNSUPPORTED_SUBSCRIPTIONREQUESTTYPE
-      '2': INSUFFICIENT_BANDWIDTH
-      '0': UNKNOWN_SYMBOL
-      '3': INSUFFICIENT_PERMISSIONS
+      9: UNSUPPORTED_TRADINGSESSIONID
+      8: UNSUPPORTED_MDENTRYTYPE
+      6: UNSUPPORTED_MDUPDATETYPE
+      5: UNSUPPORTED_MARKETDEPTH
+      4: UNSUPPORTED_SUBSCRIPTIONREQUESTTYPE
+      2: INSUFFICIENT_BANDWIDTH
+      0: UNKNOWN_SYMBOL
+      3: INSUFFICIENT_PERMISSIONS
 
   MDEntryOriginator:
     number: 282
@@ -1773,18 +1773,18 @@ fields:
     number: 285
     type: CHAR
     values:
-      '0': CANCELATION
-      '1': ERROR
+      0: CANCELATION
+      1: ERROR
 
   OpenCloseSettleFlag:
     number: 286
     type: MULTIPLEVALUESTRING
     values:
-      '1': SESSION_OPEN
-      '2': DELIVERY_SETTLEMENT_PRICE
-      '3': EXPECTED_PRICE
-      '4': PRICE_FROM_PREVIOUS_BUSINESS_DAY
-      '0': DAILY_OPEN
+      1: SESSION_OPEN
+      2: DELIVERY_SETTLEMENT_PRICE
+      3: EXPECTED_PRICE
+      4: PRICE_FROM_PREVIOUS_BUSINESS_DAY
+      0: DAILY_OPEN
 
   SellerDays:
     number: 287
@@ -1806,8 +1806,8 @@ fields:
     number: 291
     type: MULTIPLEVALUESTRING
     values:
-      '1': BANKRUPT
-      '2': PENDING_DELISTING
+      1: BANKRUPT
+      2: PENDING_DELISTING
 
   CorporateAction:
     number: 292
@@ -1838,26 +1838,26 @@ fields:
     number: 297
     type: INT
     values:
-      '6': REMOVED_FROM_MARKET
-      '1': CANCELED_FOR_SYMBOL
-      '10': PENDING
-      '9': QUOTE_NOT_FOUND
-      '8': QUERY
-      '7': EXPIRED
-      '5': REJECTED
-      '4': CANCELED_ALL
-      '3': CANCELED_FOR_UNDERLYING
-      '2': CANCELED_FOR_SECURITY_TYPE
-      '0': ACCEPTED
+      6: REMOVED_FROM_MARKET
+      1: CANCELED_FOR_SYMBOL
+      10: PENDING
+      9: QUOTE_NOT_FOUND
+      8: QUERY
+      7: EXPIRED
+      5: REJECTED
+      4: CANCELED_ALL
+      3: CANCELED_FOR_UNDERLYING
+      2: CANCELED_FOR_SECURITY_TYPE
+      0: ACCEPTED
 
   QuoteCancelType:
     number: 298
     type: INT
     values:
-      '4': CANCEL_ALL_QUOTES
-      '2': CANCEL_FOR_SECURITY_TYPE
-      '1': CANCEL_FOR_SYMBOL
-      '3': CANCEL_FOR_UNDERLYING_SYMBOL
+      4: CANCEL_ALL_QUOTES
+      2: CANCEL_FOR_SECURITY_TYPE
+      1: CANCEL_FOR_SYMBOL
+      3: CANCEL_FOR_UNDERLYING_SYMBOL
 
   QuoteEntryID:
     number: 299
@@ -1867,23 +1867,23 @@ fields:
     number: 300
     type: INT
     values:
-      '9': NOT_AUTHORIZED_TO_QUOTE_SECURITY
-      '1': UNKNOWN_SYMBOL
-      '2': EXCHANGE
-      '3': QUOTE_REQUEST_EXCEEDS_LIMIT
-      '4': TOO_LATE_TO_ENTER
-      '5': UNKNOWN_QUOTE
-      '6': DUPLICATE_QUOTE
-      '7': INVALID_BID_ASK_SPREAD
-      '8': INVALID_PRICE
+      9: NOT_AUTHORIZED_TO_QUOTE_SECURITY
+      1: UNKNOWN_SYMBOL
+      2: EXCHANGE
+      3: QUOTE_REQUEST_EXCEEDS_LIMIT
+      4: TOO_LATE_TO_ENTER
+      5: UNKNOWN_QUOTE
+      6: DUPLICATE_QUOTE
+      7: INVALID_BID_ASK_SPREAD
+      8: INVALID_PRICE
 
   QuoteResponseLevel:
     number: 301
     type: INT
     values:
-      '1': ACKNOWLEDGE_ONLY_NEGATIVE_OR_ERRONEOUS_QUOTES
-      '0': NO_ACKNOWLEDGEMENT
-      '2': ACKNOWLEDGE_EACH_QUOTE_MESSAGES
+      1: ACKNOWLEDGE_ONLY_NEGATIVE_OR_ERRONEOUS_QUOTES
+      0: NO_ACKNOWLEDGEMENT
+      2: ACKNOWLEDGE_EACH_QUOTE_MESSAGES
 
   QuoteSetID:
     number: 302
@@ -1893,8 +1893,8 @@ fields:
     number: 303
     type: INT
     values:
-      '2': AUTOMATIC
-      '1': MANUAL
+      2: AUTOMATIC
+      1: MANUAL
 
   TotQuoteEntries:
     number: 304
@@ -1956,10 +1956,10 @@ fields:
     number: 321
     type: INT
     values:
-      '0': REQUEST_SECURITY_IDENTITY_AND_SPECIFICATIONS
-      '1': REQUEST_SECURITY_IDENTITY_FOR_THE_SPECIFICATIONS_PROVIDED
-      '2': REQUEST_LIST_SECURITY_TYPES
-      '3': REQUEST_LIST_SECURITIES
+      0: REQUEST_SECURITY_IDENTITY_AND_SPECIFICATIONS
+      1: REQUEST_SECURITY_IDENTITY_FOR_THE_SPECIFICATIONS_PROVIDED
+      2: REQUEST_LIST_SECURITY_TYPES
+      3: REQUEST_LIST_SECURITIES
 
   SecurityResponseID:
     number: 322
@@ -1969,12 +1969,12 @@ fields:
     number: 323
     type: INT
     values:
-      '5': REJECT_SECURITY_PROPOSAL
-      '1': ACCEPT_SECURITY_PROPOSAL_AS_IS
-      '6': CAN_NOT_MATCH_SELECTION_CRITERIA
-      '2': ACCEPT_SECURITY_PROPOSAL_WITH_REVISIONS_AS_INDICATED_IN_THE_MESSAGE
-      '4': LIST_OF_SECURITIES_RETURNED_PER_REQUEST
-      '3': LIST_OF_SECURITY_TYPES_RETURNED_PER_REQUEST
+      5: REJECT_SECURITY_PROPOSAL
+      1: ACCEPT_SECURITY_PROPOSAL_AS_IS
+      6: CAN_NOT_MATCH_SELECTION_CRITERIA
+      2: ACCEPT_SECURITY_PROPOSAL_WITH_REVISIONS_AS_INDICATED_IN_THE_MESSAGE
+      4: LIST_OF_SECURITIES_RETURNED_PER_REQUEST
+      3: LIST_OF_SECURITY_TYPES_RETURNED_PER_REQUEST
 
   SecurityStatusReqID:
     number: 324
@@ -1991,28 +1991,28 @@ fields:
     number: 326
     type: INT
     values:
-      '20': UNKNOWN_OR_INVALID
-      '13': NO_MARKET_ON_CLOSE_IMBALANCE
-      '14': ITS_PRE_OPENING
-      '15': NEW_PRICE_INDICATION
-      '16': TRADE_DISSEMINATION_TIME
-      '17': READY_TO_TRADE
-      '19': NOT_TRADED_ON_THIS_MARKET
-      '22': OPENING_ROTATION
-      '21': PRE_OPEN
-      '12': NO_MARKET_IMBALANCE
-      '18': NOT_AVAILABLE_FOR_TRADING
-      '10': MARKET_ON_CLOSE_IMBALANCE_SELL
-      '9': MARKET_ON_CLOSE_IMBALANCE_BUY
-      '8': MARKET_IMBALANCE_SELL
-      '7': MARKET_IMBALANCE_BUY
-      '6': TRADING_RANGE_INDICATION
-      '5': PRICE_INDICATION
-      '4': NO_OPEN_NO_RESUME
-      '3': RESUME
-      '1': OPENING_DELAY
-      '2': TRADING_HALT
-      '23': FAST_MARKET
+      20: UNKNOWN_OR_INVALID
+      13: NO_MARKET_ON_CLOSE_IMBALANCE
+      14: ITS_PRE_OPENING
+      15: NEW_PRICE_INDICATION
+      16: TRADE_DISSEMINATION_TIME
+      17: READY_TO_TRADE
+      19: NOT_TRADED_ON_THIS_MARKET
+      22: OPENING_ROTATION
+      21: PRE_OPEN
+      12: NO_MARKET_IMBALANCE
+      18: NOT_AVAILABLE_FOR_TRADING
+      10: MARKET_ON_CLOSE_IMBALANCE_SELL
+      9: MARKET_ON_CLOSE_IMBALANCE_BUY
+      8: MARKET_IMBALANCE_SELL
+      7: MARKET_IMBALANCE_BUY
+      6: TRADING_RANGE_INDICATION
+      5: PRICE_INDICATION
+      4: NO_OPEN_NO_RESUME
+      3: RESUME
+      1: OPENING_DELAY
+      2: TRADING_HALT
+      23: FAST_MARKET
 
   HaltReasonChar:
     number: 327
@@ -2059,9 +2059,9 @@ fields:
     number: 334
     type: INT
     values:
-      '1': CANCEL
-      '2': ERROR
-      '3': CORRECTION
+      1: CANCEL
+      2: ERROR
+      3: CORRECTION
 
   TradSesReqID:
     number: 335
@@ -2079,29 +2079,29 @@ fields:
     number: 338
     type: INT
     values:
-      '3': TWO_PARTY
-      '1': ELECTRONIC
-      '2': OPEN_OUTCRY
+      3: TWO_PARTY
+      1: ELECTRONIC
+      2: OPEN_OUTCRY
 
   TradSesMode:
     number: 339
     type: INT
     values:
-      '3': PRODUCTION
-      '1': TESTING
-      '2': SIMULATED
+      3: PRODUCTION
+      1: TESTING
+      2: SIMULATED
 
   TradSesStatus:
     number: 340
     type: INT
     values:
-      '5': PRE_CLOSE
-      '6': REQUEST_REJECTED
-      '4': PRE_OPEN
-      '3': CLOSED
-      '2': OPEN
-      '1': HALTED
-      '0': UNKNOWN
+      5: PRE_CLOSE
+      6: REQUEST_REJECTED
+      4: PRE_OPEN
+      3: CLOSED
+      2: OPEN
+      1: HALTED
+      0: UNKNOWN
 
   TradSesStartTime:
     number: 341
@@ -2240,24 +2240,24 @@ fields:
     number: 373
     type: INT
     values:
-      '12': XML_VALIDATION_ERROR
-      '17': NON_DATA_VALUE_INCLUDES_FIELD_DELIMITER
-      '16': INCORRECT_NUMINGROUP_COUNT_FOR_REPEATING_GROUP
-      '15': REPEATING_GROUP_FIELDS_OUT_OF_ORDER
-      '14': TAG_SPECIFIED_OUT_OF_REQUIRED_ORDER
-      '11': INVALID_MSGTYPE
-      '0': INVALID_TAG_NUMBER
-      '9': COMPID_PROBLEM
-      '8': SIGNATURE_PROBLEM
-      '7': DECRYPTION_PROBLEM
-      '6': INCORRECT_DATA_FORMAT_FOR_VALUE
-      '5': VALUE_IS_INCORRECT
-      '4': TAG_SPECIFIED_WITHOUT_A_VALUE
-      '3': UNDEFINED_TAG
-      '10': SENDINGTIME_ACCURACY_PROBLEM
-      '13': TAG_APPEARS_MORE_THAN_ONCE
-      '2': TAG_NOT_DEFINED_FOR_THIS_MESSAGE_TYPE
-      '1': REQUIRED_TAG_MISSING
+      12: XML_VALIDATION_ERROR
+      17: NON_DATA_VALUE_INCLUDES_FIELD_DELIMITER
+      16: INCORRECT_NUMINGROUP_COUNT_FOR_REPEATING_GROUP
+      15: REPEATING_GROUP_FIELDS_OUT_OF_ORDER
+      14: TAG_SPECIFIED_OUT_OF_REQUIRED_ORDER
+      11: INVALID_MSGTYPE
+      0: INVALID_TAG_NUMBER
+      9: COMPID_PROBLEM
+      8: SIGNATURE_PROBLEM
+      7: DECRYPTION_PROBLEM
+      6: INCORRECT_DATA_FORMAT_FOR_VALUE
+      5: VALUE_IS_INCORRECT
+      4: TAG_SPECIFIED_WITHOUT_A_VALUE
+      3: UNDEFINED_TAG
+      10: SENDINGTIME_ACCURACY_PROBLEM
+      13: TAG_APPEARS_MORE_THAN_ONCE
+      2: TAG_NOT_DEFINED_FOR_THIS_MESSAGE_TYPE
+      1: REQUIRED_TAG_MISSING
 
   BidRequestTransType:
     number: 374
@@ -2284,15 +2284,15 @@ fields:
     number: 378
     type: INT
     values:
-      '7': CANCEL_ON_SYSTEM_FAILURE
-      '0': GT_CORPORATE_ACTION
-      '8': MARKET
-      '6': CANCEL_ON_TRADING_HALT
-      '5': PARTIAL_DECLINE_OF_ORDERQTY
-      '4': BROKER_OPTION
-      '3': REPRICING_OF_ORDER
-      '1': GT_RENEWAL
-      '2': VERBAL_CHANGE
+      7: CANCEL_ON_SYSTEM_FAILURE
+      0: GT_CORPORATE_ACTION
+      8: MARKET
+      6: CANCEL_ON_TRADING_HALT
+      5: PARTIAL_DECLINE_OF_ORDERQTY
+      4: BROKER_OPTION
+      3: REPRICING_OF_ORDER
+      1: GT_RENEWAL
+      2: VERBAL_CHANGE
 
   BusinessRejectRefID:
     number: 379
@@ -2302,14 +2302,14 @@ fields:
     number: 380
     type: INT
     values:
-      '3': UNSUPPORTED_MESSAGE_TYPE
-      '7': DELIVERTO_FIRM_NOT_AVAILABLE_AT_THIS_TIME
-      '4': APPLICATION_NOT_AVAILABLE
-      '6': NOT_AUTHORIZED
-      '0': OTHER
-      '5': CONDITIONALLY_REQUIRED_FIELD_MISSING
-      '1': UNKOWN_ID
-      '2': UNKNOWN_SECURITY
+      3: UNSUPPORTED_MESSAGE_TYPE
+      7: DELIVERTO_FIRM_NOT_AVAILABLE_AT_THIS_TIME
+      4: APPLICATION_NOT_AVAILABLE
+      6: NOT_AUTHORIZED
+      0: OTHER
+      5: CONDITIONALLY_REQUIRED_FIELD_MISSING
+      1: UNKOWN_ID
+      2: UNKNOWN_SECURITY
 
   GrossTradeAmt:
     number: 381
@@ -2346,12 +2346,12 @@ fields:
     number: 388
     type: CHAR
     values:
-      '0': RELATED_TO_DISPLAYED_PRICE
-      '1': RELATED_TO_MARKET_PRICE
-      '2': RELATED_TO_PRIMARY_PRICE
-      '3': RELATED_TO_LOCAL_PRIMARY_PRICE
-      '4': RELATED_TO_MIDPOINT_PRICE
-      '5': RELATED_TO_LAST_TRADE_PRICE
+      0: RELATED_TO_DISPLAYED_PRICE
+      1: RELATED_TO_MARKET_PRICE
+      2: RELATED_TO_PRIMARY_PRICE
+      3: RELATED_TO_LOCAL_PRIMARY_PRICE
+      4: RELATED_TO_MIDPOINT_PRICE
+      5: RELATED_TO_LAST_TRADE_PRICE
 
   DiscretionOffset:
     number: 389
@@ -2377,9 +2377,9 @@ fields:
     number: 394
     type: INT
     values:
-      '1': NON_DISCLOSED_STYLE
-      '2': DISCLOSED_STYLE
-      '3': NO_BIDDING_PROCESS
+      1: NON_DISCLOSED_STYLE
+      2: DISCLOSED_STYLE
+      3: NO_BIDDING_PROCESS
 
   NumTickets:
     number: 395
@@ -2401,9 +2401,9 @@ fields:
     number: 399
     type: INT
     values:
-      '3': INDEX
-      '2': COUNTRY
-      '1': SECTOR
+      3: INDEX
+      2: COUNTRY
+      1: SECTOR
 
   BidDescriptor:
     number: 400
@@ -2413,8 +2413,8 @@ fields:
     number: 401
     type: INT
     values:
-      '1': SIDEVALUE1
-      '2': SIDEVALUE_2
+      1: SIDEVALUE1
+      2: SIDEVALUE_2
 
   LiquidityPctLow:
     number: 402
@@ -2448,10 +2448,10 @@ fields:
     number: 409
     type: INT
     values:
-      '3': NORMAL_MARKET_SIZE
-      '4': OTHER
-      '2': 20_DAY_MOVING_AVERAGE
-      '1': 5DAY_MOVING_AVERAGE
+      3: NORMAL_MARKET_SIZE
+      4: OTHER
+      2: 20_DAY_MOVING_AVERAGE
+      1: 5DAY_MOVING_AVERAGE
 
   WtAverageLiquidity:
     number: 410
@@ -2476,9 +2476,9 @@ fields:
     number: 414
     type: INT
     values:
-      '3': REAL_TIME_EXECUTION_REPORTS
-      '2': SELLSIDE_PERIODICALLY_SENDS_STATUS_USING_LISTSTATUS_PERIOD_OPTIONALLY_SPECIFIED_IN_PROGRESSPERIOD
-      '1': BUYSIDE_EXPLICITLY_REQUESTS_STATUS_USING_STATUSREQUEST
+      3: REAL_TIME_EXECUTION_REPORTS
+      2: SELLSIDE_PERIODICALLY_SENDS_STATUS_USING_LISTSTATUS_PERIOD_OPTIONALLY_SPECIFIED_IN_PROGRESSPERIOD
+      1: BUYSIDE_EXPLICITLY_REQUESTS_STATUS_USING_STATUSREQUEST
 
   ProgPeriodInterval:
     number: 415
@@ -2488,8 +2488,8 @@ fields:
     number: 416
     type: INT
     values:
-      '2': GROSS
-      '1': NET
+      2: GROSS
+      1: NET
 
   NumBidders:
     number: 417
@@ -2508,18 +2508,18 @@ fields:
     number: 419
     type: CHAR
     values:
-      '8': VWAP_THROUGH_AN_AFTERNOON_SESSION
+      8: VWAP_THROUGH_AN_AFTERNOON_SESSION
       D: OPEN
       Z: OTHERS
       C: STRIKE
       B: VWAP_THROUGH_AN_AFTERNOON_SESSION_EXCEPT_YORI
-      '9': VWAP_THROUGH_A_DAY_EXCEPT_YORI
-      '7': VWAP_THROUGH_A_MORNING_SESSION
-      '6': VWAP_THROUGH_A_DAY
-      '5': SQ
-      '4': CURRENT_PRICE
-      '3': CLOSING_PRICE
-      '2': CLOSING_PRICE_AT_MORNING_SESSION
+      9: VWAP_THROUGH_A_DAY_EXCEPT_YORI
+      7: VWAP_THROUGH_A_MORNING_SESSION
+      6: VWAP_THROUGH_A_DAY
+      5: SQ
+      4: CURRENT_PRICE
+      3: CLOSING_PRICE
+      2: CLOSING_PRICE_AT_MORNING_SESSION
       A: VWAP_THROUGH_A_MORNING_SESSION_EXCEPT_YORI
 
   NoBidComponents:
@@ -2538,14 +2538,14 @@ fields:
     number: 423
     type: INT
     values:
-      '3': FIXED_AMOUNT
-      '1': PERCENTAGE
-      '4': DISCOUNT
-      '6': BASIS_POINTS_RELATIVE_TO_BENCHMARK
-      '7': TED_PRICE
-      '8': TED_YIELD
-      '5': PREMIUM
-      '2': PER_SHARE
+      3: FIXED_AMOUNT
+      1: PERCENTAGE
+      4: DISCOUNT
+      6: BASIS_POINTS_RELATIVE_TO_BENCHMARK
+      7: TED_PRICE
+      8: TED_YIELD
+      5: PREMIUM
+      2: PER_SHARE
 
   DayOrderQty:
     number: 424
@@ -2563,9 +2563,9 @@ fields:
     number: 427
     type: INT
     values:
-      '0': BOOK_OUT_ALL_TRADES_ON_DAY_OF_EXECUTION
-      '2': ACCUMULATE_UNTIL_VERBALLY_NOTIFIED_OTHERWISE
-      '1': ACCUMULATE_EXECUTIONS_UNTIL_ORDER_IS_FILLED_OR_EXPIRES
+      0: BOOK_OUT_ALL_TRADES_ON_DAY_OF_EXECUTION
+      2: ACCUMULATE_UNTIL_VERBALLY_NOTIFIED_OTHERWISE
+      1: ACCUMULATE_EXECUTIONS_UNTIL_ORDER_IS_FILLED_OR_EXPIRES
 
   NoStrikes:
     number: 428
@@ -2575,31 +2575,31 @@ fields:
     number: 429
     type: INT
     values:
-      '6': ALERT
-      '4': EXECSTARTED
-      '3': TIMED
-      '2': RESPONSE
-      '1': ACK
-      '5': ALLDONE
+      6: ALERT
+      4: EXECSTARTED
+      3: TIMED
+      2: RESPONSE
+      1: ACK
+      5: ALLDONE
 
   NetGrossInd:
     number: 430
     type: INT
     values:
-      '1': NET
-      '2': GROSS
+      1: NET
+      2: GROSS
 
   ListOrderStatus:
     number: 431
     type: INT
     values:
-      '4': CANCELING
-      '3': EXECUTING
-      '7': REJECT
-      '6': ALL_DONE
-      '5': ALERT
-      '2': RECEIVEDFOREXECUTION
-      '1': INBIDDINGPROCESS
+      4: CANCELING
+      3: EXECUTING
+      7: REJECT
+      6: ALL_DONE
+      5: ALERT
+      2: RECEIVEDFOREXECUTION
+      1: INBIDDINGPROCESS
 
   ExpireDate:
     number: 432
@@ -2609,18 +2609,18 @@ fields:
     number: 433
     type: CHAR
     values:
-      '5': EXCHANGE_SWITCH_CIV_ORDER_BUY_DRIVEN_CASH_WITHDRAW
-      '4': EXCHANGE_SWITCH_CIV_ORDER_BUY_DRIVEN_CASH_TOP_UP
-      '2': WAIT_FOR_EXECUTE_INSTRUCTION
-      '1': IMMEDIATE
-      '3': EXCHANGE_SWITCH_CIV_ORDER_SELL_DRIVEN
+      5: EXCHANGE_SWITCH_CIV_ORDER_BUY_DRIVEN_CASH_WITHDRAW
+      4: EXCHANGE_SWITCH_CIV_ORDER_BUY_DRIVEN_CASH_TOP_UP
+      2: WAIT_FOR_EXECUTE_INSTRUCTION
+      1: IMMEDIATE
+      3: EXCHANGE_SWITCH_CIV_ORDER_SELL_DRIVEN
 
   CxlRejResponseTo:
     number: 434
     type: CHAR
     values:
-      '2': ORDER_CANCEL_REPLACE_REQUEST
-      '1': ORDER_CANCEL_REQUEST
+      2: ORDER_CANCEL_REPLACE_REQUEST
+      1: ORDER_CANCEL_REQUEST
 
   UnderlyingCouponRate:
     number: 435
@@ -2646,9 +2646,9 @@ fields:
     number: 442
     type: CHAR
     values:
-      '1': SINGLE_SECURITY
-      '2': INDIVIDUAL_LEG_OF_A_MULTI_LEG_SECURITY
-      '3': MULTI_LEG_SECURITY
+      1: SINGLE_SECURITY
+      2: INDIVIDUAL_LEG_OF_A_MULTI_LEG_SECURITY
+      3: MULTI_LEG_SECURITY
 
   StrikeTime:
     number: 443
@@ -2670,20 +2670,20 @@ fields:
     number: 447
     type: CHAR
     values:
-      '5': CHINESE_B_SHARE
-      '8': US_EMPLOYER_IDENTIFICATION_NUMBER
+      5: CHINESE_B_SHARE
+      8: US_EMPLOYER_IDENTIFICATION_NUMBER
       A: AUSTRALIAN_TAX_FILE_NUMBER
-      '9': AUSTRALIAN_BUSINESS_NUMBER
+      9: AUSTRALIAN_BUSINESS_NUMBER
       E: ISO_COUNTRY_CODE
       B: BIC
-      '7': US_SOCIAL_SECURITY_NUMBER
+      7: US_SOCIAL_SECURITY_NUMBER
       D: PROPRIETARY_CUSTOM_CODE
       F: SETTLEMENT_ENTITY_LOCATION
-      '1': KOREAN_INVESTOR_ID
-      '2': TAIWANESE_QUALIFIED_FOREIGN_INVESTOR_ID_QFII
-      '3': TAIWANESE_TRADING_ACCOUNT
-      '4': MALAYSIAN_CENTRAL_DEPOSITORY
-      '6': UK_NATIONAL_INSURANCE_OR_PENSION_NUMBER
+      1: KOREAN_INVESTOR_ID
+      2: TAIWANESE_QUALIFIED_FOREIGN_INVESTOR_ID_QFII
+      3: TAIWANESE_TRADING_ACCOUNT
+      4: MALAYSIAN_CENTRAL_DEPOSITORY
+      6: UK_NATIONAL_INSURANCE_OR_PENSION_NUMBER
       C: GENERALLY_ACCEPTED_MARKET_PARTICIPANT_IDENTIFIER
 
   PartyID:
@@ -2706,26 +2706,26 @@ fields:
     number: 452
     type: INT
     values:
-      '15': CORRESPONDANT_CLEARING_FIRM
-      '3': CLIENT_ID
-      '20': UNDERLYING_CONTRA_FIRM
-      '19': SPONSORING_FIRM
-      '18': CONTRA_CLEARING_FIRM
-      '17': CONTRA_FIRM
-      '16': EXECUTING_SYSTEM
-      '7': ENTERING_FIRM
-      '1': EXECUTING_FIRM
-      '2': BROKER_OF_CREDIT
-      '5': INVESTOR_ID
-      '6': INTRODUCING_FIRM
-      '14': GIVEUP_CLEARING_FIRM
-      '8': LOCATE_LENDING_FIRM
-      '9': FUND_MANAGER_CLIENT_ID
-      '10': SETTLEMENT_LOCATION
-      '11': ORDER_ORIGINATION_TRADER
-      '12': EXECUTING_TRADER
-      '13': ORDER_ORIGINATION_FIRM
-      '4': CLEARING_FIRM
+      15: CORRESPONDANT_CLEARING_FIRM
+      3: CLIENT_ID
+      20: UNDERLYING_CONTRA_FIRM
+      19: SPONSORING_FIRM
+      18: CONTRA_CLEARING_FIRM
+      17: CONTRA_FIRM
+      16: EXECUTING_SYSTEM
+      7: ENTERING_FIRM
+      1: EXECUTING_FIRM
+      2: BROKER_OF_CREDIT
+      5: INVESTOR_ID
+      6: INTRODUCING_FIRM
+      14: GIVEUP_CLEARING_FIRM
+      8: LOCATE_LENDING_FIRM
+      9: FUND_MANAGER_CLIENT_ID
+      10: SETTLEMENT_LOCATION
+      11: ORDER_ORIGINATION_TRADER
+      12: EXECUTING_TRADER
+      13: ORDER_ORIGINATION_FIRM
+      4: CLEARING_FIRM
 
   NoPartyIDs:
     number: 453
@@ -2759,18 +2759,18 @@ fields:
     number: 460
     type: INT
     values:
-      '8': LOAN
-      '12': OTHER
-      '11': MUNICIPAL
-      '1': AGENCY
-      '3': CORPORATE
-      '4': CURRENCY
-      '2': COMMODITY
-      '6': GOVERNMENT
-      '10': MORTGAGE
-      '7': INDEX
-      '9': MONEYMARKET
-      '5': EQUITY
+      8: LOAN
+      12: OTHER
+      11: MUNICIPAL
+      1: AGENCY
+      3: CORPORATE
+      4: CURRENCY
+      2: COMMODITY
+      6: GOVERNMENT
+      10: MORTGAGE
+      7: INDEX
+      9: MONEYMARKET
+      5: EQUITY
 
   CFICode:
     number: 461
@@ -2795,14 +2795,14 @@ fields:
     number: 465
     type: INT
     values:
-      '6': CONTRACTS
-      '7': OTHER
-      '5': CURRENCY
-      '4': ORIGINALFACE
-      '3': CURRENTFACE
-      '2': BONDS
-      '1': SHARES
-      '8': PAR
+      6: CONTRACTS
+      7: OTHER
+      5: CURRENCY
+      4: ORIGINALFACE
+      3: CURRENTFACE
+      2: BONDS
+      1: SHARES
+      8: PAR
 
   BookingRefID:
     number: 466
@@ -2816,9 +2816,9 @@ fields:
     number: 468
     type: CHAR
     values:
-      '0': ROUND_TO_NEAREST
-      '1': ROUND_DOWN
-      '2': ROUND_UP
+      0: ROUND_TO_NEAREST
+      1: ROUND_DOWN
+      2: ROUND_UP
 
   RoundingModulus:
     number: 469
@@ -2877,9 +2877,9 @@ fields:
     number: 481
     type: CHAR
     values:
-      '3': EXEMPT_AUTHORISED_CREDIT_OR_FINANCIAL_INSTITUTION
-      '2': EXEMPT_CLIENT_MONEY_TYPE_EXEMPTION
-      '1': EXEMPT_BELOW_THE_LIMIT
+      3: EXEMPT_AUTHORISED_CREDIT_OR_FINANCIAL_INSTITUTION
+      2: EXEMPT_CLIENT_MONEY_TYPE_EXEMPTION
+      1: EXEMPT_BELOW_THE_LIMIT
       Y: PASSED
       N: NOT_CHECKED
 
@@ -2939,21 +2939,21 @@ fields:
     number: 492
     type: INT
     values:
-      '14': BPAY
-      '13': ACH_CREDIT
-      '12': ACH_DEBIT
-      '11': CREDIT_CARD
-      '10': DIRECT_CREDIT
-      '9': DIRECT_DEBIT
-      '8': DEBIT_CARD
-      '7': FEDWIRE
-      '15': HIGH_VALUE_CLEARING_SYSTEM
-      '3': EUROCLEAR
-      '6': TELEGRAPHIC_TRANSFER
-      '4': CLEARSTREAM
-      '1': CREST
-      '2': NSCC
-      '5': CHEQUE
+      14: BPAY
+      13: ACH_CREDIT
+      12: ACH_DEBIT
+      11: CREDIT_CARD
+      10: DIRECT_CREDIT
+      9: DIRECT_DEBIT
+      8: DEBIT_CARD
+      7: FEDWIRE
+      15: HIGH_VALUE_CLEARING_SYSTEM
+      3: EUROCLEAR
+      6: TELEGRAPHIC_TRANSFER
+      4: CLEARSTREAM
+      1: CREST
+      2: NSCC
+      5: CHEQUE
 
   RegistAcctType:
     number: 493
@@ -2967,36 +2967,36 @@ fields:
     number: 495
     type: INT
     values:
-      '19': PROFIT_SHARING_PLAN
-      '11': EMPLOYER
-      '12': EMPLOYER_CURRENT_YEAR
-      '13': NON_FUND_PROTOTYPE_IRA
-      '14': NON_FUND_QUALIFIED_PLAN
-      '15': DEFINED_CONTRIBUTION_PLAN
-      '10': EMPLOYEE_CURRENT_YEAR
-      '17': INDIVIDUAL_RETIREMENT_ACCOUNT_ROLLOVER
-      '5': MINI_INSURANCE_ISA
-      '16': INDIVIDUAL_RETIREMENT_ACCOUNT
-      '9': EMPLOYEE
-      '8': ASSET_TRANSFER
-      '21': SELF_DIRECTED_IRA
-      '6': CURRENT_YEAR_PAYMENT
-      '20': 401K
-      '4': MINI_STOCKS_AND_SHARES_ISA
-      '3': MINI_CASH_ISA
-      '2': TESSA
-      '1': MAXI_ISA
-      '0': NONE_NOT_APPLICABLE
-      '7': PRIOR_YEAR_PAYMENT
-      '23': '457'
-      '24': ROTH_IRA_24
-      '25': ROTH_IRA_25
-      '26': ROTH_CONVERSION_IRA_26
-      '27': ROTH_CONVERSION_IRA_27
-      '28': EDUCATION_IRA_28
-      '29': EDUCATION_IRA_29
-      '18': KEOGH
-      '22': '403'
+      19: PROFIT_SHARING_PLAN
+      11: EMPLOYER
+      12: EMPLOYER_CURRENT_YEAR
+      13: NON_FUND_PROTOTYPE_IRA
+      14: NON_FUND_QUALIFIED_PLAN
+      15: DEFINED_CONTRIBUTION_PLAN
+      10: EMPLOYEE_CURRENT_YEAR
+      17: INDIVIDUAL_RETIREMENT_ACCOUNT_ROLLOVER
+      5: MINI_INSURANCE_ISA
+      16: INDIVIDUAL_RETIREMENT_ACCOUNT
+      9: EMPLOYEE
+      8: ASSET_TRANSFER
+      21: SELF_DIRECTED_IRA
+      6: CURRENT_YEAR_PAYMENT
+      20: 401K
+      4: MINI_STOCKS_AND_SHARES_ISA
+      3: MINI_CASH_ISA
+      2: TESSA
+      1: MAXI_ISA
+      0: NONE_NOT_APPLICABLE
+      7: PRIOR_YEAR_PAYMENT
+      23: '457'
+      24: ROTH_IRA_24
+      25: ROTH_IRA_25
+      26: ROTH_CONVERSION_IRA_26
+      27: ROTH_CONVERSION_IRA_27
+      28: EDUCATION_IRA_28
+      29: EDUCATION_IRA_29
+      18: KEOGH
+      22: '403'
 
   RegistRejReasonText:
     number: 496
@@ -3050,24 +3050,24 @@ fields:
     number: 507
     type: INT
     values:
-      '13': INVALID_UNACCEPTABLE_NODISTRIBINSTNS
-      '17': INVALID_UNACCEPTABLE_CASH_DISTRIB_AGENT_CODE
-      '16': INVALID_UNACCEPTABLE_CASH_DISTRIB_AGENT_ACCT_NAME
-      '4': INVALID_UNACCEPTABLE_NO_REG_DETLS
-      '15': INVALID_UNACCEPTABLE_DISTRIB_PAYMENT_METHOD
-      '14': INVALID_UNACCEPTABLE_DISTRIB_PERCENTAGE
-      '3': INVALID_UNACCEPTABLE_OWNERSHIP_TYPE
-      '2': INVALID_UNACCEPTABLE_TAX_EXEMPT_TYPE
-      '12': INVALID_UNACCEPTABLE_INVESTOR_COUNTRY_OF_RESIDENCE
-      '11': INVALID_UNACCEPTABLE_DATE_OF_BIRTH
-      '10': INVALID_UNACCEPTABLE_INVESTOR_ID_SOURCE
-      '9': INVALID_UNACCEPTABLE_INVESTOR_ID
-      '8': INVALID_UNACCEPTABLE_MAILING_INST
-      '7': INVALID_UNACCEPTABLE_MAILING_DTLS
-      '5': INVALID_UNACCEPTABLE_REG_SEQ_NO
-      '1': INVALID_UNACCEPTABLE_ACCOUNT_TYPE
-      '18': INVALID_UNACCEPTABLE_CASH_DISTRIB_AGENT_ACCT_NUM
-      '6': INVALID_UNACCEPTABLE_REG_DTLS
+      13: INVALID_UNACCEPTABLE_NODISTRIBINSTNS
+      17: INVALID_UNACCEPTABLE_CASH_DISTRIB_AGENT_CODE
+      16: INVALID_UNACCEPTABLE_CASH_DISTRIB_AGENT_ACCT_NAME
+      4: INVALID_UNACCEPTABLE_NO_REG_DETLS
+      15: INVALID_UNACCEPTABLE_DISTRIB_PAYMENT_METHOD
+      14: INVALID_UNACCEPTABLE_DISTRIB_PERCENTAGE
+      3: INVALID_UNACCEPTABLE_OWNERSHIP_TYPE
+      2: INVALID_UNACCEPTABLE_TAX_EXEMPT_TYPE
+      12: INVALID_UNACCEPTABLE_INVESTOR_COUNTRY_OF_RESIDENCE
+      11: INVALID_UNACCEPTABLE_DATE_OF_BIRTH
+      10: INVALID_UNACCEPTABLE_INVESTOR_ID_SOURCE
+      9: INVALID_UNACCEPTABLE_INVESTOR_ID
+      8: INVALID_UNACCEPTABLE_MAILING_INST
+      7: INVALID_UNACCEPTABLE_MAILING_DTLS
+      5: INVALID_UNACCEPTABLE_REG_SEQ_NO
+      1: INVALID_UNACCEPTABLE_ACCOUNT_TYPE
+      18: INVALID_UNACCEPTABLE_CASH_DISTRIB_AGENT_ACCT_NUM
+      6: INVALID_UNACCEPTABLE_REG_DTLS
 
   RegistRefID:
     number: 508
@@ -3097,9 +3097,9 @@ fields:
     number: 514
     type: CHAR
     values:
-      '2': CANCEL
-      '0': NEW
-      '1': REPLACE
+      2: CANCEL
+      0: NEW
+      1: REPLACE
 
   ExecValuationPoint:
     number: 515
@@ -3121,21 +3121,21 @@ fields:
     number: 519
     type: INT
     values:
-      '15': NET_SETTLEMENT_AMOUNT
-      '1': COMMISSION_AMOUNT
-      '2': COMMISSION
-      '3': INITIAL_CHARGE_AMOUNT
-      '4': INITIAL_CHARGE
-      '5': DISCOUNT_AMOUNT
-      '6': DISCOUNT
-      '7': DILUTION_LEVY_AMOUNT
-      '8': DILUTION_LEVY
-      '9': EXIT_CHARGE_AMOUNT
-      '10': EXIT_CHARGE
-      '11': FUND_BASED_RENEWAL_COMMISSION
-      '12': PROJECTED_FUND_VALUE
-      '14': FUND_BASED_RENEWAL_COMMISSION_AMOUNT_14
-      '13': FUND_BASED_RENEWAL_COMMISSION_AMOUNT_13
+      15: NET_SETTLEMENT_AMOUNT
+      1: COMMISSION_AMOUNT
+      2: COMMISSION
+      3: INITIAL_CHARGE_AMOUNT
+      4: INITIAL_CHARGE
+      5: DISCOUNT_AMOUNT
+      6: DISCOUNT
+      7: DILUTION_LEVY_AMOUNT
+      8: DILUTION_LEVY
+      9: EXIT_CHARGE_AMOUNT
+      10: EXIT_CHARGE
+      11: FUND_BASED_RENEWAL_COMMISSION
+      12: PROJECTED_FUND_VALUE
+      14: FUND_BASED_RENEWAL_COMMISSION_AMOUNT_14
+      13: FUND_BASED_RENEWAL_COMMISSION_AMOUNT_13
 
   ContAmtValue:
     number: 520
@@ -3149,19 +3149,19 @@ fields:
     number: 522
     type: INT
     values:
-      '5': COMPANY_TRUSTEE
-      '13': NOMINEE
-      '12': CORPORATE_BODY
-      '11': NON_PROFIT_ORGANIZATION
-      '10': NETWORKING_SUB_ACCOUNT
-      '9': FIDUCIARIES
-      '8': TRUSTS
-      '6': PENSION_PLAN
-      '4': INDIVIDUAL_TRUSTEE
-      '2': PUBLIC_COMPANY
-      '3': PRIVATE_COMPANY
-      '1': INDIVIDUAL_INVESTOR
-      '7': CUSTODIAN_UNDER_GIFTS_TO_MINORS_ACT
+      5: COMPANY_TRUSTEE
+      13: NOMINEE
+      12: CORPORATE_BODY
+      11: NON_PROFIT_ORGANIZATION
+      10: NETWORKING_SUB_ACCOUNT
+      9: FIDUCIARIES
+      8: TRUSTS
+      6: PENSION_PLAN
+      4: INDIVIDUAL_TRUSTEE
+      2: PUBLIC_COMPANY
+      3: PRIVATE_COMPANY
+      1: INDIVIDUAL_INVESTOR
+      7: CUSTODIAN_UNDER_GIFTS_TO_MINORS_ACT
 
   PartySubID:
     number: 523
@@ -3198,53 +3198,53 @@ fields:
     number: 529
     type: MULTIPLEVALUESTRING
     values:
-      '7': FOREIGN_ENTITY
+      7: FOREIGN_ENTITY
       A: RISKLESS_ARBITRAGE
-      '1': PROGRAM_TRADE
-      '8': EXTERNAL_MARKET_PARTICIPANT
-      '6': ACTING_AS_MARKET_MAKER_OR_SPECIALIST_IN_THE_UNDERLYING_SECURITY_OF_A_DERIVATIVE_SECURITY
-      '5': ACTING_AS_MARKET_MAKER_OR_SPECIALIST_IN_THE_SECURITY
-      '3': NON_INDEX_ARBITRAGE
-      '2': INDEX_ARBITRAGE
-      '4': COMPETING_MARKET_MAKER
-      '9': EXTERNAL_INTER_CONNECTED_MARKET_LINKAGE
+      1: PROGRAM_TRADE
+      8: EXTERNAL_MARKET_PARTICIPANT
+      6: ACTING_AS_MARKET_MAKER_OR_SPECIALIST_IN_THE_UNDERLYING_SECURITY_OF_A_DERIVATIVE_SECURITY
+      5: ACTING_AS_MARKET_MAKER_OR_SPECIALIST_IN_THE_SECURITY
+      3: NON_INDEX_ARBITRAGE
+      2: INDEX_ARBITRAGE
+      4: COMPETING_MARKET_MAKER
+      9: EXTERNAL_INTER_CONNECTED_MARKET_LINKAGE
 
   MassCancelRequestType:
     number: 530
     type: CHAR
     values:
-      '1': CANCEL_ORDERS_FOR_A_SECURITY
-      '7': CANCEL_ALL_ORDERS
-      '6': CANCEL_ORDERS_FOR_A_TRADING_SESSION
-      '5': CANCEL_ORDERS_FOR_A_SECURITYTYPE
-      '4': CANCEL_ORDERS_FOR_A_CFICODE
-      '2': CANCEL_ORDERS_FOR_AN_UNDERLYING_SECURITY
-      '3': CANCEL_ORDERS_FOR_A_PRODUCT
+      1: CANCEL_ORDERS_FOR_A_SECURITY
+      7: CANCEL_ALL_ORDERS
+      6: CANCEL_ORDERS_FOR_A_TRADING_SESSION
+      5: CANCEL_ORDERS_FOR_A_SECURITYTYPE
+      4: CANCEL_ORDERS_FOR_A_CFICODE
+      2: CANCEL_ORDERS_FOR_AN_UNDERLYING_SECURITY
+      3: CANCEL_ORDERS_FOR_A_PRODUCT
 
   MassCancelResponse:
     number: 531
     type: CHAR
     values:
-      '6': CANCEL_ORDERS_FOR_A_TRADING_SESSION
-      '0': CANCEL_REQUEST_REJECTED
-      '7': CANCEL_ALL_ORDERS
-      '3': CANCEL_ORDERS_FOR_A_PRODUCT
-      '5': CANCEL_ORDERS_FOR_A_SECURITYTYPE
-      '4': CANCEL_ORDERS_FOR_A_CFICODE
-      '1': CANCEL_ORDERS_FOR_A_SECURITY
-      '2': CANCEL_ORDERS_FOR_AN_UNDERLYING_SECURITY
+      6: CANCEL_ORDERS_FOR_A_TRADING_SESSION
+      0: CANCEL_REQUEST_REJECTED
+      7: CANCEL_ALL_ORDERS
+      3: CANCEL_ORDERS_FOR_A_PRODUCT
+      5: CANCEL_ORDERS_FOR_A_SECURITYTYPE
+      4: CANCEL_ORDERS_FOR_A_CFICODE
+      1: CANCEL_ORDERS_FOR_A_SECURITY
+      2: CANCEL_ORDERS_FOR_AN_UNDERLYING_SECURITY
 
   MassCancelRejectReason:
     number: 532
     type: CHAR
     values:
-      '2': INVALID_OR_UNKNOWN_UNDERLYING
-      '6': INVALID_OR_UNKNOWN_TRADING_SESSION
-      '5': INVALID_OR_UNKNOWN_SECURITY_TYPE
-      '3': INVALID_OR_UNKNOWN_PRODUCT
-      '1': INVALID_OR_UNKNOWN_SECURITY
-      '0': MASS_CANCEL_NOT_SUPPORTED
-      '4': INVALID_OR_UNKNOWN_CFICODE
+      2: INVALID_OR_UNKNOWN_UNDERLYING
+      6: INVALID_OR_UNKNOWN_TRADING_SESSION
+      5: INVALID_OR_UNKNOWN_SECURITY_TYPE
+      3: INVALID_OR_UNKNOWN_PRODUCT
+      1: INVALID_OR_UNKNOWN_SECURITY
+      0: MASS_CANCEL_NOT_SUPPORTED
+      4: INVALID_OR_UNKNOWN_CFICODE
 
   TotalAffectedOrders:
     number: 533
@@ -3266,9 +3266,9 @@ fields:
     number: 537
     type: INT
     values:
-      '0': INDICATIVE
-      '1': TRADEABLE
-      '2': RESTRICTED_TRADEABLE
+      0: INDICATIVE
+      1: TRADEABLE
+      2: RESTRICTED_TRADEABLE
 
   NestedPartyRole:
     number: 538
@@ -3298,9 +3298,9 @@ fields:
     number: 544
     type: CHAR
     values:
-      '2': MARGIN_OPEN
-      '3': MARGIN_CLOSE
-      '1': CASH
+      2: MARGIN_OPEN
+      3: MARGIN_CLOSE
+      1: CASH
 
   NestedPartySubID:
     number: 545
@@ -3310,9 +3310,9 @@ fields:
     number: 546
     type: MULTIPLEVALUESTRING
     values:
-      '1': LOCAL
-      '2': NATIONAL
-      '3': GLOBAL
+      1: LOCAL
+      2: NATIONAL
+      3: GLOBAL
 
   MDImplicitDelete:
     number: 547
@@ -3329,18 +3329,18 @@ fields:
     number: 549
     type: INT
     values:
-      '1': CROSS_TRADE_WHICH_IS_EXECUTED_COMPLETELY_OR_NOT_BOTH_SIDES_ARE_TREATED_IN_THE_SAME_MANNER_THIS_IS_EQUIVALENT_TO_AN_ALL_OR_NONE
-      '2': CROSS_TRADE_WHICH_IS_EXECUTED_PARTIALLY_AND_THE_REST_IS_CANCELLED_ONE_SIDE_IS_FULLY_EXECUTED_THE_OTHER_SIDE_IS_PARTIALLY_EXECUTED_WITH_THE_REMAINDER_BEING_CANCELLED_THIS_IS_EQUIVALENT_TO_AN_IMMEDIATE_OR_CANCEL_ON_THE_OTHER_SIDE
-      '3': CROSS_TRADE_WHICH_IS_PARTIALLY_EXECUTED_WITH_THE_UNFILLED_PORTIONS_REMAINING_ACTIVE_ONE_SIDE_OF_THE_CROSS_IS_FULLY_EXECUTED
-      '4': CROSS_TRADE_IS_EXECUTED_WITH_EXISTING_ORDERS_WITH_THE_SAME_PRICE
+      1: CROSS_TRADE_WHICH_IS_EXECUTED_COMPLETELY_OR_NOT_BOTH_SIDES_ARE_TREATED_IN_THE_SAME_MANNER_THIS_IS_EQUIVALENT_TO_AN_ALL_OR_NONE
+      2: CROSS_TRADE_WHICH_IS_EXECUTED_PARTIALLY_AND_THE_REST_IS_CANCELLED_ONE_SIDE_IS_FULLY_EXECUTED_THE_OTHER_SIDE_IS_PARTIALLY_EXECUTED_WITH_THE_REMAINDER_BEING_CANCELLED_THIS_IS_EQUIVALENT_TO_AN_IMMEDIATE_OR_CANCEL_ON_THE_OTHER_SIDE
+      3: CROSS_TRADE_WHICH_IS_PARTIALLY_EXECUTED_WITH_THE_UNFILLED_PORTIONS_REMAINING_ACTIVE_ONE_SIDE_OF_THE_CROSS_IS_FULLY_EXECUTED
+      4: CROSS_TRADE_IS_EXECUTED_WITH_EXISTING_ORDERS_WITH_THE_SAME_PRICE
 
   CrossPrioritization:
     number: 550
     type: INT
     values:
-      '2': SELLSIDE_PRIORITIZED
-      '0': NONE
-      '1': BUYSIDE_PRIORITIZED
+      2: SELLSIDE_PRIORITIZED
+      0: NONE
+      1: BUYSIDE_PRIORITIZED
 
   OrigCrossID:
     number: 551
@@ -3350,8 +3350,8 @@ fields:
     number: 552
     type: NUMINGROUP
     values:
-      '1': ONE_SIDE
-      '2': BOTH_SIDES
+      1: ONE_SIDE
+      2: BOTH_SIDES
 
   Username:
     number: 553
@@ -3381,22 +3381,22 @@ fields:
     number: 559
     type: INT
     values:
-      '1': SECURITYTYPE_AND_OR_CFICODE
-      '2': PRODUCT
-      '3': TRADINGSESSIONID
-      '4': ALL_SECURITIES
-      '0': SYMBOL
+      1: SECURITYTYPE_AND_OR_CFICODE
+      2: PRODUCT
+      3: TRADINGSESSIONID
+      4: ALL_SECURITIES
+      0: SYMBOL
 
   SecurityRequestResult:
     number: 560
     type: INT
     values:
-      '4': INSTRUMENT_DATA_TEMPORARILY_UNAVAILABLE
-      '0': VALID_REQUEST
-      '1': INVALID_OR_UNSUPPORTED_REQUEST
-      '5': REQUEST_FOR_INSTRUMENT_DATA_NOT_SUPPORTED
-      '3': NOT_AUTHORIZED_TO_RETRIEVE_INSTRUMENT_DATA
-      '2': NO_INSTRUMENTS_FOUND_THAT_MATCH_SELECTION_CRITERIA
+      4: INSTRUMENT_DATA_TEMPORARILY_UNAVAILABLE
+      0: VALID_REQUEST
+      1: INVALID_OR_UNSUPPORTED_REQUEST
+      5: REQUEST_FOR_INSTRUMENT_DATA_NOT_SUPPORTED
+      3: NOT_AUTHORIZED_TO_RETRIEVE_INSTRUMENT_DATA
+      2: NO_INSTRUMENTS_FOUND_THAT_MATCH_SELECTION_CRITERIA
 
   RoundLot:
     number: 561
@@ -3426,7 +3426,7 @@ fields:
     number: 567
     type: INT
     values:
-      '1': UNKNOWN_OR_INVALID_TRADINGSESSIONID
+      1: UNKNOWN_OR_INVALID_TRADINGSESSIONID
 
   TradeRequestID:
     number: 568
@@ -3436,11 +3436,11 @@ fields:
     number: 569
     type: INT
     values:
-      '4': ADVISORIES_THAT_MATCH_CRITERIA
-      '3': UNREPORTED_TRADES_THAT_MATCH_CRITERIA
-      '2': UNMATCHED_TRADES_THAT_MATCH_CRITERIA
-      '1': MATCHED_TRADES_MATCHING_CRITERIA_PROVIDED_ON_REQUEST
-      '0': ALL_TRADES
+      4: ADVISORIES_THAT_MATCH_CRITERIA
+      3: UNREPORTED_TRADES_THAT_MATCH_CRITERIA
+      2: UNMATCHED_TRADES_THAT_MATCH_CRITERIA
+      1: MATCHED_TRADES_MATCHING_CRITERIA_PROVIDED_ON_REQUEST
+      0: ALL_TRADES
 
   PreviouslyReported:
     number: 570
@@ -3461,9 +3461,9 @@ fields:
     number: 573
     type: CHAR
     values:
-      '0': COMPARED_MATCHED_OR_AFFIRMED
-      '1': UNCOMPARED_UNMATCHED_OR_UNAFFIRMED
-      '2': ADVISORY_OR_ALERT
+      0: COMPARED_MATCHED_OR_AFFIRMED
+      1: UNCOMPARED_UNMATCHED_OR_UNAFFIRMED
+      2: ADVISORY_OR_ALERT
 
   MatchType:
     number: 574
@@ -3500,17 +3500,17 @@ fields:
     number: 577
     type: INT
     values:
-      '8': MANUAL_MODE
-      '5': MULTILATERAL_NETTING
-      '9': AUTOMATIC_POSTING_MODE
-      '2': BILATERAL_NETTING_ONLY
-      '6': CLEAR_AGAINST_CENTRAL_COUNTERPARTY
-      '10': AUTOMATIC_GIVE_UP_MODE
-      '4': SPECIAL_TRADE
-      '3': EX_CLEARING
-      '0': PROCESS_NORMALLY
-      '7': EXCLUDE_FROM_CENTRAL_COUNTERPARTY
-      '1': EXCLUDE_FROM_ALL_NETTING
+      8: MANUAL_MODE
+      5: MULTILATERAL_NETTING
+      9: AUTOMATIC_POSTING_MODE
+      2: BILATERAL_NETTING_ONLY
+      6: CLEAR_AGAINST_CENTRAL_COUNTERPARTY
+      10: AUTOMATIC_GIVE_UP_MODE
+      4: SPECIAL_TRADE
+      3: EX_CLEARING
+      0: PROCESS_NORMALLY
+      7: EXCLUDE_FROM_CENTRAL_COUNTERPARTY
+      1: EXCLUDE_FROM_ALL_NETTING
 
   TradeInputSource:
     number: 578
@@ -3528,13 +3528,13 @@ fields:
     number: 581
     type: INT
     values:
-      '3': HOUSE_TRADER
-      '7': ACCOUNT_IS_HOUSE_TRADER_AND_IS_CROSS_MARGINED
-      '6': ACCOUNT_IS_CARRIED_ON_NON_CUSTOMER_SIDE_OF_BOOKS_AND_IS_CROSS_MARGINED
-      '4': FLOOR_TRADER
-      '2': ACCOUNT_IS_CARRIED_ON_NON_CUSTOMER_SIDE_OF_BOOKS
-      '1': ACCOUNT_IS_CARRIED_ON_CUSTOMER_SIDE_OF_BOOKS
-      '8': JOINT_BACKOFFICE_ACCOUNT
+      3: HOUSE_TRADER
+      7: ACCOUNT_IS_HOUSE_TRADER_AND_IS_CROSS_MARGINED
+      6: ACCOUNT_IS_CARRIED_ON_NON_CUSTOMER_SIDE_OF_BOOKS_AND_IS_CROSS_MARGINED
+      4: FLOOR_TRADER
+      2: ACCOUNT_IS_CARRIED_ON_NON_CUSTOMER_SIDE_OF_BOOKS
+      1: ACCOUNT_IS_CARRIED_ON_CUSTOMER_SIDE_OF_BOOKS
+      8: JOINT_BACKOFFICE_ACCOUNT
 
   CustOrderCapacity:
     number: 582
@@ -3552,14 +3552,14 @@ fields:
     number: 585
     type: INT
     values:
-      '1': STATUS_FOR_ORDERS_FOR_A_SECURITY
-      '2': STATUS_FOR_ORDERS_FOR_AN_UNDERLYING_SECURITY
-      '3': STATUS_FOR_ORDERS_FOR_A_PRODUCT
-      '4': STATUS_FOR_ORDERS_FOR_A_CFICODE
-      '5': STATUS_FOR_ORDERS_FOR_A_SECURITYTYPE
-      '6': STATUS_FOR_ORDERS_FOR_A_TRADING_SESSION
-      '8': STATUS_FOR_ORDERS_FOR_A_PARTYID
-      '7': STATUS_FOR_ALL_ORDERS
+      1: STATUS_FOR_ORDERS_FOR_A_SECURITY
+      2: STATUS_FOR_ORDERS_FOR_AN_UNDERLYING_SECURITY
+      3: STATUS_FOR_ORDERS_FOR_A_PRODUCT
+      4: STATUS_FOR_ORDERS_FOR_A_CFICODE
+      5: STATUS_FOR_ORDERS_FOR_A_SECURITYTYPE
+      6: STATUS_FOR_ORDERS_FOR_A_TRADING_SESSION
+      8: STATUS_FOR_ORDERS_FOR_A_PARTYID
+      7: STATUS_FOR_ALL_ORDERS
 
   OrigOrdModTime:
     number: 586
@@ -3577,23 +3577,23 @@ fields:
     number: 589
     type: CHAR
     values:
-      '0': CAN_TRIGGER_BOOKING_WITHOUT_REFERENCE_TO_THE_ORDER_INITIATOR
-      '1': SPEAK_WITH_ORDER_INITIATOR_BEFORE_BOOKING
+      0: CAN_TRIGGER_BOOKING_WITHOUT_REFERENCE_TO_THE_ORDER_INITIATOR
+      1: SPEAK_WITH_ORDER_INITIATOR_BEFORE_BOOKING
 
   BookingUnit:
     number: 590
     type: CHAR
     values:
-      '1': AGGREGATE_PARTIAL_EXECUTIONS_ON_THIS_ORDER_AND_BOOK_ONE_TRADE_PER_ORDER
-      '2': AGGREGATE_EXECUTIONS_FOR_THIS_SYMBOL_SIDE_AND_SETTLEMENT_DATE
-      '0': EACH_PARTIAL_EXECUTION_IS_A_BOOKABLE_UNIT
+      1: AGGREGATE_PARTIAL_EXECUTIONS_ON_THIS_ORDER_AND_BOOK_ONE_TRADE_PER_ORDER
+      2: AGGREGATE_EXECUTIONS_FOR_THIS_SYMBOL_SIDE_AND_SETTLEMENT_DATE
+      0: EACH_PARTIAL_EXECUTION_IS_A_BOOKABLE_UNIT
 
   PreallocMethod:
     number: 591
     type: CHAR
     values:
-      '0': PRO_RATA
-      '1': DO_NOT_PRO_RATA_DISCUSS_FIRST
+      0: PRO_RATA
+      1: DO_NOT_PRO_RATA_DISCUSS_FIRST
 
   UnderlyingCountryOfIssue:
     number: 592
@@ -3735,12 +3735,12 @@ fields:
     number: 626
     type: INT
     values:
-      '6': BUYSIDE_READY_TO_BOOK_6
-      '2': BUYSIDE_PRELIMINARY
-      '3': SELLSIDE_CALCULATED_USING_PRELIMINARY
-      '5': BUYSIDE_READY_TO_BOOK_5
-      '1': BUYSIDE_CALCULATED
-      '4': SELLSIDE_CALCULATED_WITHOUT_PRELIMINARY
+      6: BUYSIDE_READY_TO_BOOK_6
+      2: BUYSIDE_PRELIMINARY
+      3: SELLSIDE_CALCULATED_USING_PRELIMINARY
+      5: BUYSIDE_READY_TO_BOOK_5
+      1: BUYSIDE_CALCULATED
+      4: SELLSIDE_CALCULATED_WITHOUT_PRELIMINARY
 
   NoHops:
     number: 627
@@ -3779,14 +3779,14 @@ fields:
     type: STRING
     values:
       H: 106H_AND_106J_FIRMS
-      '5': 5TH_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
-      '4': 4TH_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
-      '3': 3RD_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
-      '2': 2ND_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
-      '1': 1ST_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
+      5: 5TH_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
+      4: 4TH_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
+      3: 3RD_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
+      2: 2ND_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
+      1: 1ST_YEAR_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
       M: ALL_OTHER_OWNERSHIP_TYPES
       I: GIM_IDEM_AND_COM_MEMBERSHIP_INTEREST_HOLDERS
-      '9': 6TH_YEAR_AND_BEYOND_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
+      9: 6TH_YEAR_AND_BEYOND_DELEGATE_TRADING_FOR_HIS_OWN_ACCOUNT
       F: FULL_AND_ASSOCIATE_MEMBER_TRADING_FOR_OWN_ACCOUNT_AND_AS_FLOOR
       E: EQUITY_MEMBER_AND_CLEARING_MEMBER
       C: NON_MEMBER_AND_CUSTOMER
@@ -3808,8 +3808,8 @@ fields:
     number: 638
     type: INT
     values:
-      '0': PRIORITY_UNCHANGED
-      '1': LOST_PRIORITY_AS_RESULT_OF_ORDER_CHANGE
+      0: PRIORITY_UNCHANGED
+      1: LOST_PRIORITY_AS_RESULT_OF_ORDER_CHANGE
 
   PriceImprovement:
     number: 639
@@ -3890,12 +3890,12 @@ fields:
     number: 658
     type: INT
     values:
-      '1': UNKNOWN_SYMBOL
-      '2': EXCHANGE
-      '3': QUOTE_REQUEST_EXCEEDS_LIMIT
-      '4': TOO_LATE_TO_ENTER
-      '5': INVALID_PRICE
-      '6': NOT_AUTHORIZED_TO_REQUEST_QUOTE
+      1: UNKNOWN_SYMBOL
+      2: EXCHANGE
+      3: QUOTE_REQUEST_EXCEEDS_LIMIT
+      4: TOO_LATE_TO_ENTER
+      5: INVALID_PRICE
+      6: NOT_AUTHORIZED_TO_REQUEST_QUOTE
 
   SideComplianceID:
     number: 659

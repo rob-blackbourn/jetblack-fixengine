@@ -70,9 +70,9 @@ fields:
     number: 13
     type: CHAR
     values:
-      '1': PER_SHARE
-      '2': PERCENTAGE
-      '3': ABSOLUTE
+      1: PER_SHARE
+      2: PERCENTAGE
+      3: ABSOLUTE
 
   CumQty:
     number: 14
@@ -94,16 +94,16 @@ fields:
     number: 18
     type: CHAR
     values:
-      '0': STAY_ON_OFFERSIDE
-      '1': NOT_HELD
-      '2': WORK
-      '3': GO_ALONG
-      '4': OVER_THE_DAY
-      '5': HELD
-      '6': PARTICIPATE_DONT_INITIATE
-      '7': STRICT_SCALE
-      '8': TRY_TO_SCALE
-      '9': STAY_ON_BIDSIDE
+      0: STAY_ON_OFFERSIDE
+      1: NOT_HELD
+      2: WORK
+      3: GO_ALONG
+      4: OVER_THE_DAY
+      5: HELD
+      6: PARTICIPATE_DONT_INITIATE
+      7: STRICT_SCALE
+      8: TRY_TO_SCALE
+      9: STAY_ON_BIDSIDE
       A: NO_CROSS
       B: OK_TO_CROSS
       C: CALL_FIRST
@@ -128,28 +128,28 @@ fields:
     number: 20
     type: CHAR
     values:
-      '0': NEW
-      '1': CANCEL
-      '2': CORRECT
-      '3': STATUS
+      0: NEW
+      1: CANCEL
+      2: CORRECT
+      3: STATUS
 
   HandlInst:
     number: 21
     type: CHAR
     values:
-      '1': AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION
-      '2': AUTOMATED_EXECUTION_ORDER_PUBLIC_BROKER_INTERVENTION_OK
-      '3': MANUAL_ORDER_BEST_EXECUTION
+      1: AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION
+      2: AUTOMATED_EXECUTION_ORDER_PUBLIC_BROKER_INTERVENTION_OK
+      3: MANUAL_ORDER_BEST_EXECUTION
 
   IDSource:
     number: 22
     type: CHAR
     values:
-      '1': CUSIP
-      '2': SEDOL
-      '3': QUIK
-      '4': ISIN_NUMBER
-      '5': RIC_CODE
+      1: CUSIP
+      2: SEDOL
+      3: QUIK
+      4: ISIN_NUMBER
+      5: RIC_CODE
 
   IOIid:
     number: 23
@@ -194,10 +194,10 @@ fields:
     number: 29
     type: CHAR
     values:
-      '1': AGENT
-      '2': CROSS_AS_AGENT
-      '3': CROSS_AS_PRINCIPAL
-      '4': PRINCIPAL
+      1: AGENT
+      2: CROSS_AS_AGENT
+      3: CROSS_AS_PRINCIPAL
+      4: PRINCIPAL
 
   LastMkt:
     number: 30
@@ -223,16 +223,16 @@ fields:
     number: 35
     type: CHAR
     values:
-      '0': HEARTBEAT
-      '1': TEST_REQUEST
-      '2': RESEND_REQUEST
-      '3': REJECT
-      '4': SEQUENCE_RESET
-      '5': LOGOUT
-      '6': INDICATION_OF_INTEREST
-      '7': ADVERTISEMENT
-      '8': EXECUTION_REPORT
-      '9': ORDER_CANCEL_REJECT
+      0: HEARTBEAT
+      1: TEST_REQUEST
+      2: RESEND_REQUEST
+      3: REJECT
+      4: SEQUENCE_RESET
+      5: LOGOUT
+      6: INDICATION_OF_INTEREST
+      7: ADVERTISEMENT
+      8: EXECUTION_REPORT
+      9: ORDER_CANCEL_REJECT
       A: LOGON
       B: NEWS
       C: EMAIL
@@ -267,16 +267,16 @@ fields:
     number: 39
     type: CHAR
     values:
-      '0': NEW
-      '1': PARTIALLY_FILLED
-      '2': FILLED
-      '3': DONE_FOR_DAY
-      '4': CANCELED
-      '5': REPLACED
-      '6': PENDING_CANCEL_REPLACE
-      '7': STOPPED
-      '8': REJECTED
-      '9': SUSPENDED
+      0: NEW
+      1: PARTIALLY_FILLED
+      2: FILLED
+      3: DONE_FOR_DAY
+      4: CANCELED
+      5: REPLACED
+      6: PENDING_CANCEL_REPLACE
+      7: STOPPED
+      8: REJECTED
+      9: SUSPENDED
       A: PENDING_NEW
       B: CALCULATED
       C: EXPIRED
@@ -285,15 +285,15 @@ fields:
     number: 40
     type: CHAR
     values:
-      '1': MARKET
-      '2': LIMIT
-      '3': STOP
-      '4': STOP_LIMIT
-      '5': MARKET_ON_CLOSE
-      '6': WITH_OR_WITHOUT
-      '7': LIMIT_OR_BETTER
-      '8': LIMIT_WITH_OR_WITHOUT
-      '9': ON_BASIS
+      1: MARKET
+      2: LIMIT
+      3: STOP
+      4: STOP_LIMIT
+      5: MARKET_ON_CLOSE
+      6: WITH_OR_WITHOUT
+      7: LIMIT_OR_BETTER
+      8: LIMIT_WITH_OR_WITHOUT
+      9: ON_BASIS
       A: ON_CLOSE
       B: LIMIT_ON_CLOSE
       C: FOREX
@@ -368,12 +368,12 @@ fields:
     number: 54
     type: CHAR
     values:
-      '1': BUY
-      '2': SELL
-      '3': BUY_MINUS
-      '4': SELL_PLUS
-      '5': SELL_SHORT
-      '6': SELL_SHORT_EXEMPT
+      1: BUY
+      2: SELL
+      3: BUY_MINUS
+      4: SELL_PLUS
+      5: SELL_SHORT
+      6: SELL_SHORT_EXEMPT
 
   Symbol:
     number: 55
@@ -395,13 +395,13 @@ fields:
     number: 59
     type: CHAR
     values:
-      '0': DAY
-      '1': GOOD_TILL_CANCEL
-      '2': AT_THE_OPENING
-      '3': IMMEDIATE_OR_CANCEL
-      '4': FILL_OR_KILL
-      '5': GOOD_TILL_CROSSING
-      '6': GOOD_TILL_DATE
+      0: DAY
+      1: GOOD_TILL_CANCEL
+      2: AT_THE_OPENING
+      3: IMMEDIATE_OR_CANCEL
+      4: FILL_OR_KILL
+      5: GOOD_TILL_CROSSING
+      6: GOOD_TILL_DATE
 
   TransactTime:
     number: 60
@@ -411,9 +411,9 @@ fields:
     number: 61
     type: CHAR
     values:
-      '0': NORMAL
-      '1': FLASH
-      '2': BACKGROUND
+      0: NORMAL
+      1: FLASH
+      2: BACKGROUND
 
   ValidUntilTime:
     number: 62
@@ -423,16 +423,16 @@ fields:
     number: 63
     type: CHAR
     values:
-      '0': REGULAR
-      '1': CASH
-      '2': NEXT_DAY
-      '3': T_PLUS_2
-      '4': T_PLUS_3
-      '5': T_PLUS_4
-      '6': FUTURE
-      '7': WHEN_ISSUED
-      '8': SELLERS_OPTION
-      '9': T_PLUS_5
+      0: REGULAR
+      1: CASH
+      2: NEXT_DAY
+      3: T_PLUS_2
+      4: T_PLUS_3
+      5: T_PLUS_4
+      6: FUTURE
+      7: WHEN_ISSUED
+      8: SELLERS_OPTION
+      9: T_PLUS_5
 
   FutSettDate:
     number: 64
@@ -466,9 +466,9 @@ fields:
     number: 71
     type: CHAR
     values:
-      '0': NEW
-      '1': REPLACE
-      '2': CANCEL
+      0: NEW
+      1: REPLACE
+      2: CANCEL
 
   RefAllocID:
     number: 72
@@ -510,13 +510,13 @@ fields:
     number: 81
     type: CHAR
     values:
-      '0': REGULAR
-      '1': SOFT_DOLLAR
-      '2': STEP_IN
-      '3': STEP_OUT
-      '4': SOFT_DOLLAR_STEP_IN
-      '5': SOFT_DOLLAR_STEP_OUT
-      '6': PLAN_SPONSOR
+      0: REGULAR
+      1: SOFT_DOLLAR
+      2: STEP_IN
+      3: STEP_OUT
+      4: SOFT_DOLLAR_STEP_IN
+      5: SOFT_DOLLAR_STEP_OUT
+      6: PLAN_SPONSOR
 
   NoRpts:
     number: 82
@@ -542,23 +542,23 @@ fields:
     number: 87
     type: INT
     values:
-      '0': ACCEPTED
-      '1': REJECTED
-      '2': PARTIAL_ACCEPT
-      '3': RECEIVED
+      0: ACCEPTED
+      1: REJECTED
+      2: PARTIAL_ACCEPT
+      3: RECEIVED
 
   AllocRejCode:
     number: 88
     type: INT
     values:
-      '0': UNKNOWN_ACCOUNT
-      '1': INCORRECT_QUANTITY
-      '2': INCORRECT_AVERAGE_PRICE
-      '3': UNKNOWN_EXECUTING_BROKER_MNEMONIC
-      '4': COMMISSION_DIFFERENCE
-      '5': UNKNOWN_ORDERID
-      '6': UNKNOWN_LISTID
-      '7': OTHER
+      0: UNKNOWN_ACCOUNT
+      1: INCORRECT_QUANTITY
+      2: INCORRECT_AVERAGE_PRICE
+      3: UNKNOWN_EXECUTING_BROKER_MNEMONIC
+      4: COMMISSION_DIFFERENCE
+      5: UNKNOWN_ORDERID
+      6: UNKNOWN_LISTID
+      7: OTHER
 
   Signature:
     number: 89
@@ -584,9 +584,9 @@ fields:
     number: 94
     type: CHAR
     values:
-      '0': NEW
-      '1': REPLY
-      '2': ADMIN_REPLY
+      0: NEW
+      1: REPLY
+      2: ADMIN_REPLY
 
   RawDataLength:
     number: 95
@@ -604,13 +604,13 @@ fields:
     number: 98
     type: INT
     values:
-      '0': NONE
-      '1': PKCS
-      '2': DES
-      '3': PKCS_DES
-      '4': PGP_DES
-      '5': PGP_DES_MD5
-      '6': PEM_DES_MD5
+      0: NONE
+      1: PKCS
+      2: DES
+      3: PKCS_DES
+      4: PGP_DES
+      5: PGP_DES_MD5
+      6: PEM_DES_MD5
 
   StopPx:
     number: 99
@@ -620,25 +620,25 @@ fields:
     number: 100
     type: CHAR
     values:
-      '0': NONE
-      '4': POSIT
+      0: NONE
+      4: POSIT
 
   CxlRejReason:
     number: 102
     type: INT
     values:
-      '0': TOO_LATE_TO_CANCEL
-      '1': UNKNOWN_ORDER
+      0: TOO_LATE_TO_CANCEL
+      1: UNKNOWN_ORDER
 
   OrdRejReason:
     number: 103
     type: INT
     values:
-      '0': BROKER_OPTION
-      '1': UNKNOWN_SYMBOL
-      '2': EXCHANGE_CLOSED
-      '3': ORDER_EXCEEDS_LIMIT
-      '4': TOO_LATE_TO_ENTER
+      0: BROKER_OPTION
+      1: UNKNOWN_SYMBOL
+      2: EXCHANGE_CLOSED
+      3: ORDER_EXCEEDS_LIMIT
+      4: TOO_LATE_TO_ENTER
 
   IOIQualifier:
     number: 104
@@ -823,13 +823,13 @@ fields:
     number: 139
     type: CHAR
     values:
-      '1': REGULATORY
-      '2': TAX
-      '3': LOCAL_COMMISSION
-      '4': EXCHANGE_FEES
-      '5': STAMP
-      '6': LEVY
-      '7': OTHER
+      1: REGULATORY
+      2: TAX
+      3: LOCAL_COMMISSION
+      4: EXCHANGE_FEES
+      5: STAMP
+      6: LEVY
+      7: OTHER
 
   PrevClosePx:
     number: 140
