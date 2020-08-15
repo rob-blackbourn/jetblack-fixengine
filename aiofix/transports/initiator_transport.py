@@ -47,7 +47,7 @@ async def initiate(
 
     reader, writer = await asyncio.open_connection(host, port, ssl=ssl)
     read_buffer = FixReadBuffer(sep, convert_sep_to_soh_for_checksum, validate)
-    buffered_reader = fix_read_async(read_buffer, reader)
+    buffered_reader = fix_read_async(read_buffer, reader, 1024)
     await fix_stream_processor(
         handler,
         shutdown_timeout,

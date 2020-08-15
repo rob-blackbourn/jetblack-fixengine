@@ -155,9 +155,6 @@ async def fix_stream_processor(
                 except StopAsyncIteration:
                     state = FixState.EOF
                     continue
-
-                else:
-                    raise AssertionError('Invalid read state')
             else:
                 raise AssertionError('Invalid task')
 

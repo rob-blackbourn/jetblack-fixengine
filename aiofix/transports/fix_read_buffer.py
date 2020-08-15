@@ -231,7 +231,8 @@ class FixReadBuffer:
                 raise FixReadError("Wrong checksum")
 
         # Reset state
-        self._queue.appendleft(self._buf[self._required_length:])
+        if len(self._buf) > self._required_length:
+            self._queue.appendleft(self._buf[self._required_length:])
         self._buf = bytearray()
         self._index = 0
         self._required_length = 0
