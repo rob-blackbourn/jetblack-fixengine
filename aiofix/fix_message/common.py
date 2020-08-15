@@ -1,6 +1,6 @@
 """Common Code"""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import List, Tuple, Any
 from ..meta_data import ProtocolMetaData, FieldMetaData
@@ -96,9 +96,15 @@ def decode_value(
         return value.decode('ascii').split(' ')
     elif meta_data.type == 'UTCTIMESTAMP':
         if protocol.is_millisecond_time:
-            return datetime.strptime(value.decode('ascii'), UTCTIMESTAMP_FMT_MILLIS)
+            return datetime.strptime(
+                value.decode('ascii'),
+                UTCTIMESTAMP_FMT_MILLIS
+            ).replace(tzinfo=timezone.utc)
         else:
-            return datetime.strptime(value.decode('ascii'), UTCTIMESTAMP_FMT_NO_MILLIS)
+            return datetime.strptime(
+                value.decode('ascii'),
+                UTCTIMESTAMP_FMT_NO_MILLIS
+            ).replace(tzinfo=timezone.utc)
     elif meta_data.type == 'UTCTIMEONLY':
         if protocol.is_millisecond_time:
             return datetime.strptime(value.decode('ascii'), UTCTIMEONLY_FMT_MILLIS)

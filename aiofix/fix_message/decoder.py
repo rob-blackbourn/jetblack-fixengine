@@ -1,7 +1,6 @@
-"""Fix message decodes"""
+"""Fix message decoder"""
 
 from typing import MutableMapping, Tuple, Optional, List, Iterator, cast
-from collections import OrderedDict
 
 from ..meta_data import (
     ProtocolMetaData,
@@ -150,7 +149,7 @@ def _decode_group(
     assert meta_data.children is not None
     decoded_groups: List[FieldMessageDataMap] = []
     for _ in range(int(count)):
-        decoded_group: FieldMessageDataMap = OrderedDict()
+        decoded_group: FieldMessageDataMap = {}
         index = _decode_fields_in_order(
             protocol,
             encoded_message,
@@ -310,7 +309,7 @@ def decode(
         convert_sep_for_checksum: bool = True
 ) -> Tuple[FieldMessageDataMap, MessageMetaData]:
     encoded_message = _to_encoded_message(buf, sep)
-    decoded_message: FieldMessageDataMap = OrderedDict()
+    decoded_message: FieldMessageDataMap = {}
 
     index = _decode_header(protocol, encoded_message, decoded_message, strict)
     meta_data = find_message_meta_data(protocol, decoded_message)

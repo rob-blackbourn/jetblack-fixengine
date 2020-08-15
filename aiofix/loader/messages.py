@@ -1,6 +1,5 @@
 """Messages"""
 
-from collections import OrderedDict
 from typing import Any, Mapping, MutableMapping, Optional
 
 from ..meta_data import FieldMetaData, ComponentMetaData, MessageMemberMetaData, MessageMetaData
@@ -11,7 +10,7 @@ def _to_message_member_meta_data(
         field_meta_data: Mapping[str, FieldMetaData],
         component_meta_data: Mapping[str, ComponentMetaData]
 ) -> Mapping[str, MessageMemberMetaData]:
-    member: MutableMapping[str, MessageMemberMetaData] = OrderedDict()
+    member: MutableMapping[str, MessageMemberMetaData] = {}
 
     for name, value in info.items():
         if value['type'] == 'field':

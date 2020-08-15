@@ -1,6 +1,5 @@
 """Loader"""
 
-# from collections import OrderedDict
 from typing import Any, Dict
 import xml.dom.minidom as minidom
 import xml.dom as dom
@@ -14,7 +13,7 @@ from .messages import parse_messages, parse_header, parse_components
 
 
 def process_members(node: Any) -> Dict[str, Any]:
-    members: Dict[str, Any] = {}  # OrderedDict()
+    members: Dict[str, Any] = {}
     for child in node.childNodes:
         if child.nodeType != dom.Node.ELEMENT_NODE:
             continue

@@ -1,11 +1,14 @@
 """Parsing FX messages"""
 
 from __future__ import annotations
+from copy import deepcopy
+
 from ..meta_data import (
     ProtocolMetaData,
     MessageMetaData,
     FieldMessageDataMap
 )
+
 from .encoder import encode, SOH
 from .decoder import decode
 
@@ -18,21 +21,9 @@ class FixMessage:
             data: FieldMessageDataMap,
             meta_data: MessageMetaData
     ) -> None:
-        self._protocol = protocol
-        self._data = data
-        self._meta_data = meta_data
-
-    @property
-    def protocol(self) -> ProtocolMetaData:
-        return self._protocol
-
-    @property
-    def data(self) -> FieldMessageDataMap:
-        return self._data
-
-    @property
-    def meta_data(self) -> MessageMetaData:
-        return self._meta_data
+        self.protocol = protocol
+        self.data = deepcopy(data)
+        self.meta_data = meta_data
 
     @classmethod
     def decode(

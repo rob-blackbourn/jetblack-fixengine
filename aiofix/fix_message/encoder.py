@@ -1,6 +1,5 @@
 """Encode a FIX message"""
 
-from aiofix.meta_data.message_member import FieldMetaData
 from typing import Iterator, List, Tuple, cast
 
 from ..meta_data import (
@@ -10,6 +9,8 @@ from ..meta_data import (
     ProtocolMetaData,
     FieldMessageDataMap
 )
+from ..meta_data.message_member import FieldMetaData
+
 from .errors import EncodingError
 from .common import SOH, encode_value
 
@@ -25,7 +26,8 @@ def _encode_fields(
         if meta_datum.member.name not in data:
             if meta_datum.is_required:
                 raise EncodingError(
-                    f'required field "{meta_datum.member.name}" is missing')
+                    f'required field "{meta_datum.member.name}" is missing'
+                )
             continue
 
         item_data = data[meta_datum.member.name]
@@ -48,36 +50,44 @@ def _encode_fields(
                 )
         else:
             raise EncodingError(
-                f'unknown type "{meta_datum.type}" for item "{meta_datum.member.name}"')
+                f'unknown type "{meta_datum.type}" for item "{meta_datum.member.name}"'
+            )
 
 
 def _regenerate_integrity(
         protocol: ProtocolMetaData,
         encoded_message: List[Tuple[bytes, bytes]],
         sep: bytes,
-        convert_sep_for_checkum: bool
-) -> bytes:
-    body = sep.join(field + b'=' + value for field,
-                    value in encoded_message[2:-1]) + sep
-    body_lengh = len(body)
+        convert_sep_for_checksum: bool
+) -> Tuple[bytes, int, str]:
+    body = sep.join(
+        field + b'=' + value
+        for field, value in encoded_message[2:-1]
+    ) + sep
+    body_length = len(body)
 
     encoded_header = [
         (protocol.fields_by_name['BeginString'].number, protocol.begin_string),
         (protocol.fields_by_name['BodyLength'].number,
-         str(body_lengh).encode('ascii'))
+         str(body_length).encode('ascii'))
     ]
-    header = sep.join(field + b'=' + value for field,
-                      value in encoded_header) + sep
+    header = sep.join(
+        field + b'=' + value
+        for field, value in encoded_header
+    ) + sep
 
     buf = header + body
 
     # Calculate the checksum
-    check_sum = sum(
-        buf if sep == SOH or not convert_sep_for_checkum else buf.replace(sep, SOH)) % 256
+    checksum = sum(
+        buf if sep == SOH or not convert_sep_for_checksum
+        else buf.replace(sep, SOH)
+    ) % 256
+    checksum_str = f'{checksum:#03}'
     buf += protocol.fields_by_name['CheckSum'].number + \
-        b'=' + f'{check_sum:#03}'.encode('ascii') + sep
+        b'=' + checksum_str.encode('ascii') + sep
 
-    return buf
+    return buf, body_length, checksum_str
 
 
 def encode(
@@ -96,16 +106,34 @@ def encode(
         data['BodyLength'] = 0
         data['CheckSum'] = '000'
 
-    _encode_fields(protocol, encoded_message, data,
-                   message_member_iter(protocol.header.values()))
-    _encode_fields(protocol, encoded_message, data,
-                   message_member_iter(meta_data.fields.values()))
-    _encode_fields(protocol, encoded_message, data,
-                   message_member_iter(protocol.trailer.values()))
+    _encode_fields(
+        protocol,
+        encoded_message,
+        data,
+        message_member_iter(protocol.header.values())
+    )
+    _encode_fields(
+        protocol,
+        encoded_message,
+        data,
+        message_member_iter(meta_data.fields.values())
+    )
+    _encode_fields(
+        protocol,
+        encoded_message,
+        data,
+        message_member_iter(protocol.trailer.values())
+    )
 
     if regenerate_integrity:
-        buf = _regenerate_integrity(
-            protocol, encoded_message, sep, convert_sep_for_checksum)
+        buf, body_length, checksum = _regenerate_integrity(
+            protocol,
+            encoded_message,
+            sep,
+            convert_sep_for_checksum
+        )
+        data['BodyLength'] = body_length
+        data['CheckSum'] = checksum
     else:
         buf = sep.join(field + b'=' + value for field,
                        value in encoded_message) + sep
