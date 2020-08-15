@@ -4,12 +4,11 @@ import asyncio
 from datetime import tzinfo, time
 import logging
 from ssl import SSLContext
-from typing import Optional, Callable, Type, Tuple, cast
+from typing import Optional, Callable, Type, Tuple
 
 from ..types import Handler, Store
 from ..meta_data import ProtocolMetaData
 from ..utils.cancellation import register_cancellation_token
-from ..middlewares import mw, FixMessageMiddleware
 from ..fix_message import SOH
 
 from .fix_transport import fix_stream_processor
@@ -88,9 +87,6 @@ def create_initiator(
         logon_time_range=logon_time_range,
         tz=tz
     )
-    middleware = FixMessageMiddleware(protocol)
-    handler: InitiatorHandler = cast(
-        InitiatorHandler, mw([middleware], handler=handler))
     return handler
 
 

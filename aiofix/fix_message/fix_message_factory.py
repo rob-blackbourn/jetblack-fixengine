@@ -6,7 +6,7 @@ from typing import Any, Mapping, Optional
 
 from ..meta_data import ProtocolMetaData
 
-from .fix_message import FixMessage
+from .fix_message import FixMessage, SOH
 
 
 class FixMessageFactory:
@@ -16,18 +16,28 @@ class FixMessageFactory:
             protocol: ProtocolMetaData,
             sender_comp_id: str,
             target_comp_id: str,
-            **header_kwargs: Any
+            *,
+            strict: bool = True,
+            validate: bool = True,
+            sep: bytes = SOH,
+            convert_sep_for_checksum: bool = True,
+            header_kwargs: Optional[Mapping[str, Any]] = None
     ) -> None:
         self.protocol = protocol
         self.sender_comp_id = sender_comp_id
         self.target_comp_id = target_comp_id
+        self.strict = strict
+        self.validate = validate
+        self.sep = sep
+        self.convert_sep_for_checksum = convert_sep_for_checksum
+        self.header_kwargs = header_kwargs
 
     def create(
             self,
             msg_type: str,
             msg_seq_num: int,
             sending_time: datetime,
-            body_kwargs: Mapping[str, Any],
+            body_kwargs: Optional[Mapping[str, Any]] = None,
             header_kwargs: Optional[Mapping[str, Any]] = None,
             trailer_kwargs: Optional[Mapping[str, Any]] = None
     ) -> FixMessage:
@@ -41,6 +51,8 @@ class FixMessageFactory:
             'TargetCompID': self.target_comp_id,
             'SendingTime': sending_time
         }
+        if self.header_kwargs:
+            header_args.update(self.header_kwargs)
         if header_kwargs:
             header_args.update(header_kwargs)
 
@@ -50,7 +62,8 @@ class FixMessageFactory:
             if name in header_args
         }
 
-        data.update(body_kwargs)
+        if body_kwargs:
+            data.update(body_kwargs)
 
         if trailer_kwargs:
             data.update({
@@ -60,3 +73,13 @@ class FixMessageFactory:
             })
 
         return FixMessage(self.protocol, data)
+
+    def decode(self, message: bytes) -> FixMessage:
+        return FixMessage.decode(
+            self.protocol,
+            message,
+            strict=self.strict,
+            validate=self.validate,
+            sep=self.sep,
+            convert_sep_for_checksum=self.convert_sep_for_checksum
+        )

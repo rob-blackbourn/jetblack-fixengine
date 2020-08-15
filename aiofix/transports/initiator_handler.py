@@ -1,8 +1,12 @@
+"""The Initiator base class"""
+
 from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, time, tzinfo
 import logging
-from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple
+from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple, cast
+
+from ..fix_message import FixMessageFactory, FixMessage
 from ..meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
@@ -18,6 +22,7 @@ STATE_LOGGED_OUT = 'logout.done'
 
 
 class InitiatorHandler(metaclass=ABCMeta):
+    """The base class for initiators"""
 
     def __init__(
             self,
@@ -32,14 +37,16 @@ class InitiatorHandler(metaclass=ABCMeta):
             logon_time_range: Optional[Tuple[time, time]] = None,
             tz: Optional[tzinfo] = None
     ) -> None:
-        self.protocol = protocol
-        self.sender_comp_id = sender_comp_id
-        self.target_comp_id = target_comp_id
         self.heartbeat_timeout = heartbeat_timeout
         self.heartbeat_threshold = heartbeat_threshold
         self.cancellation_token = cancellation_token
         self.logon_time_range = logon_time_range
         self.tz = tz
+        self.fix_message_factory = FixMessageFactory(
+            protocol,
+            sender_comp_id,
+            target_comp_id
+        )
 
         self._state = STATE_DISCONNECTED
         self._last_send_time_utc: Optional[datetime] = None
@@ -63,96 +70,94 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send(event)
         self._last_send_time_utc = send_time_utc
 
-    async def _send_fix_message(self, message: Mapping[str, Any], send_time_utc: datetime) -> None:
-        logger.info('sending: %s', message)
+    async def _send_fix_message(self, fix_message: FixMessage, send_time_utc: datetime) -> None:
+        logger.info('sending: %s', fix_message.data)
         event = {
             'type': 'fix',
-            'message_contents': message
+            'message': fix_message.encode(regenerate_integrity=True)
         }
         await self._send_event(event, send_time_utc)
 
     async def logon(self) -> None:
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'LOGON',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'EncryptMethod': 'NONE',
-            'HeartBtInt': self.heartbeat_timeout
-        }
+        fix_message = self.fix_message_factory.create(
+            'LOGON',
+            msg_seq_num,
+            send_time_utc,
+            {
+                'EncryptMethod': 'NONE',
+                'HeartBtInt': self.heartbeat_timeout
+            }
+        )
         self._state = STATE_LOGGING_ON
-        await self._send_fix_message(message, send_time_utc)
+        await self._send_fix_message(fix_message, send_time_utc)
 
     async def logout(self) -> None:
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'LOGOUT',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc
-        }
+        fix_message = self.fix_message_factory.create(
+            'LOGOUT',
+            msg_seq_num,
+            send_time_utc
+        )
         self._state = STATE_LOGGING_OFF
-        await self._send_fix_message(message, send_time_utc)
+        await self._send_fix_message(fix_message, send_time_utc)
 
     async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'HEARTBEAT',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc
-        }
+        body_kwargs = {}
         if test_req_id:
-            message['TestReqID'] = test_req_id
-        await self._send_fix_message(message, send_time_utc)
+            body_kwargs['TestReqID'] = test_req_id
+        fix_message = self.fix_message_factory.create(
+            'HEARTBEAT',
+            msg_seq_num,
+            send_time_utc,
+            body_kwargs
+        )
+        await self._send_fix_message(fix_message, send_time_utc)
 
     async def resend_request(self, begin_seqnum: int, end_seqnum: int = 0) -> None:
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'RESEND_REQUEST',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'BeginSeqNo': begin_seqnum,
-            'EndSeqNo': end_seqnum
-        }
-        await self._send_fix_message(message, send_time_utc)
+        fix_message = self.fix_message_factory.create(
+            'RESEND_REQUEST',
+            msg_seq_num,
+            send_time_utc,
+            {
+                'BeginSeqNo': begin_seqnum,
+                'EndSeqNo': end_seqnum
+            }
+        )
+        await self._send_fix_message(fix_message, send_time_utc)
 
     async def test_request(self, test_req_id: str) -> None:
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'TEST_REQUEST',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'TestReqID': test_req_id
-        }
-        await self._send_fix_message(message, send_time_utc)
+        fix_message = self.fix_message_factory.create(
+            'TEST_REQUEST',
+            msg_seq_num,
+            send_time_utc,
+            {
+                'TestReqID': test_req_id
+            }
+        )
+        await self._send_fix_message(fix_message, send_time_utc)
 
     async def sequence_reset(self, gap_fill: bool, new_seq_no: int) -> None:
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'SEQUENCE_RESET',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'GapFillFlag': gap_fill,
-            'NewSeqNo': new_seq_no
-        }
-        await self._send_fix_message(message, send_time_utc)
+        fix_message = self.fix_message_factory.create(
+            'SEQUENCE_RESET',
+            msg_seq_num,
+            send_time_utc,
+            {
+                'GapFillFlag': gap_fill,
+                'NewSeqNo': new_seq_no
+            }
+        )
+        await self._send_fix_message(fix_message, send_time_utc)
 
     async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
         logger.info('on_admin_message: %s', message)
@@ -198,13 +203,22 @@ class InitiatorHandler(metaclass=ABCMeta):
     async def _handle_event(self, event: Event) -> bool:
         if event['type'] == 'fix':
             await self._session.save_message(event['message'])
-            if event['message_category'] == 'admin':
-                status = await self._on_admin_message(event['message_contents'])
+
+            fix_message: FixMessage = event['fix_message']
+
+            msgcat = cast(str, fix_message.meta_data.msgcat)
+            if msgcat == 'admin':
+                status = await self._on_admin_message(fix_message.data)
             else:
-                status = await self.on_application_message(event['message_comtents'])
-            await self._set_incoming_seqnum(event['message_contents']['MsgSeqNum'])
+                status = await self.on_application_message(fix_message.data)
+
+            msg_seq_num: int = cast(int, fix_message.data['MsgSeqNum'])
+            await self._set_incoming_seqnum(msg_seq_num)
+
             self._last_receive_time_utc = datetime.utcnow()
+
             return status
+
         elif event['type'] == 'error':
             logger.warning('error')
             return False
@@ -255,7 +269,11 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         return None
 
-    async def __call__(self, send: Callable[[Event], Awaitable[None]], receive: Callable[[], Awaitable[Event]]) -> None:
+    async def __call__(
+            self,
+            send: Callable[[Event], Awaitable[None]],
+            receive: Callable[[], Awaitable[Event]]
+    ) -> None:
         self._send, self._receive = send, receive
 
         event = await receive()
@@ -276,6 +294,12 @@ class InitiatorHandler(metaclass=ABCMeta):
 
                     timeout = await self._handle_heartbeat()
                     event = await asyncio.wait_for(receive(), timeout=timeout)
+
+                    if event['type'] == 'fix':
+                        event['fix_message'] = self.fix_message_factory.decode(
+                            event['message']
+                        )
+
                     ok = await self._handle_event(event)
                 except asyncio.TimeoutError:
                     await self._handle_timeout()

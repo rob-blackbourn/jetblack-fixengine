@@ -23,14 +23,6 @@ class FixMessageMiddleware:
         self.convert_sep_for_checksum = convert_sep_for_checksum if convert_sep_for_checksum is not None else False
 
     async def __call__(self, send: Send, receive: Receive, handler: Handler) -> None:
-        async def wrapped_send(event: Event) -> None:
-            if event['type'] == 'fix':
-                data = event['message_contents']
-                fix_message = FixMessage(self.protocol, data)
-                encoded_message = fix_message.encode(regenerate_integrity=True)
-                event['message'] = encoded_message
-            await send(event)
-
         async def wrapped_receive() -> Event:
             event = await receive()
             if event['type'] == 'fix':
@@ -40,4 +32,4 @@ class FixMessageMiddleware:
                 event['message_category'] = decoded_message.meta_data.msgcat
             return event
 
-        await handler(wrapped_send, wrapped_receive)
+        await handler(send, wrapped_receive)
