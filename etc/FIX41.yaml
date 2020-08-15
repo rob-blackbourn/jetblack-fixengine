@@ -1234,105 +1234,80 @@ components: {}
 header:
 
   BeginString:
-    type: field
     required: true
 
   BodyLength:
-    type: field
     required: true
 
   MsgType:
-    type: field
     required: true
 
   SenderCompID:
-    type: field
     required: true
 
   TargetCompID:
-    type: field
     required: true
 
   OnBehalfOfCompID:
-    type: field
     required: false
 
   DeliverToCompID:
-    type: field
     required: false
 
   SecureDataLen:
-    type: field
     required: false
 
   SecureData:
-    type: field
     required: false
 
   MsgSeqNum:
-    type: field
     required: true
 
   SenderSubID:
-    type: field
     required: false
 
   SenderLocationID:
-    type: field
     required: false
 
   TargetSubID:
-    type: field
     required: false
 
   TargetLocationID:
-    type: field
     required: false
 
   OnBehalfOfSubID:
-    type: field
     required: false
 
   OnBehalfOfLocationID:
-    type: field
     required: false
 
   DeliverToSubID:
-    type: field
     required: false
 
   DeliverToLocationID:
-    type: field
     required: false
 
   PossDupFlag:
-    type: field
     required: false
 
   PossResend:
-    type: field
     required: false
 
   SendingTime:
-    type: field
     required: true
 
   OrigSendingTime:
-    type: field
     required: false
 
 trailer:
 
   SignatureLength:
-    type: field
     required: false
 
   Signature:
-    type: field
     required: false
 
   CheckSum:
-    type: field
     required: true
 
 messages:
@@ -1342,7 +1317,6 @@ messages:
     msgcat: admin
     fields:
       TestReqID:
-        type: field
         required: false
 
   TestRequest:
@@ -1350,7 +1324,6 @@ messages:
     msgcat: admin
     fields:
       TestReqID:
-        type: field
         required: true
 
   ResendRequest:
@@ -1358,10 +1331,8 @@ messages:
     msgcat: admin
     fields:
       BeginSeqNo:
-        type: field
         required: true
       EndSeqNo:
-        type: field
         required: true
 
   Reject:
@@ -1369,10 +1340,8 @@ messages:
     msgcat: admin
     fields:
       RefSeqNum:
-        type: field
         required: true
       Text:
-        type: field
         required: false
 
   SequenceReset:
@@ -1380,10 +1349,8 @@ messages:
     msgcat: admin
     fields:
       GapFillFlag:
-        type: field
         required: false
       NewSeqNo:
-        type: field
         required: true
 
   Logout:
@@ -1391,7 +1358,6 @@ messages:
     msgcat: admin
     fields:
       Text:
-        type: field
         required: false
 
   IOI:
@@ -1399,92 +1365,64 @@ messages:
     msgcat: app
     fields:
       IOIid:
-        type: field
         required: true
       IOITransType:
-        type: field
         required: true
       IOIRefID:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       Side:
-        type: field
         required: true
       IOIShares:
-        type: field
         required: true
       Price:
-        type: field
         required: false
       Currency:
-        type: field
         required: false
       ValidUntilTime:
-        type: field
         required: false
       IOIQltyInd:
-        type: field
         required: false
       IOIOthSvc:
-        type: field
         required: false
       IOINaturalFlag:
-        type: field
         required: false
       NoIOIQualifiers:
         type: group
         required: false
         fields:
           IOIQualifier:
-            type: field
             required: false
       Text:
-        type: field
         required: false
       TransactTime:
-        type: field
         required: false
       URLLink:
-        type: field
         required: false
 
   Advertisement:
@@ -1492,79 +1430,54 @@ messages:
     msgcat: app
     fields:
       AdvId:
-        type: field
         required: true
       AdvTransType:
-        type: field
         required: true
       AdvRefID:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       AdvSide:
-        type: field
         required: true
       Shares:
-        type: field
         required: true
       Price:
-        type: field
         required: false
       Currency:
-        type: field
         required: false
       TradeDate:
-        type: field
         required: false
       TransactTime:
-        type: field
         required: false
       Text:
-        type: field
         required: false
       URLLink:
-        type: field
         required: false
       LastMkt:
-        type: field
         required: false
 
   ExecutionReport:
@@ -1572,181 +1485,122 @@ messages:
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: true
       SecondaryOrderID:
-        type: field
         required: false
       ClOrdID:
-        type: field
         required: false
       OrigClOrdID:
-        type: field
         required: false
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       ListID:
-        type: field
         required: false
       ExecID:
-        type: field
         required: true
       ExecTransType:
-        type: field
         required: true
       ExecRefID:
-        type: field
         required: false
       ExecType:
-        type: field
         required: true
       OrdStatus:
-        type: field
         required: true
       OrdRejReason:
-        type: field
         required: false
       Account:
-        type: field
         required: false
       SettlmntTyp:
-        type: field
         required: false
       FutSettDate:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       Side:
-        type: field
         required: true
       OrderQty:
-        type: field
         required: true
       OrdType:
-        type: field
         required: false
       Price:
-        type: field
         required: false
       StopPx:
-        type: field
         required: false
       PegDifference:
-        type: field
         required: false
       Currency:
-        type: field
         required: false
       TimeInForce:
-        type: field
         required: false
       ExpireTime:
-        type: field
         required: false
       ExecInst:
-        type: field
         required: false
       Rule80A:
-        type: field
         required: false
       LastShares:
-        type: field
         required: true
       LastPx:
-        type: field
         required: true
       LastSpotRate:
-        type: field
         required: false
       LastForwardPoints:
-        type: field
         required: false
       LastMkt:
-        type: field
         required: false
       LastCapacity:
-        type: field
         required: false
       LeavesQty:
-        type: field
         required: true
       CumQty:
-        type: field
         required: true
       AvgPx:
-        type: field
         required: true
       TradeDate:
-        type: field
         required: false
       TransactTime:
-        type: field
         required: false
       ReportToExch:
-        type: field
         required: false
       Commission:
-        type: field
         required: false
       CommType:
-        type: field
         required: false
       SettlCurrAmt:
-        type: field
         required: false
       SettlCurrency:
-        type: field
         required: false
       SettlCurrFxRate:
-        type: field
         required: false
       SettlCurrFxRateCalc:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   OrderCancelReject:
@@ -1754,34 +1608,24 @@ messages:
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: true
       SecondaryOrderID:
-        type: field
         required: false
       ClOrdID:
-        type: field
         required: true
       OrigClOrdID:
-        type: field
         required: true
       OrdStatus:
-        type: field
         required: true
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       ListID:
-        type: field
         required: false
       CxlRejReason:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   Logon:
@@ -1789,19 +1633,14 @@ messages:
     msgcat: admin
     fields:
       EncryptMethod:
-        type: field
         required: true
       HeartBtInt:
-        type: field
         required: true
       RawDataLength:
-        type: field
         required: false
       RawData:
-        type: field
         required: false
       ResetSeqNumFlag:
-        type: field
         required: false
 
   News:
@@ -1809,72 +1648,52 @@ messages:
     msgcat: app
     fields:
       OrigTime:
-        type: field
         required: false
       Urgency:
-        type: field
         required: false
       Headline:
-        type: field
         required: true
       NoRelatedSym:
         type: group
         required: false
         fields:
           RelatdSym:
-            type: field
             required: false
           SymbolSfx:
-            type: field
             required: false
           SecurityID:
-            type: field
             required: false
           IDSource:
-            type: field
             required: false
           SecurityType:
-            type: field
             required: false
           MaturityMonthYear:
-            type: field
             required: false
           MaturityDay:
-            type: field
             required: false
           PutOrCall:
-            type: field
             required: false
           StrikePrice:
-            type: field
             required: false
           OptAttribute:
-            type: field
             required: false
           SecurityExchange:
-            type: field
             required: false
           Issuer:
-            type: field
             required: false
           SecurityDesc:
-            type: field
             required: false
       LinesOfText:
         type: group
         required: true
         fields:
           Text:
-            type: field
             required: true
       URLLink:
-        type: field
         required: false
       RawDataLength:
-        type: field
         required: false
       RawData:
-        type: field
         required: false
 
   Email:
@@ -1882,78 +1701,56 @@ messages:
     msgcat: app
     fields:
       EmailThreadID:
-        type: field
         required: true
       EmailType:
-        type: field
         required: true
       OrigTime:
-        type: field
         required: false
       Subject:
-        type: field
         required: true
       NoRelatedSym:
         type: group
         required: false
         fields:
           RelatdSym:
-            type: field
             required: false
           SymbolSfx:
-            type: field
             required: false
           SecurityID:
-            type: field
             required: false
           IDSource:
-            type: field
             required: false
           SecurityType:
-            type: field
             required: false
           MaturityMonthYear:
-            type: field
             required: false
           MaturityDay:
-            type: field
             required: false
           PutOrCall:
-            type: field
             required: false
           StrikePrice:
-            type: field
             required: false
           OptAttribute:
-            type: field
             required: false
           SecurityExchange:
-            type: field
             required: false
           Issuer:
-            type: field
             required: false
           SecurityDesc:
-            type: field
             required: false
       OrderID:
-        type: field
         required: false
       ClOrdID:
-        type: field
         required: false
       LinesOfText:
         type: group
         required: true
         fields:
           Text:
-            type: field
             required: true
       RawDataLength:
-        type: field
         required: false
       RawData:
-        type: field
         required: false
 
   NewOrderSingle:
@@ -1961,157 +1758,106 @@ messages:
     msgcat: app
     fields:
       ClOrdID:
-        type: field
         required: true
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       Account:
-        type: field
         required: false
       SettlmntTyp:
-        type: field
         required: false
       FutSettDate:
-        type: field
         required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
         required: false
       MinQty:
-        type: field
         required: false
       MaxFloor:
-        type: field
         required: false
       ExDestination:
-        type: field
         required: false
       ProcessCode:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       PrevClosePx:
-        type: field
         required: false
       Side:
-        type: field
         required: true
       LocateReqd:
-        type: field
         required: false
       OrderQty:
-        type: field
         required: false
       CashOrderQty:
-        type: field
         required: false
       OrdType:
-        type: field
         required: true
       Price:
-        type: field
         required: false
       StopPx:
-        type: field
         required: false
       Currency:
-        type: field
         required: false
       IOIid:
-        type: field
         required: false
       QuoteID:
-        type: field
         required: false
       TimeInForce:
-        type: field
         required: false
       ExpireTime:
-        type: field
         required: false
       Commission:
-        type: field
         required: false
       CommType:
-        type: field
         required: false
       Rule80A:
-        type: field
         required: false
       ForexReq:
-        type: field
         required: false
       SettlCurrency:
-        type: field
         required: false
       Text:
-        type: field
         required: false
       FutSettDate2:
-        type: field
         required: false
       OrderQty2:
-        type: field
         required: false
       OpenClose:
-        type: field
         required: false
       CoveredOrUncovered:
-        type: field
         required: false
       CustomerOrFirm:
-        type: field
         required: false
       MaxShow:
-        type: field
         required: false
       PegDifference:
-        type: field
         required: false
 
   NewOrderList:
@@ -2119,163 +1865,110 @@ messages:
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       WaveNo:
-        type: field
         required: false
       ListSeqNo:
-        type: field
         required: true
       ListNoOrds:
-        type: field
         required: true
       ListExecInst:
-        type: field
         required: false
       ClOrdID:
-        type: field
         required: true
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       Account:
-        type: field
         required: false
       SettlmntTyp:
-        type: field
         required: false
       FutSettDate:
-        type: field
         required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
         required: false
       MinQty:
-        type: field
         required: false
       MaxFloor:
-        type: field
         required: false
       ExDestination:
-        type: field
         required: false
       ProcessCode:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       PrevClosePx:
-        type: field
         required: false
       Side:
-        type: field
         required: true
       LocateReqd:
-        type: field
         required: false
       OrderQty:
-        type: field
         required: true
       OrdType:
-        type: field
         required: true
       Price:
-        type: field
         required: false
       StopPx:
-        type: field
         required: false
       PegDifference:
-        type: field
         required: false
       Currency:
-        type: field
         required: false
       TimeInForce:
-        type: field
         required: false
       ExpireTime:
-        type: field
         required: false
       Commission:
-        type: field
         required: false
       CommType:
-        type: field
         required: false
       Rule80A:
-        type: field
         required: false
       ForexReq:
-        type: field
         required: false
       SettlCurrency:
-        type: field
         required: false
       Text:
-        type: field
         required: false
       FutSettDate2:
-        type: field
         required: false
       OrderQty2:
-        type: field
         required: false
       OpenClose:
-        type: field
         required: false
       CoveredOrUncovered:
-        type: field
         required: false
       CustomerOrFirm:
-        type: field
         required: false
       MaxShow:
-        type: field
         required: false
 
   OrderCancelRequest:
@@ -2283,73 +1976,50 @@ messages:
     msgcat: app
     fields:
       OrigClOrdID:
-        type: field
         required: true
       OrderID:
-        type: field
         required: false
       ClOrdID:
-        type: field
         required: true
       ListID:
-        type: field
         required: false
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       Side:
-        type: field
         required: true
       OrderQty:
-        type: field
         required: false
       CashOrderQty:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   OrderCancelReplaceRequest:
@@ -2357,154 +2027,104 @@ messages:
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: false
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       OrigClOrdID:
-        type: field
         required: true
       ClOrdID:
-        type: field
         required: true
       ListID:
-        type: field
         required: false
       Account:
-        type: field
         required: false
       SettlmntTyp:
-        type: field
         required: false
       FutSettDate:
-        type: field
         required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
         required: false
       MinQty:
-        type: field
         required: false
       MaxFloor:
-        type: field
         required: false
       ExDestination:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       Side:
-        type: field
         required: true
       OrderQty:
-        type: field
         required: false
       CashOrderQty:
-        type: field
         required: false
       OrdType:
-        type: field
         required: true
       Price:
-        type: field
         required: false
       StopPx:
-        type: field
         required: false
       PegDifference:
-        type: field
         required: false
       Currency:
-        type: field
         required: false
       TimeInForce:
-        type: field
         required: false
       ExpireTime:
-        type: field
         required: false
       Commission:
-        type: field
         required: false
       CommType:
-        type: field
         required: false
       Rule80A:
-        type: field
         required: false
       ForexReq:
-        type: field
         required: false
       SettlCurrency:
-        type: field
         required: false
       Text:
-        type: field
         required: false
       FutSettDate2:
-        type: field
         required: false
       OrderQty2:
-        type: field
         required: false
       OpenClose:
-        type: field
         required: false
       CoveredOrUncovered:
-        type: field
         required: false
       CustomerOrFirm:
-        type: field
         required: false
       MaxShow:
-        type: field
         required: false
       LocateReqd:
-        type: field
         required: false
 
   OrderStatusRequest:
@@ -2512,58 +2132,40 @@ messages:
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: false
       ClOrdID:
-        type: field
         required: true
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       Side:
-        type: field
         required: true
 
   Allocation:
@@ -2571,212 +2173,148 @@ messages:
     msgcat: app
     fields:
       AllocID:
-        type: field
         required: true
       AllocTransType:
-        type: field
         required: true
       RefAllocID:
-        type: field
         required: false
       AllocLinkID:
-        type: field
         required: false
       AllocLinkType:
-        type: field
         required: false
       NoOrders:
         type: group
         required: false
         fields:
           ClOrdID:
-            type: field
             required: false
           OrderID:
-            type: field
             required: false
           SecondaryOrderID:
-            type: field
             required: false
           ListID:
-            type: field
             required: false
           WaveNo:
-            type: field
             required: false
       NoExecs:
         type: group
         required: false
         fields:
           LastShares:
-            type: field
             required: false
           ExecID:
-            type: field
             required: false
           LastPx:
-            type: field
             required: false
           LastCapacity:
-            type: field
             required: false
       Side:
-        type: field
         required: true
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       Shares:
-        type: field
         required: true
       LastMkt:
-        type: field
         required: false
       AvgPx:
-        type: field
         required: true
       Currency:
-        type: field
         required: false
       AvgPrxPrecision:
-        type: field
         required: false
       TradeDate:
-        type: field
         required: true
       TransactTime:
-        type: field
         required: false
       SettlmntTyp:
-        type: field
         required: false
       FutSettDate:
-        type: field
         required: false
       NetMoney:
-        type: field
         required: false
       OpenClose:
-        type: field
         required: false
       Text:
-        type: field
         required: false
       NumDaysInterest:
-        type: field
         required: false
       AccruedInterestRate:
-        type: field
         required: false
       NoAllocs:
         type: group
         required: false
         fields:
           AllocAccount:
-            type: field
             required: false
           AllocShares:
-            type: field
             required: true
           ProcessCode:
-            type: field
             required: false
           BrokerOfCredit:
-            type: field
             required: false
           NotifyBrokerOfCredit:
-            type: field
             required: false
           AllocHandlInst:
-            type: field
             required: false
           AllocText:
-            type: field
             required: false
           ExecBroker:
-            type: field
             required: false
           ClientID:
-            type: field
             required: false
           Commission:
-            type: field
             required: false
           CommType:
-            type: field
             required: false
           AllocAvgPx:
-            type: field
             required: false
           AllocNetMoney:
-            type: field
             required: false
           SettlCurrAmt:
-            type: field
             required: false
           SettlCurrency:
-            type: field
             required: false
           SettlCurrFxRate:
-            type: field
             required: false
           SettlCurrFxRateCalc:
-            type: field
             required: false
           AccruedInterestAmt:
-            type: field
             required: false
           SettlInstMode:
-            type: field
             required: false
           NoMiscFees:
             type: group
             required: false
             fields:
               MiscFeeAmt:
-                type: field
                 required: false
               MiscFeeCurr:
-                type: field
                 required: false
               MiscFeeType:
-                type: field
                 required: false
 
   ListCancelRequest:
@@ -2784,13 +2322,10 @@ messages:
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       WaveNo:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   ListExecute:
@@ -2798,13 +2333,10 @@ messages:
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       WaveNo:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   ListStatusRequest:
@@ -2812,13 +2344,10 @@ messages:
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       WaveNo:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   ListStatus:
@@ -2826,35 +2355,26 @@ messages:
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       WaveNo:
-        type: field
         required: false
       NoRpts:
-        type: field
         required: true
       RptSeq:
-        type: field
         required: true
       NoOrders:
         type: group
         required: true
         fields:
           ClOrdID:
-            type: field
             required: true
           CumQty:
-            type: field
             required: true
           LeavesQty:
-            type: field
             required: true
           CxlQty:
-            type: field
             required: true
           AvgPx:
-            type: field
             required: true
 
   AllocationInstructionAck:
@@ -2862,28 +2382,20 @@ messages:
     msgcat: app
     fields:
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       AllocID:
-        type: field
         required: true
       TradeDate:
-        type: field
         required: true
       TransactTime:
-        type: field
         required: false
       AllocStatus:
-        type: field
         required: true
       AllocRejCode:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   DontKnowTrade:
@@ -2891,70 +2403,48 @@ messages:
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: false
       ExecID:
-        type: field
         required: false
       DKReason:
-        type: field
         required: true
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       Side:
-        type: field
         required: true
       OrderQty:
-        type: field
         required: false
       CashOrderQty:
-        type: field
         required: false
       LastShares:
-        type: field
         required: false
       LastPx:
-        type: field
         required: false
       Text:
-        type: field
         required: false
 
   QuoteRequest:
@@ -2962,67 +2452,46 @@ messages:
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
         required: true
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       PrevClosePx:
-        type: field
         required: false
       Side:
-        type: field
         required: false
       OrderQty:
-        type: field
         required: false
       FutSettDate:
-        type: field
         required: false
       OrdType:
-        type: field
         required: false
       FutSettDate2:
-        type: field
         required: false
       OrderQty2:
-        type: field
         required: false
 
   Quote:
@@ -3030,91 +2499,62 @@ messages:
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
         required: false
       QuoteID:
-        type: field
         required: true
       Symbol:
-        type: field
         required: true
       SymbolSfx:
-        type: field
         required: false
       SecurityID:
-        type: field
         required: false
       IDSource:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       MaturityMonthYear:
-        type: field
         required: false
       MaturityDay:
-        type: field
         required: false
       PutOrCall:
-        type: field
         required: false
       StrikePrice:
-        type: field
         required: false
       OptAttribute:
-        type: field
         required: false
       SecurityExchange:
-        type: field
         required: false
       Issuer:
-        type: field
         required: false
       SecurityDesc:
-        type: field
         required: false
       BidPx:
-        type: field
         required: false
       OfferPx:
-        type: field
         required: false
       BidSize:
-        type: field
         required: false
       OfferSize:
-        type: field
         required: false
       ValidUntilTime:
-        type: field
         required: false
       BidSpotRate:
-        type: field
         required: false
       OfferSpotRate:
-        type: field
         required: false
       BidForwardPoints:
-        type: field
         required: false
       OfferForwardPoints:
-        type: field
         required: false
       TransactTime:
-        type: field
         required: false
       FutSettDate:
-        type: field
         required: false
       OrdType:
-        type: field
         required: false
       FutSettDate2:
-        type: field
         required: false
       OrderQty2:
-        type: field
         required: false
         
   SettlementInstructions:
@@ -3122,104 +2562,70 @@ messages:
     msgcat: app
     fields:
       SettlInstID:
-        type: field
         required: true
       SettlInstTransType:
-        type: field
         required: true
       SettlInstMode:
-        type: field
         required: true
       SettlInstSource:
-        type: field
         required: true
       AllocAccount:
-        type: field
         required: true
       SettlLocation:
-        type: field
         required: false
       TradeDate:
-        type: field
         required: false
       AllocID:
-        type: field
         required: false
       LastMkt:
-        type: field
         required: false
       Side:
-        type: field
         required: false
       SecurityType:
-        type: field
         required: false
       EffectiveTime:
-        type: field
         required: false
       TransactTime:
-        type: field
         required: true
       ClientID:
-        type: field
         required: false
       ExecBroker:
-        type: field
         required: false
       StandInstDbType:
-        type: field
         required: false
       StandInstDbName:
-        type: field
         required: false
       StandInstDbID:
-        type: field
         required: false
       SettlDeliveryType:
-        type: field
         required: false
       SettlDepositoryCode:
-        type: field
         required: false
       SettlBrkrCode:
-        type: field
         required: false
       SettlInstCode:
-        type: field
         required: false
       SecuritySettlAgentName:
-        type: field
         required: false
       SecuritySettlAgentCode:
-        type: field
         required: false
       SecuritySettlAgentAcctNum:
-        type: field
         required: false
       SecuritySettlAgentAcctName:
-        type: field
         required: false
       SecuritySettlAgentContactName:
-        type: field
         required: false
       SecuritySettlAgentContactPhone:
-        type: field
         required: false
       CashSettlAgentName:
-        type: field
         required: false
       CashSettlAgentCode:
-        type: field
         required: false
       CashSettlAgentAcctNum:
-        type: field
         required: false
       CashSettlAgentAcctName:
-        type: field
         required: false
       CashSettlAgentContactName:
-        type: field
         required: false
       CashSettlAgentContactPhone:
-        type: field
         required: false

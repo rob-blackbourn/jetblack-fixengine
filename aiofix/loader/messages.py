@@ -13,25 +13,37 @@ def _to_message_member_meta_data(
     member: MutableMapping[str, MessageMemberMetaData] = {}
 
     for name, value in info.items():
-        if value['type'] == 'field':
-            field = field_meta_data[name]
-            member[name] = MessageMemberMetaData(
-                field, value['type'], value['required'])
-        elif value['type'] == 'group':
+        member_type = value.get('type', 'field') if value else 'field'
+        is_required = value.get('required', False) if value else False
+
+        if member_type == 'field':
             field = field_meta_data[name]
             member[name] = MessageMemberMetaData(
                 field,
-                value['type'],
-                value['required'],
-                _to_message_member_meta_data(
-                    value['fields'], field_meta_data, component_meta_data)
+                member_type,
+                is_required
             )
-        elif value['type'] == 'component':
+        elif member_type == 'group':
+            field = field_meta_data[name]
+            member[name] = MessageMemberMetaData(
+                field,
+                member_type,
+                is_required,
+                _to_message_member_meta_data(
+                    value['fields'],
+                    field_meta_data,
+                    component_meta_data
+                )
+            )
+        elif member_type == 'component':
             component = component_meta_data[name]
             member[name] = MessageMemberMetaData(
-                component, value['type'], value['required'])
+                component,
+                member_type,
+                is_required
+            )
         else:
-            raise RuntimeError(f'unknown type "{value["type"]}"')
+            raise RuntimeError(f'unknown type "{member_type}"')
 
     return member
 

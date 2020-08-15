@@ -3905,573 +3905,248 @@ components:
 
   CommissionData:
     Commission:
-      type: field
-      required: false
     CommType:
-      type: field
-      required: false
     CommCurrency:
-      type: field
-      required: false
     FundRenewWaiv:
-      type: field
-      required: false
 
   Instrument:
     Symbol:
-      type: field
-      required: false
     SymbolSfx:
-      type: field
-      required: false
     SecurityID:
-      type: field
-      required: false
     SecurityIDSource:
-      type: field
-      required: false
     NoSecurityAltID:
       type: group
-      required: false
       fields:
         SecurityAltID:
-          type: field
-          required: false
         SecurityAltIDSource:
-          type: field
-          required: false
     Product:
-      type: field
-      required: false
     CFICode:
-      type: field
-      required: false
     SecurityType:
-      type: field
-      required: false
     MaturityMonthYear:
-      type: field
-      required: false
     MaturityDate:
-      type: field
-      required: false
     CouponPaymentDate:
-      type: field
-      required: false
     IssueDate:
-      type: field
-      required: false
     RepoCollateralSecurityType:
-      type: field
-      required: false
     RepurchaseTerm:
-      type: field
-      required: false
     RepurchaseRate:
-      type: field
-      required: false
     Factor:
-      type: field
-      required: false
     CreditRating:
-      type: field
-      required: false
     InstrRegistry:
-      type: field
-      required: false
     CountryOfIssue:
-      type: field
-      required: false
     StateOrProvinceOfIssue:
-      type: field
-      required: false
     LocaleOfIssue:
-      type: field
-      required: false
     RedemptionDate:
-      type: field
-      required: false
     StrikePrice:
-      type: field
-      required: false
     OptAttribute:
-      type: field
-      required: false
     ContractMultiplier:
-      type: field
-      required: false
     CouponRate:
-      type: field
-      required: false
     SecurityExchange:
-      type: field
-      required: false
     Issuer:
-      type: field
-      required: false
     EncodedIssuerLen:
-      type: field
-      required: false
     EncodedIssuer:
-      type: field
-      required: false
     SecurityDesc:
-      type: field
-      required: false
     EncodedSecurityDescLen:
-      type: field
-      required: false
     EncodedSecurityDesc:
-      type: field
-      required: false
 
   InstrumentLeg:
     LegSymbol:
-      type: field
-      required: false
     LegSymbolSfx:
-      type: field
-      required: false
     LegSecurityID:
-      type: field
-      required: false
     LegSecurityIDSource:
-      type: field
-      required: false
     NoLegSecurityAltID:
       type: group
-      required: false
       fields:
         LegSecurityAltID:
-          type: field
-          required: false
         LegSecurityAltIDSource:
-          type: field
-          required: false
     LegProduct:
-      type: field
-      required: false
     LegCFICode:
-      type: field
-      required: false
     LegSecurityType:
-      type: field
-      required: false
     LegMaturityMonthYear:
-      type: field
-      required: false
     LegMaturityDate:
-      type: field
-      required: false
     LegCouponPaymentDate:
-      type: field
-      required: false
     LegIssueDate:
-      type: field
-      required: false
     LegRepoCollateralSecurityType:
-      type: field
-      required: false
     LegRepurchaseTerm:
-      type: field
-      required: false
     LegRepurchaseRate:
-      type: field
-      required: false
     LegFactor:
-      type: field
-      required: false
     LegCreditRating:
-      type: field
-      required: false
     LegInstrRegistry:
-      type: field
-      required: false
     LegCountryOfIssue:
-      type: field
-      required: false
     LegStateOrProvinceOfIssue:
-      type: field
-      required: false
     LegLocaleOfIssue:
-      type: field
-      required: false
     LegRedemptionDate:
-      type: field
-      required: false
     LegStrikePrice:
-      type: field
-      required: false
     LegOptAttribute:
-      type: field
-      required: false
     LegContractMultiplier:
-      type: field
-      required: false
     LegCouponRate:
-      type: field
-      required: false
     LegSecurityExchange:
-      type: field
-      required: false
     LegIssuer:
-      type: field
-      required: false
     EncodedLegIssuerLen:
-      type: field
-      required: false
     EncodedLegIssuer:
-      type: field
-      required: false
     LegSecurityDesc:
-      type: field
-      required: false
     EncodedLegSecurityDescLen:
-      type: field
-      required: false
     EncodedLegSecurityDesc:
-      type: field
-      required: false
     LegRatioQty:
-      type: field
-      required: false
     LegSide:
-      type: field
-      required: false
 
   NestedParties:
     NoNestedPartyIDs:
       type: group
-      required: false
       fields:
         NestedPartyID:
-          type: field
-          required: false
         NestedPartyIDSource:
-          type: field
-          required: false
         NestedPartyRole:
-          type: field
-          required: false
         NestedPartySubID:
-          type: field
-          required: false
 
   OrderQtyData:
     OrderQty:
-      type: field
-      required: false
     CashOrderQty:
-      type: field
-      required: false
     OrderPercent:
-      type: field
-      required: false
     RoundingDirection:
-      type: field
-      required: false
     RoundingModulus:
-      type: field
-      required: false
 
   Parties:
     NoPartyIDs:
       type: group
-      required: false
       fields:
         PartyID:
-          type: field
-          required: false
         PartyIDSource:
-          type: field
-          required: false
         PartyRole:
-          type: field
-          required: false
         PartySubID:
-          type: field
-          required: false
 
   SpreadOrBenchmarkCurveData:
     Spread:
-      type: field
-      required: false
     BenchmarkCurveCurrency:
-      type: field
-      required: false
     BenchmarkCurveName:
-      type: field
-      required: false
     BenchmarkCurvePoint:
-      type: field
-      required: false
 
   Stipulations:
     NoStipulations:
       type: group
-      required: false
       fields:
         StipulationType:
-          type: field
-          required: false
         StipulationValue:
-          type: field
-          required: false
 
   UnderlyingInstrument:
     UnderlyingSymbol:
-      type: field
-      required: false
     UnderlyingSymbolSfx:
-      type: field
-      required: false
     UnderlyingSecurityID:
-      type: field
-      required: false
     UnderlyingSecurityIDSource:
-      type: field
-      required: false
     NoUnderlyingSecurityAltID:
       type: group
-      required: false
       fields:
         UnderlyingSecurityAltID:
-          type: field
-          required: false
         UnderlyingSecurityAltIDSource:
-          type: field
-          required: false
     UnderlyingProduct:
-      type: field
-      required: false
     UnderlyingCFICode:
-      type: field
-      required: false
     UnderlyingSecurityType:
-      type: field
-      required: false
     UnderlyingMaturityMonthYear:
-      type: field
-      required: false
     UnderlyingMaturityDate:
-      type: field
-      required: false
     UnderlyingPutOrCall:
-      type: field
-      required: false
     UnderlyingCouponPaymentDate:
-      type: field
-      required: false
     UnderlyingIssueDate:
-      type: field
-      required: false
     UnderlyingRepoCollateralSecurityType:
-      type: field
-      required: false
     UnderlyingRepurchaseTerm:
-      type: field
-      required: false
     UnderlyingRepurchaseRate:
-      type: field
-      required: false
     UnderlyingFactor:
-      type: field
-      required: false
     UnderlyingCreditRating:
-      type: field
-      required: false
     UnderlyingInstrRegistry:
-      type: field
-      required: false
     UnderlyingCountryOfIssue:
-      type: field
-      required: false
     UnderlyingStateOrProvinceOfIssue:
-      type: field
-      required: false
     UnderlyingLocaleOfIssue:
-      type: field
-      required: false
     UnderlyingRedemptionDate:
-      type: field
-      required: false
     UnderlyingStrikePrice:
-      type: field
-      required: false
     UnderlyingOptAttribute:
-      type: field
-      required: false
     UnderlyingContractMultiplier:
-      type: field
-      required: false
     UnderlyingCouponRate:
-      type: field
-      required: false
     UnderlyingSecurityExchange:
-      type: field
-      required: false
     UnderlyingIssuer:
-      type: field
-      required: false
     EncodedUnderlyingIssuerLen:
-      type: field
-      required: false
     EncodedUnderlyingIssuer:
-      type: field
-      required: false
     UnderlyingSecurityDesc:
-      type: field
-      required: false
     EncodedUnderlyingSecurityDescLen:
-      type: field
-      required: false
     EncodedUnderlyingSecurityDesc:
-      type: field
-      required: false
 
   YieldData:
     YieldType:
-      type: field
-      required: false
     Yield:
-      type: field
-      required: false
 
 header:
 
   BeginString:
-    type: field
     required: true
 
   BodyLength:
-    type: field
     required: true
 
   MsgType:
-    type: field
     required: true
 
   SenderCompID:
-    type: field
     required: true
   TargetCompID:
-    type: field
     required: true
 
   OnBehalfOfCompID:
-    type: field
-    required: false
 
   DeliverToCompID:
-    type: field
-    required: false
 
   SecureDataLen:
-    type: field
-    required: false
 
   SecureData:
-    type: field
-    required: false
 
   MsgSeqNum:
-    type: field
     required: true
 
   SenderSubID:
-    type: field
-    required: false
 
   SenderLocationID:
-    type: field
-    required: false
 
   TargetSubID:
-    type: field
-    required: false
 
   TargetLocationID:
-    type: field
-    required: false
 
   OnBehalfOfSubID:
-    type: field
-    required: false
 
   OnBehalfOfLocationID:
-    type: field
-    required: false
 
   DeliverToSubID:
-    type: field
-    required: false
 
   DeliverToLocationID:
-    type: field
-    required: false
 
   PossDupFlag:
-    type: field
-    required: false
 
   PossResend:
-    type: field
-    required: false
 
   SendingTime:
-    type: field
     required: true
 
   OrigSendingTime:
-    type: field
-    required: false
 
   XmlDataLen:
-    type: field
-    required: false
 
   XmlData:
-    type: field
-    required: false
 
   MessageEncoding:
-    type: field
-    required: false
 
   LastMsgSeqNumProcessed:
-    type: field
-    required: false
 
   OnBehalfOfSendingTime:
-    type: field
-    required: false
 
   NoHops:
     type: group
-    required: false
     fields:
       HopCompID:
-        type: field
-        required: false
       HopSendingTime:
-        type: field
-        required: false
       HopRefID:
-        type: field
-        required: false
 
 trailer:
 
   SignatureLength:
-    type: field
-    required: false
 
   Signature:
-    type: field
-    required: false
 
   CheckSum:
-    type: field
     required: true
 
 messages:
@@ -4481,15 +4156,12 @@ messages:
     msgcat: admin
     fields:
       TestReqID:
-        type: field
-        required: false
 
   TestRequest:
     msgtype: '1'
     msgcat: admin
     fields:
       TestReqID:
-        type: field
         required: true
 
   ResendRequest:
@@ -4497,10 +4169,8 @@ messages:
     msgcat: admin
     fields:
       BeginSeqNo:
-        type: field
         required: true
       EndSeqNo:
-        type: field
         required: true
 
   Reject:
@@ -4508,36 +4178,20 @@ messages:
     msgcat: admin
     fields:
       RefSeqNum:
-        type: field
         required: true
       RefTagID:
-        type: field
-        required: false
       RefMsgType:
-        type: field
-        required: false
       SessionRejectReason:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   SequenceReset:
     msgtype: '4'
     msgcat: admin
     fields:
       GapFillFlag:
-        type: field
-        required: false
       NewSeqNo:
-        type: field
         required: true
 
   Logout:
@@ -4545,1640 +4199,731 @@ messages:
     msgcat: admin
     fields:
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   IOI:
     msgtype: '6'
     msgcat: app
     fields:
       IOIid:
-        type: field
         required: true
       IOITransType:
-        type: field
         required: true
       IOIRefID:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       Side:
-        type: field
         required: true
       QuantityType:
-        type: field
-        required: false
       IOIQty:
-        type: field
         required: true
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       ValidUntilTime:
-        type: field
-        required: false
       IOIQltyInd:
-        type: field
-        required: false
       IOINaturalFlag:
-        type: field
-        required: false
       NoIOIQualifiers:
         type: group
-        required: false
         fields:
           IOIQualifier:
-            type: field
-            required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       URLLink:
-        type: field
-        required: false
       NoRoutingIDs:
         type: group
-        required: false
         fields:
           RoutingType:
-            type: field
-            required: false
           RoutingID:
-            type: field
-            required: false
       SpreadOrBenchmarkCurveData:
         type: component
-        required: false
       Benchmark:
-        type: field
-        required: false
 
   Advertisement:
     msgtype: '7'
     msgcat: app
     fields:
       AdvId:
-        type: field
         required: true
       AdvTransType:
-        type: field
         required: true
       AdvRefID:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       AdvSide:
-        type: field
         required: true
       Quantity:
-        type: field
         required: true
       Price:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       TradeDate:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       URLLink:
-        type: field
-        required: false
       LastMkt:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
 
   ExecutionReport:
     msgtype: '8'
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: true
       SecondaryOrderID:
-        type: field
-        required: false
       SecondaryClOrdID:
-        type: field
-        required: false
       SecondaryExecID:
-        type: field
-        required: false
       ClOrdID:
-        type: field
-        required: false
       OrigClOrdID:
-        type: field
-        required: false
       ClOrdLinkID:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       TradeOriginationDate:
-        type: field
-        required: false
       NoContraBrokers:
         type: group
-        required: false
         fields:
           ContraBroker:
-            type: field
-            required: false
           ContraTrader:
-            type: field
-            required: false
           ContraTradeQty:
-            type: field
-            required: false
           ContraTradeTime:
-            type: field
-            required: false
           ContraLegRefID:
-            type: field
-            required: false
       ListID:
-        type: field
-        required: false
       CrossID:
-        type: field
-        required: false
       OrigCrossID:
-        type: field
-        required: false
       CrossType:
-        type: field
-        required: false
       ExecID:
-        type: field
         required: true
       ExecRefID:
-        type: field
-        required: false
       ExecType:
-        type: field
         required: true
       OrdStatus:
-        type: field
         required: true
       WorkingIndicator:
-        type: field
-        required: false
       OrdRejReason:
-        type: field
-        required: false
       ExecRestatementReason:
-        type: field
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       DayBookingInst:
-        type: field
-        required: false
       BookingUnit:
-        type: field
-        required: false
       PreallocMethod:
-        type: field
-        required: false
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       CashMargin:
-        type: field
-        required: false
       ClearingFeeIndicator:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       Side:
-        type: field
         required: true
       Stipulations:
         type: component
-        required: false
       QuantityType:
-        type: field
-        required: false
       OrderQtyData:
         type: component
         required: true
       OrdType:
-        type: field
-        required: false
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       StopPx:
-        type: field
-        required: false
       PegDifference:
-        type: field
-        required: false
       DiscretionInst:
-        type: field
-        required: false
       DiscretionOffset:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       ComplianceID:
-        type: field
-        required: false
       SolicitedFlag:
-        type: field
-        required: false
       TimeInForce:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       ExpireDate:
-        type: field
-        required: false
       ExpireTime:
-        type: field
-        required: false
       ExecInst:
-        type: field
-        required: false
       OrderCapacity:
-        type: field
-        required: false
       OrderRestrictions:
-        type: field
-        required: false
       CustOrderCapacity:
-        type: field
-        required: false
       Rule80A:
-        type: field
-        required: false
       LastQty:
-        type: field
-        required: false
       UnderlyingLastQty:
-        type: field
-        required: false
       LastPx:
-        type: field
-        required: false
       UnderlyingLastPx:
-        type: field
-        required: false
       LastSpotRate:
-        type: field
-        required: false
       LastForwardPoints:
-        type: field
-        required: false
       LastMkt:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       LastCapacity:
-        type: field
-        required: false
       LeavesQty:
-        type: field
         required: true
       CumQty:
-        type: field
         required: true
       AvgPx:
-        type: field
         required: true
       DayOrderQty:
-        type: field
-        required: false
       DayCumQty:
-        type: field
-        required: false
       DayAvgPx:
-        type: field
-        required: false
       GTBookingInst:
-        type: field
-        required: false
       TradeDate:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       ReportToExch:
-        type: field
-        required: false
       CommissionData:
         type: component
-        required: false
       SpreadOrBenchmarkCurveData:
         type: component
-        required: false
       YieldData:
         type: component
-        required: false
       GrossTradeAmt:
-        type: field
-        required: false
       NumDaysInterest:
-        type: field
-        required: false
       ExDate:
-        type: field
-        required: false
       AccruedInterestRate:
-        type: field
-        required: false
       AccruedInterestAmt:
-        type: field
-        required: false
       TradedFlatSwitch:
-        type: field
-        required: false
       BasisFeatureDate:
-        type: field
-        required: false
       BasisFeaturePrice:
-        type: field
-        required: false
       Concession:
-        type: field
-        required: false
       TotalTakedown:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
       SettlCurrAmt:
-        type: field
-        required: false
       SettlCurrency:
-        type: field
-        required: false
       SettlCurrFxRate:
-        type: field
-        required: false
       SettlCurrFxRateCalc:
-        type: field
-        required: false
       HandlInst:
-        type: field
-        required: false
       MinQty:
-        type: field
-        required: false
       MaxFloor:
-        type: field
-        required: false
       PositionEffect:
-        type: field
-        required: false
       MaxShow:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       FutSettDate2:
-        type: field
-        required: false
       OrderQty2:
-        type: field
-        required: false
       LastForwardPoints2:
-        type: field
-        required: false
       MultiLegReportingType:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       Designation:
-        type: field
-        required: false
       TransBkdTime:
-        type: field
-        required: false
       ExecValuationPoint:
-        type: field
-        required: false
       ExecPriceType:
-        type: field
-        required: false
       ExecPriceAdjustment:
-        type: field
-        required: false
       PriorityIndicator:
-        type: field
-        required: false
       PriceImprovement:
-        type: field
-        required: false
       NoContAmts:
         type: group
-        required: false
         fields:
           ContAmtType:
-            type: field
-            required: false
           ContAmtValue:
-            type: field
-            required: false
           ContAmtCurr:
-            type: field
-            required: false
       NoLegs:
         type: group
-        required: false
         fields:
           InstrumentLeg:
             type: component
-            required: false
           LegPositionEffect:
-            type: field
-            required: false
           LegCoveredOrUncovered:
-            type: field
-            required: false
           NestedParties:
             type: component
-            required: false
           LegRefID:
-            type: field
-            required: false
           LegPrice:
-            type: field
-            required: false
           LegSettlmntTyp:
-            type: field
-            required: false
           LegFutSettDate:
-            type: field
-            required: false
           LegLastPx:
-            type: field
-            required: false
 
   OrderCancelReject:
     msgtype: '9'
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: true
       SecondaryOrderID:
-        type: field
-        required: false
       SecondaryClOrdID:
-        type: field
-        required: false
       ClOrdID:
-        type: field
         required: true
       ClOrdLinkID:
-        type: field
-        required: false
       OrigClOrdID:
-        type: field
         required: true
       OrdStatus:
-        type: field
         required: true
       WorkingIndicator:
-        type: field
-        required: false
       OrigOrdModTime:
-        type: field
-        required: false
       ListID:
-        type: field
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       TradeOriginationDate:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       CxlRejResponseTo:
-        type: field
         required: true
       CxlRejReason:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   Logon:
     msgtype: A
     msgcat: admin
     fields:
       EncryptMethod:
-        type: field
         required: true
       HeartBtInt:
-        type: field
         required: true
       RawDataLength:
-        type: field
-        required: false
       RawData:
-        type: field
-        required: false
       ResetSeqNumFlag:
-        type: field
-        required: false
       MaxMessageSize:
-        type: field
-        required: false
       NoMsgTypes:
         type: group
-        required: false
         fields:
           RefMsgType:
-            type: field
-            required: false
           MsgDirection:
-            type: field
-            required: false
       TestMessageIndicator:
-        type: field
-        required: false
       Username:
-        type: field
-        required: false
       Password:
-        type: field
-        required: false
 
   News:
     msgtype: B
     msgcat: app
     fields:
       OrigTime:
-        type: field
-        required: false
       Urgency:
-        type: field
-        required: false
       Headline:
-        type: field
         required: true
       EncodedHeadlineLen:
-        type: field
-        required: false
       EncodedHeadline:
-        type: field
-        required: false
       NoRoutingIDs:
         type: group
-        required: false
         fields:
           RoutingType:
-            type: field
-            required: false
           RoutingID:
-            type: field
-            required: false
       NoRelatedSym:
         type: group
-        required: false
         fields:
           Instrument:
             type: component
-            required: false
       LinesOfText:
         type: group
         required: true
         fields:
           Text:
-            type: field
             required: true
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
       URLLink:
-        type: field
-        required: false
       RawDataLength:
-        type: field
-        required: false
       RawData:
-        type: field
-        required: false
 
   Email:
     msgtype: C
     msgcat: app
     fields:
       EmailThreadID:
-        type: field
         required: true
       EmailType:
-        type: field
         required: true
       OrigTime:
-        type: field
-        required: false
       Subject:
-        type: field
         required: true
       EncodedSubjectLen:
-        type: field
-        required: false
       EncodedSubject:
-        type: field
-        required: false
       NoRoutingIDs:
         type: group
-        required: false
         fields:
           RoutingType:
-            type: field
-            required: false
           RoutingID:
-            type: field
-            required: false
       NoRelatedSym:
         type: group
-        required: false
         fields:
           Instrument:
             type: component
-            required: false
       OrderID:
-        type: field
-        required: false
       ClOrdID:
-        type: field
-        required: false
       LinesOfText:
         type: group
         required: true
         fields:
           Text:
-            type: field
             required: true
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
       RawDataLength:
-        type: field
-        required: false
       RawData:
-        type: field
-        required: false
 
   NewOrderSingle:
     msgtype: D
     msgcat: app
     fields:
       ClOrdID:
-        type: field
         required: true
       SecondaryClOrdID:
-        type: field
-        required: false
       ClOrdLinkID:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       TradeOriginationDate:
-        type: field
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       DayBookingInst:
-        type: field
-        required: false
       BookingUnit:
-        type: field
-        required: false
       PreallocMethod:
-        type: field
-        required: false
       NoAllocs:
         type: group
-        required: false
         fields:
           AllocAccount:
-            type: field
-            required: false
           IndividualAllocID:
-            type: field
-            required: false
           NestedParties:
             type: component
-            required: false
           AllocQty:
-            type: field
-            required: false
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       CashMargin:
-        type: field
-        required: false
       ClearingFeeIndicator:
-        type: field
-        required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
-        required: false
       MinQty:
-        type: field
-        required: false
       MaxFloor:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       NoTradingSessions:
         type: group
-        required: false
         fields:
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
       ProcessCode:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       PrevClosePx:
-        type: field
-        required: false
       Side:
-        type: field
         required: true
       LocateReqd:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       Stipulations:
         type: component
-        required: false
       QuantityType:
-        type: field
-        required: false
       OrderQtyData:
         type: component
         required: true
       OrdType:
-        type: field
         required: true
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       StopPx:
-        type: field
-        required: false
       SpreadOrBenchmarkCurveData:
         type: component
-        required: false
       YieldData:
         type: component
-        required: false
       Currency:
-        type: field
-        required: false
       ComplianceID:
-        type: field
-        required: false
       SolicitedFlag:
-        type: field
-        required: false
       IOIid:
-        type: field
-        required: false
       QuoteID:
-        type: field
-        required: false
       TimeInForce:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       ExpireDate:
-        type: field
-        required: false
       ExpireTime:
-        type: field
-        required: false
       GTBookingInst:
-        type: field
-        required: false
       CommissionData:
         type: component
-        required: false
       OrderCapacity:
-        type: field
-        required: false
       OrderRestrictions:
-        type: field
-        required: false
       CustOrderCapacity:
-        type: field
-        required: false
       Rule80A:
-        type: field
-        required: false
       ForexReq:
-        type: field
-        required: false
       SettlCurrency:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       FutSettDate2:
-        type: field
-        required: false
       OrderQty2:
-        type: field
-        required: false
       Price2:
-        type: field
-        required: false
       PositionEffect:
-        type: field
-        required: false
       CoveredOrUncovered:
-        type: field
-        required: false
       MaxShow:
-        type: field
-        required: false
       PegDifference:
-        type: field
-        required: false
       DiscretionInst:
-        type: field
-        required: false
       DiscretionOffset:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       Designation:
-        type: field
-        required: false
       AccruedInterestRate:
-        type: field
-        required: false
       AccruedInterestAmt:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
 
   NewOrderList:
     msgtype: E
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       BidID:
-        type: field
-        required: false
       ClientBidID:
-        type: field
-        required: false
       ProgRptReqs:
-        type: field
-        required: false
       BidType:
-        type: field
         required: true
       ProgPeriodInterval:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       ListExecInstType:
-        type: field
-        required: false
       ListExecInst:
-        type: field
-        required: false
       EncodedListExecInstLen:
-        type: field
-        required: false
       EncodedListExecInst:
-        type: field
-        required: false
       TotNoOrders:
-        type: field
         required: true
       NoOrders:
         type: group
         required: true
         fields:
           ClOrdID:
-            type: field
             required: true
           SecondaryClOrdID:
-            type: field
-            required: false
           ListSeqNo:
-            type: field
             required: true
           ClOrdLinkID:
-            type: field
-            required: false
           SettlInstMode:
-            type: field
-            required: false
           Parties:
             type: component
-            required: false
           TradeOriginationDate:
-            type: field
-            required: false
           Account:
-            type: field
-            required: false
           AccountType:
-            type: field
-            required: false
           DayBookingInst:
-            type: field
-            required: false
           BookingUnit:
-            type: field
-            required: false
           PreallocMethod:
-            type: field
-            required: false
           NoAllocs:
             type: group
-            required: false
             fields:
               AllocAccount:
-                type: field
-                required: false
               IndividualAllocID:
-                type: field
-                required: false
               NestedParties:
                 type: component
-                required: false
               AllocQty:
-                type: field
-                required: false
           SettlmntTyp:
-            type: field
-            required: false
           FutSettDate:
-            type: field
-            required: false
           CashMargin:
-            type: field
-            required: false
           ClearingFeeIndicator:
-            type: field
-            required: false
           HandlInst:
-            type: field
-            required: false
           ExecInst:
-            type: field
-            required: false
           MinQty:
-            type: field
-            required: false
           MaxFloor:
-            type: field
-            required: false
           ExDestination:
-            type: field
-            required: false
           NoTradingSessions:
             type: group
-            required: false
             fields:
               TradingSessionID:
-                type: field
-                required: false
               TradingSessionSubID:
-                type: field
-                required: false
           ProcessCode:
-            type: field
-            required: false
           Instrument:
             type: component
             required: true
           PrevClosePx:
-            type: field
-            required: false
           Side:
-            type: field
             required: true
           SideValueInd:
-            type: field
-            required: false
           LocateReqd:
-            type: field
-            required: false
           TransactTime:
-            type: field
-            required: false
           Stipulations:
             type: component
-            required: false
           QuantityType:
-            type: field
-            required: false
           OrderQtyData:
             type: component
             required: true
           OrdType:
-            type: field
-            required: false
           PriceType:
-            type: field
-            required: false
           Price:
-            type: field
-            required: false
           StopPx:
-            type: field
-            required: false
           SpreadOrBenchmarkCurveData:
             type: component
-            required: false
           YieldData:
             type: component
-            required: false
           Currency:
-            type: field
-            required: false
           ComplianceID:
-            type: field
-            required: false
           SolicitedFlag:
-            type: field
-            required: false
           IOIid:
-            type: field
-            required: false
           QuoteID:
-            type: field
-            required: false
           TimeInForce:
-            type: field
-            required: false
           EffectiveTime:
-            type: field
-            required: false
           ExpireDate:
-            type: field
-            required: false
           ExpireTime:
-            type: field
-            required: false
           GTBookingInst:
-            type: field
-            required: false
           CommissionData:
             type: component
-            required: false
           OrderCapacity:
-            type: field
-            required: false
           OrderRestrictions:
-            type: field
-            required: false
           CustOrderCapacity:
-            type: field
-            required: false
           Rule80A:
-            type: field
-            required: false
           ForexReq:
-            type: field
-            required: false
           SettlCurrency:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
           FutSettDate2:
-            type: field
-            required: false
           OrderQty2:
-            type: field
-            required: false
           Price2:
-            type: field
-            required: false
           PositionEffect:
-            type: field
-            required: false
           CoveredOrUncovered:
-            type: field
-            required: false
           MaxShow:
-            type: field
-            required: false
           PegDifference:
-            type: field
-            required: false
           DiscretionInst:
-            type: field
-            required: false
           DiscretionOffset:
-            type: field
-            required: false
           Designation:
-            type: field
-            required: false
           AccruedInterestRate:
-            type: field
-            required: false
           AccruedInterestAmt:
-            type: field
-            required: false
           NetMoney:
-            type: field
-            required: false
 
   OrderCancelRequest:
     msgtype: F
     msgcat: app
     fields:
       OrigClOrdID:
-        type: field
         required: true
       OrderID:
-        type: field
-        required: false
       ClOrdID:
-        type: field
         required: true
       SecondaryClOrdID:
-        type: field
-        required: false
       ClOrdLinkID:
-        type: field
-        required: false
       ListID:
-        type: field
-        required: false
       OrigOrdModTime:
-        type: field
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Instrument:
         type: component
         required: true
       Side:
-        type: field
         required: true
       TransactTime:
-        type: field
         required: true
       OrderQtyData:
         type: component
         required: true
       ComplianceID:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   OrderCancelReplaceRequest:
     msgtype: G
     msgcat: app
     fields:
       OrderID:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       TradeOriginationDate:
-        type: field
-        required: false
       OrigClOrdID:
-        type: field
         required: true
       ClOrdID:
-        type: field
         required: true
       SecondaryClOrdID:
-        type: field
-        required: false
       ClOrdLinkID:
-        type: field
-        required: false
       ListID:
-        type: field
-        required: false
       OrigOrdModTime:
-        type: field
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       DayBookingInst:
-        type: field
-        required: false
       BookingUnit:
-        type: field
-        required: false
       PreallocMethod:
-        type: field
-        required: false
       NoAllocs:
         type: group
-        required: false
         fields:
           AllocAccount:
-            type: field
-            required: false
           IndividualAllocID:
-            type: field
-            required: false
           NestedParties:
             type: component
-            required: false
           AllocQty:
-            type: field
-            required: false
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       CashMargin:
-        type: field
-        required: false
       ClearingFeeIndicator:
-        type: field
-        required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
-        required: false
       MinQty:
-        type: field
-        required: false
       MaxFloor:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       NoTradingSessions:
         type: group
-        required: false
         fields:
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
       Instrument:
         type: component
         required: true
       Side:
-        type: field
         required: true
       TransactTime:
-        type: field
         required: true
       QuantityType:
-        type: field
-        required: false
       OrderQtyData:
         type: component
         required: true
       OrdType:
-        type: field
         required: true
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       StopPx:
-        type: field
-        required: false
       SpreadOrBenchmarkCurveData:
         type: component
-        required: false
       YieldData:
         type: component
-        required: false
       PegDifference:
-        type: field
-        required: false
       DiscretionInst:
-        type: field
-        required: false
       DiscretionOffset:
-        type: field
-        required: false
       ComplianceID:
-        type: field
-        required: false
       SolicitedFlag:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       TimeInForce:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       ExpireDate:
-        type: field
-        required: false
       ExpireTime:
-        type: field
-        required: false
       GTBookingInst:
-        type: field
-        required: false
       CommissionData:
         type: component
-        required: false
       OrderCapacity:
-        type: field
-        required: false
       OrderRestrictions:
-        type: field
-        required: false
       CustOrderCapacity:
-        type: field
-        required: false
       Rule80A:
-        type: field
-        required: false
       ForexReq:
-        type: field
-        required: false
       SettlCurrency:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       FutSettDate2:
-        type: field
-        required: false
       OrderQty2:
-        type: field
-        required: false
       Price2:
-        type: field
-        required: false
       PositionEffect:
-        type: field
-        required: false
       CoveredOrUncovered:
-        type: field
-        required: false
       MaxShow:
-        type: field
-        required: false
       LocateReqd:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       Designation:
-        type: field
-        required: false
       AccruedInterestRate:
-        type: field
-        required: false
       AccruedInterestAmt:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
 
   OrderStatusRequest:
     msgtype: H
     msgcat: app
     fields:
       OrderID:
-        type: field
-        required: false
       ClOrdID:
-        type: field
         required: true
       SecondaryClOrdID:
-        type: field
-        required: false
       ClOrdLinkID:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       Side:
-        type: field
         required: true
 
   Allocation:
@@ -6186,366 +4931,177 @@ messages:
     msgcat: app
     fields:
       AllocID:
-        type: field
         required: true
       AllocTransType:
-        type: field
         required: true
       AllocType:
-        type: field
         required: true
       RefAllocID:
-        type: field
-        required: false
       AllocLinkID:
-        type: field
-        required: false
       AllocLinkType:
-        type: field
-        required: false
       BookingRefID:
-        type: field
-        required: false
       NoOrders:
         type: group
-        required: false
         fields:
           ClOrdID:
-            type: field
-            required: false
           OrderID:
-            type: field
-            required: false
           SecondaryOrderID:
-            type: field
-            required: false
           SecondaryClOrdID:
-            type: field
-            required: false
           ListID:
-            type: field
-            required: false
       NoExecs:
         type: group
-        required: false
         fields:
           LastQty:
-            type: field
-            required: false
           ExecID:
-            type: field
-            required: false
           SecondaryExecID:
-            type: field
-            required: false
           LastPx:
-            type: field
-            required: false
           LastCapacity:
-            type: field
-            required: false
       Side:
-        type: field
         required: true
       Instrument:
         type: component
         required: true
       Quantity:
-        type: field
         required: true
       LastMkt:
-        type: field
-        required: false
       TradeOriginationDate:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       PriceType:
-        type: field
-        required: false
       AvgPx:
-        type: field
         required: true
       Currency:
-        type: field
-        required: false
       AvgPrxPrecision:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       TradeDate:
-        type: field
         required: true
       TransactTime:
-        type: field
-        required: false
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       GrossTradeAmt:
-        type: field
-        required: false
       Concession:
-        type: field
-        required: false
       TotalTakedown:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
       PositionEffect:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       NumDaysInterest:
-        type: field
-        required: false
       AccruedInterestRate:
-        type: field
-        required: false
       TotalAccruedInterestAmt:
-        type: field
-        required: false
       LegalConfirm:
-        type: field
-        required: false
       NoAllocs:
         type: group
-        required: false
         fields:
           AllocAccount:
-            type: field
-            required: false
           AllocPrice:
-            type: field
-            required: false
           AllocQty:
-            type: field
-            required: false
           IndividualAllocID:
-            type: field
-            required: false
           ProcessCode:
-            type: field
-            required: false
           NestedParties:
             type: component
-            required: false
           NotifyBrokerOfCredit:
-            type: field
-            required: false
           AllocHandlInst:
-            type: field
-            required: false
           AllocText:
-            type: field
-            required: false
           EncodedAllocTextLen:
-            type: field
-            required: false
           EncodedAllocText:
-            type: field
-            required: false
           CommissionData:
             type: component
-            required: false
           AllocAvgPx:
-            type: field
-            required: false
           AllocNetMoney:
-            type: field
-            required: false
           SettlCurrAmt:
-            type: field
-            required: false
           SettlCurrency:
-            type: field
-            required: false
           SettlCurrFxRate:
-            type: field
-            required: false
           SettlCurrFxRateCalc:
-            type: field
-            required: false
           AccruedInterestAmt:
-            type: field
-            required: false
           SettlInstMode:
-            type: field
-            required: false
           NoMiscFees:
             type: group
-            required: false
             fields:
               MiscFeeAmt:
-                type: field
-                required: false
               MiscFeeCurr:
-                type: field
-                required: false
               MiscFeeType:
-                type: field
-                required: false
 
   ListCancelRequest:
     msgtype: K
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       TransactTime:
-        type: field
         required: true
       TradeOriginationDate:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   ListExecute:
     msgtype: L
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       ClientBidID:
-        type: field
-        required: false
       BidID:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   ListStatusRequest:
     msgtype: M
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   ListStatus:
     msgtype: N
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       ListStatusType:
-        type: field
         required: true
       NoRpts:
-        type: field
         required: true
       ListOrderStatus:
-        type: field
         required: true
       RptSeq:
-        type: field
         required: true
       ListStatusText:
-        type: field
-        required: false
       EncodedListStatusTextLen:
-        type: field
-        required: false
       EncodedListStatusText:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       TotNoOrders:
-        type: field
         required: true
       NoOrders:
         type: group
         required: true
         fields:
           ClOrdID:
-            type: field
             required: true
           SecondaryClOrdID:
-            type: field
-            required: false
           CumQty:
-            type: field
             required: true
           OrdStatus:
-            type: field
             required: true
           WorkingIndicator:
-            type: field
-            required: false
           LeavesQty:
-            type: field
             required: true
           CxlQty:
-            type: field
             required: true
           AvgPx:
-            type: field
             required: true
           OrdRejReason:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
 
   AllocationAck:
     msgtype: P
@@ -6553,83 +5109,50 @@ messages:
     fields:
       Parties:
         type: component
-        required: false
       AllocID:
-        type: field
         required: true
       TradeDate:
-        type: field
         required: true
       TransactTime:
-        type: field
-        required: false
       AllocStatus:
-        type: field
         required: true
       AllocRejCode:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       LegalConfirm:
-        type: field
-        required: false
 
   DontKnowTrade:
     msgtype: Q
     msgcat: app
     fields:
       OrderID:
-        type: field
         required: true
       ExecID:
-        type: field
         required: true
       DKReason:
-        type: field
         required: true
       Instrument:
         type: component
         required: true
       Side:
-        type: field
         required: true
       OrderQtyData:
         type: component
         required: true
       LastQty:
-        type: field
-        required: false
       LastPx:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   QuoteRequest:
     msgtype: R
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
         required: true
       RFQReqID:
-        type: field
-        required: false
       NoRelatedSym:
         type: group
         required: true
@@ -6638,407 +5161,170 @@ messages:
             type: component
             required: true
           PrevClosePx:
-            type: field
-            required: false
           QuoteRequestType:
-            type: field
-            required: false
           QuoteType:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           TradeOriginationDate:
-            type: field
-            required: false
           Stipulations:
             type: component
-            required: false
           Side:
-            type: field
-            required: false
           QuantityType:
-            type: field
-            required: false
           OrderQty:
-            type: field
-            required: false
           CashOrderQty:
-            type: field
-            required: false
           SettlmntTyp:
-            type: field
-            required: false
           FutSettDate:
-            type: field
-            required: false
           OrdType:
-            type: field
-            required: false
           FutSettDate2:
-            type: field
-            required: false
           OrderQty2:
-            type: field
-            required: false
           ExpireTime:
-            type: field
-            required: false
           TransactTime:
-            type: field
-            required: false
           Currency:
-            type: field
-            required: false
           SpreadOrBenchmarkCurveData:
             type: component
-            required: false
           PriceType:
-            type: field
-            required: false
           Price:
-            type: field
-            required: false
           Price2:
-            type: field
-            required: false
           YieldData:
             type: component
-            required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   Quote:
     msgtype: S
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
-        required: false
       QuoteID:
-        type: field
         required: true
       QuoteType:
-        type: field
-        required: false
       QuoteResponseLevel:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       BidPx:
-        type: field
-        required: false
       OfferPx:
-        type: field
-        required: false
       MktBidPx:
-        type: field
-        required: false
       MktOfferPx:
-        type: field
-        required: false
       MinBidSize:
-        type: field
-        required: false
       BidSize:
-        type: field
-        required: false
       MinOfferSize:
-        type: field
-        required: false
       OfferSize:
-        type: field
-        required: false
       ValidUntilTime:
-        type: field
-        required: false
       BidSpotRate:
-        type: field
-        required: false
       OfferSpotRate:
-        type: field
-        required: false
       BidForwardPoints:
-        type: field
-        required: false
       OfferForwardPoints:
-        type: field
-        required: false
       MidPx:
-        type: field
-        required: false
       BidYield:
-        type: field
-        required: false
       MidYield:
-        type: field
-        required: false
       OfferYield:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       OrdType:
-        type: field
-        required: false
       FutSettDate2:
-        type: field
-        required: false
       OrderQty2:
-        type: field
-        required: false
       BidForwardPoints2:
-        type: field
-        required: false
       OfferForwardPoints2:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       SettlCurrBidFxRate:
-        type: field
-        required: false
       SettlCurrOfferFxRate:
-        type: field
-        required: false
       SettlCurrFxRateCalc:
-        type: field
-        required: false
       Commission:
-        type: field
-        required: false
       CommType:
-        type: field
-        required: false
       CustOrderCapacity:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   SettlementInstructions:
     msgtype: T
     msgcat: app
     fields:
       SettlInstID:
-        type: field
         required: true
       SettlInstTransType:
-        type: field
         required: true
       SettlInstRefID:
-        type: field
         required: true
       SettlInstMode:
-        type: field
         required: true
       SettlInstSource:
-        type: field
         required: true
       AllocAccount:
-        type: field
         required: true
       IndividualAllocID:
-        type: field
-        required: false
       ClOrdID:
-        type: field
-        required: false
       TradeDate:
-        type: field
-        required: false
       AllocID:
-        type: field
-        required: false
       LastMkt:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       Side:
-        type: field
-        required: false
       SecurityType:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       Parties:
         type: component
-        required: false
       StandInstDbType:
-        type: field
-        required: false
       StandInstDbName:
-        type: field
-        required: false
       StandInstDbID:
-        type: field
-        required: false
       SettlDeliveryType:
-        type: field
-        required: false
       SettlDepositoryCode:
-        type: field
-        required: false
       SettlBrkrCode:
-        type: field
-        required: false
       SettlInstCode:
-        type: field
-        required: false
       SecuritySettlAgentName:
-        type: field
-        required: false
       SecuritySettlAgentCode:
-        type: field
-        required: false
       SecuritySettlAgentAcctNum:
-        type: field
-        required: false
       SecuritySettlAgentAcctName:
-        type: field
-        required: false
       SecuritySettlAgentContactName:
-        type: field
-        required: false
       SecuritySettlAgentContactPhone:
-        type: field
-        required: false
       CashSettlAgentName:
-        type: field
-        required: false
       CashSettlAgentCode:
-        type: field
-        required: false
       CashSettlAgentAcctNum:
-        type: field
-        required: false
       CashSettlAgentAcctName:
-        type: field
-        required: false
       CashSettlAgentContactName:
-        type: field
-        required: false
       CashSettlAgentContactPhone:
-        type: field
-        required: false
       PaymentMethod:
-        type: field
-        required: false
       PaymentRef:
-        type: field
-        required: false
       CardHolderName:
-        type: field
-        required: false
       CardNumber:
-        type: field
-        required: false
       CardStartDate:
-        type: field
-        required: false
       CardExpDate:
-        type: field
-        required: false
       CardIssNo:
-        type: field
-        required: false
       PaymentDate:
-        type: field
-        required: false
       PaymentRemitterID:
-        type: field
-        required: false
 
   MarketDataRequest:
     msgtype: V
     msgcat: app
     fields:
       MDReqID:
-        type: field
         required: true
       SubscriptionRequestType:
-        type: field
         required: true
       MarketDepth:
-        type: field
         required: true
       MDUpdateType:
-        type: field
-        required: false
       AggregatedBook:
-        type: field
-        required: false
       OpenCloseSettleFlag:
-        type: field
-        required: false
       Scope:
-        type: field
-        required: false
       MDImplicitDelete:
-        type: field
-        required: false
       NoMDEntryTypes:
         type: group
         required: true
         fields:
           MDEntryType:
-            type: field
             required: true
       NoRelatedSym:
         type: group
@@ -7049,716 +5335,326 @@ messages:
             required: true
       NoTradingSessions:
         type: group
-        required: false
         fields:
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
 
   MarketDataSnapshotFullRefresh:
     msgtype: W
     msgcat: app
     fields:
       MDReqID:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       FinancialStatus:
-        type: field
-        required: false
       CorporateAction:
-        type: field
-        required: false
       TotalVolumeTraded:
-        type: field
-        required: false
       TotalVolumeTradedDate:
-        type: field
-        required: false
       TotalVolumeTradedTime:
-        type: field
-        required: false
       NetChgPrevDay:
-        type: field
-        required: false
       NoMDEntries:
         type: group
         required: true
         fields:
           MDEntryType:
-            type: field
             required: true
           MDEntryPx:
-            type: field
-            required: false
           Currency:
-            type: field
-            required: false
           MDEntrySize:
-            type: field
-            required: false
           MDEntryDate:
-            type: field
-            required: false
           MDEntryTime:
-            type: field
-            required: false
           TickDirection:
-            type: field
-            required: false
           MDMkt:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           QuoteCondition:
-            type: field
-            required: false
           TradeCondition:
-            type: field
-            required: false
           MDEntryOriginator:
-            type: field
-            required: false
           LocationID:
-            type: field
-            required: false
           DeskID:
-            type: field
-            required: false
           OpenCloseSettleFlag:
-            type: field
-            required: false
           TimeInForce:
-            type: field
-            required: false
           ExpireDate:
-            type: field
-            required: false
           ExpireTime:
-            type: field
-            required: false
           MinQty:
-            type: field
-            required: false
           ExecInst:
-            type: field
-            required: false
           SellerDays:
-            type: field
-            required: false
           OrderID:
-            type: field
-            required: false
           QuoteEntryID:
-            type: field
-            required: false
           MDEntryBuyer:
-            type: field
-            required: false
           MDEntrySeller:
-            type: field
-            required: false
           NumberOfOrders:
-            type: field
-            required: false
           MDEntryPositionNo:
-            type: field
-            required: false
           Scope:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
 
   MarketDataIncrementalRefresh:
     msgtype: X
     msgcat: app
     fields:
       MDReqID:
-        type: field
-        required: false
       NoMDEntries:
         type: group
         required: true
         fields:
           MDUpdateAction:
-            type: field
             required: true
           DeleteReason:
-            type: field
-            required: false
           MDEntryType:
-            type: field
-            required: false
           MDEntryID:
-            type: field
-            required: false
           MDEntryRefID:
-            type: field
-            required: false
           Instrument:
             type: component
-            required: false
           FinancialStatus:
-            type: field
-            required: false
           CorporateAction:
-            type: field
-            required: false
           MDEntryPx:
-            type: field
-            required: false
           Currency:
-            type: field
-            required: false
           MDEntrySize:
-            type: field
-            required: false
           MDEntryDate:
-            type: field
-            required: false
           MDEntryTime:
-            type: field
-            required: false
           TickDirection:
-            type: field
-            required: false
           MDMkt:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           QuoteCondition:
-            type: field
-            required: false
           TradeCondition:
-            type: field
-            required: false
           MDEntryOriginator:
-            type: field
-            required: false
           LocationID:
-            type: field
-            required: false
           DeskID:
-            type: field
-            required: false
           OpenCloseSettleFlag:
-            type: field
-            required: false
           TimeInForce:
-            type: field
-            required: false
           ExpireDate:
-            type: field
-            required: false
           ExpireTime:
-            type: field
-            required: false
           MinQty:
-            type: field
-            required: false
           ExecInst:
-            type: field
-            required: false
           SellerDays:
-            type: field
-            required: false
           OrderID:
-            type: field
-            required: false
           QuoteEntryID:
-            type: field
-            required: false
           MDEntryBuyer:
-            type: field
-            required: false
           MDEntrySeller:
-            type: field
-            required: false
           NumberOfOrders:
-            type: field
-            required: false
           MDEntryPositionNo:
-            type: field
-            required: false
           Scope:
-            type: field
-            required: false
           TotalVolumeTraded:
-            type: field
-            required: false
           TotalVolumeTradedDate:
-            type: field
-            required: false
           TotalVolumeTradedTime:
-            type: field
-            required: false
           NetChgPrevDay:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
   MarketDataRequestReject:
     msgtype: Y
     msgcat: app
     fields:
       MDReqID:
-        type: field
         required: true
       MDReqRejReason:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   QuoteCancel:
     msgtype: Z
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
-        required: false
       QuoteID:
-        type: field
         required: true
       QuoteCancelType:
-        type: field
         required: true
       QuoteResponseLevel:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       NoQuoteEntries:
         type: group
-        required: false
         fields:
           Instrument:
             type: component
-            required: false
 
   QuoteStatusRequest:
     msgtype: a
     msgcat: app
     fields:
       QuoteStatusReqID:
-        type: field
-        required: false
       QuoteID:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       SubscriptionRequestType:
-        type: field
-        required: false
 
   MassQuoteAcknowledgement:
     msgtype: b
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
-        required: false
       QuoteID:
-        type: field
-        required: false
       QuoteStatus:
-        type: field
         required: true
       QuoteRejectReason:
-        type: field
-        required: false
       QuoteResponseLevel:
-        type: field
-        required: false
       QuoteType:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       NoQuoteSets:
         type: group
-        required: false
         fields:
           QuoteSetID:
-            type: field
-            required: false
           UnderlyingInstrument:
             type: component
-            required: false
           TotQuoteEntries:
-            type: field
-            required: false
           NoQuoteEntries:
             type: group
-            required: false
             fields:
               QuoteEntryID:
-                type: field
-                required: false
               Instrument:
                 type: component
-                required: false
               BidPx:
-                type: field
-                required: false
               OfferPx:
-                type: field
-                required: false
               BidSize:
-                type: field
-                required: false
               OfferSize:
-                type: field
-                required: false
               ValidUntilTime:
-                type: field
-                required: false
               BidSpotRate:
-                type: field
-                required: false
               OfferSpotRate:
-                type: field
-                required: false
               BidForwardPoints:
-                type: field
-                required: false
               OfferForwardPoints:
-                type: field
-                required: false
               MidPx:
-                type: field
-                required: false
               BidYield:
-                type: field
-                required: false
               MidYield:
-                type: field
-                required: false
               OfferYield:
-                type: field
-                required: false
               TransactTime:
-                type: field
-                required: false
               TradingSessionID:
-                type: field
-                required: false
               TradingSessionSubID:
-                type: field
-                required: false
               FutSettDate:
-                type: field
-                required: false
               OrdType:
-                type: field
-                required: false
               FutSettDate2:
-                type: field
-                required: false
               OrderQty2:
-                type: field
-                required: false
               BidForwardPoints2:
-                type: field
-                required: false
               OfferForwardPoints2:
-                type: field
-                required: false
               Currency:
-                type: field
-                required: false
               QuoteEntryRejectReason:
-                type: field
-                required: false
 
   SecurityDefinitionRequest:
     msgtype: c
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       SecurityRequestType:
-        type: field
         required: true
       Instrument:
         type: component
-        required: false
       Currency:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       NoLegs:
         type: group
-        required: false
         fields:
           InstrumentLeg:
             type: component
-            required: false
           LegCurrency:
-            type: field
-            required: false
       SubscriptionRequestType:
-        type: field
-        required: false
 
   SecurityDefinition:
     msgtype: d
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       SecurityResponseID:
-        type: field
         required: true
       SecurityResponseType:
-        type: field
         required: true
       Instrument:
         type: component
-        required: false
       Currency:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       NoLegs:
         type: group
-        required: false
         fields:
           InstrumentLeg:
             type: component
-            required: false
           LegCurrency:
-            type: field
-            required: false
       RoundLot:
-        type: field
-        required: false
       MinTradeVol:
-        type: field
-        required: false
 
   SecurityStatusRequest:
     msgtype: e
     msgcat: app
     fields:
       SecurityStatusReqID:
-        type: field
         required: true
       Instrument:
         type: component
         required: true
       Currency:
-        type: field
-        required: false
       SubscriptionRequestType:
-        type: field
         required: true
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
 
   SecurityStatus:
     msgtype: f
     msgcat: app
     fields:
       SecurityStatusReqID:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       Currency:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       UnsolicitedIndicator:
-        type: field
-        required: false
       SecurityTradingStatus:
-        type: field
-        required: false
       FinancialStatus:
-        type: field
-        required: false
       CorporateAction:
-        type: field
-        required: false
       HaltReasonChar:
-        type: field
-        required: false
       InViewOfCommon:
-        type: field
-        required: false
       DueToRelated:
-        type: field
-        required: false
       BuyVolume:
-        type: field
-        required: false
       SellVolume:
-        type: field
-        required: false
       HighPx:
-        type: field
-        required: false
       LowPx:
-        type: field
-        required: false
       LastPx:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       Adjustment:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   TradingSessionStatusRequest:
     msgtype: g
     msgcat: app
     fields:
       TradSesReqID:
-        type: field
         required: true
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       TradSesMethod:
-        type: field
-        required: false
       TradSesMode:
-        type: field
-        required: false
       SubscriptionRequestType:
-        type: field
         required: true
 
   TradingSessionStatus:
@@ -7766,371 +5662,166 @@ messages:
     msgcat: app
     fields:
       TradSesReqID:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
         required: true
       TradingSessionSubID:
-        type: field
-        required: false
       TradSesMethod:
-        type: field
-        required: false
       TradSesMode:
-        type: field
-        required: false
       UnsolicitedIndicator:
-        type: field
-        required: false
       TradSesStatus:
-        type: field
         required: true
       TradSesStatusRejReason:
-        type: field
-        required: false
       TradSesStartTime:
-        type: field
-        required: false
       TradSesOpenTime:
-        type: field
-        required: false
       TradSesPreCloseTime:
-        type: field
-        required: false
       TradSesCloseTime:
-        type: field
-        required: false
       TradSesEndTime:
-        type: field
-        required: false
       TotalVolumeTraded:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   MassQuote:
     msgtype: i
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
-        required: false
       QuoteID:
-        type: field
         required: true
       QuoteType:
-        type: field
-        required: false
       QuoteResponseLevel:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       DefBidSize:
-        type: field
-        required: false
       DefOfferSize:
-        type: field
-        required: false
       NoQuoteSets:
         type: group
         required: true
         fields:
           QuoteSetID:
-            type: field
             required: true
           UnderlyingInstrument:
             type: component
-            required: false
           QuoteSetValidUntilTime:
-            type: field
-            required: false
           TotQuoteEntries:
-            type: field
             required: true
           NoQuoteEntries:
             type: group
             required: true
             fields:
               QuoteEntryID:
-                type: field
                 required: true
               Instrument:
                 type: component
-                required: false
               BidPx:
-                type: field
-                required: false
               OfferPx:
-                type: field
-                required: false
               BidSize:
-                type: field
-                required: false
               OfferSize:
-                type: field
-                required: false
               ValidUntilTime:
-                type: field
-                required: false
               BidSpotRate:
-                type: field
-                required: false
               OfferSpotRate:
-                type: field
-                required: false
               BidForwardPoints:
-                type: field
-                required: false
               OfferForwardPoints:
-                type: field
-                required: false
               MidPx:
-                type: field
-                required: false
               BidYield:
-                type: field
-                required: false
               MidYield:
-                type: field
-                required: false
               OfferYield:
-                type: field
-                required: false
               TransactTime:
-                type: field
-                required: false
               TradingSessionID:
-                type: field
-                required: false
               TradingSessionSubID:
-                type: field
-                required: false
               FutSettDate:
-                type: field
-                required: false
               OrdType:
-                type: field
-                required: false
               FutSettDate2:
-                type: field
-                required: false
               OrderQty2:
-                type: field
-                required: false
               BidForwardPoints2:
-                type: field
-                required: false
               OfferForwardPoints2:
-                type: field
-                required: false
               Currency:
-                type: field
-                required: false
 
   BusinessMessageReject:
     msgtype: j
     msgcat: app
     fields:
       RefSeqNum:
-        type: field
-        required: false
       RefMsgType:
-        type: field
         required: true
       BusinessRejectRefID:
-        type: field
-        required: false
       BusinessRejectReason:
-        type: field
         required: true
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   BidRequest:
     msgtype: k
     msgcat: app
     fields:
       BidID:
-        type: field
-        required: false
       ClientBidID:
-        type: field
         required: true
       BidRequestTransType:
-        type: field
         required: true
       ListName:
-        type: field
-        required: false
       TotalNumSecurities:
-        type: field
         required: true
       BidType:
-        type: field
         required: true
       NumTickets:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       SideValue1:
-        type: field
-        required: false
       SideValue2:
-        type: field
-        required: false
       NoBidDescriptors:
         type: group
-        required: false
         fields:
           BidDescriptorType:
-            type: field
-            required: false
           BidDescriptor:
-            type: field
-            required: false
           SideValueInd:
-            type: field
-            required: false
           LiquidityValue:
-            type: field
-            required: false
           LiquidityNumSecurities:
-            type: field
-            required: false
           LiquidityPctLow:
-            type: field
-            required: false
           LiquidityPctHigh:
-            type: field
-            required: false
           EFPTrackingError:
-            type: field
-            required: false
           FairValue:
-            type: field
-            required: false
           OutsideIndexPct:
-            type: field
-            required: false
           ValueOfFutures:
-            type: field
-            required: false
       NoBidComponents:
         type: group
-        required: false
         fields:
           ListID:
-            type: field
-            required: false
           Side:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           NetGrossInd:
-            type: field
-            required: false
           SettlmntTyp:
-            type: field
-            required: false
           FutSettDate:
-            type: field
-            required: false
           Account:
-            type: field
-            required: false
       LiquidityIndType:
-        type: field
-        required: false
       WtAverageLiquidity:
-        type: field
-        required: false
       ExchangeForPhysical:
-        type: field
-        required: false
       OutMainCntryUIndex:
-        type: field
-        required: false
       CrossPercent:
-        type: field
-        required: false
       ProgRptReqs:
-        type: field
-        required: false
       ProgPeriodInterval:
-        type: field
-        required: false
       IncTaxInd:
-        type: field
-        required: false
       ForexReq:
-        type: field
-        required: false
       NumBidders:
-        type: field
-        required: false
       TradeDate:
-        type: field
-        required: false
       TradeType:
-        type: field
         required: true
       BasisPxType:
-        type: field
         required: true
       StrikeTime:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   BidResponse:
     msgtype: l
     msgcat: app
     fields:
       BidID:
-        type: field
-        required: false
       ClientBidID:
-        type: field
-        required: false
       NoBidComponents:
         type: group
         required: true
@@ -8139,57 +5830,27 @@ messages:
             type: component
             required: true
           ListID:
-            type: field
-            required: false
           Country:
-            type: field
-            required: false
           Side:
-            type: field
-            required: false
           Price:
-            type: field
-            required: false
           PriceType:
-            type: field
-            required: false
           FairValue:
-            type: field
-            required: false
           NetGrossInd:
-            type: field
-            required: false
           SettlmntTyp:
-            type: field
-            required: false
           FutSettDate:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
 
   ListStrikePrice:
     msgtype: m
     msgcat: app
     fields:
       ListID:
-        type: field
         required: true
       TotNoStrikes:
-        type: field
         required: true
       NoStrikes:
         type: group
@@ -8199,32 +5860,15 @@ messages:
             type: component
             required: true
           PrevClosePx:
-            type: field
-            required: false
           ClOrdID:
-            type: field
-            required: false
           SecondaryClOrdID:
-            type: field
-            required: false
           Side:
-            type: field
-            required: false
           Price:
-            type: field
             required: true
           Currency:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
 
   XMLnonFIX:
     msgtype: n
@@ -8236,540 +5880,264 @@ messages:
     msgcat: app
     fields:
       RegistID:
-        type: field
         required: true
       RegistTransType:
-        type: field
         required: true
       RegistRefID:
-        type: field
         required: true
       ClOrdID:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       RegistAcctType:
-        type: field
-        required: false
       TaxAdvantageType:
-        type: field
-        required: false
       OwnershipType:
-        type: field
-        required: false
       NoRegistDtls:
         type: group
-        required: false
         fields:
           RegistDetls:
-            type: field
-            required: false
           RegistEmail:
-            type: field
-            required: false
           MailingDtls:
-            type: field
-            required: false
           MailingInst:
-            type: field
-            required: false
           NestedParties:
             type: component
-            required: false
           OwnerType:
-            type: field
-            required: false
           DateOfBirth:
-            type: field
-            required: false
           InvestorCountryOfResidence:
-            type: field
-            required: false
       NoDistribInsts:
         type: group
-        required: false
         fields:
           DistribPaymentMethod:
-            type: field
-            required: false
           DistribPercentage:
-            type: field
-            required: false
           CashDistribCurr:
-            type: field
-            required: false
           CashDistribAgentName:
-            type: field
-            required: false
           CashDistribAgentCode:
-            type: field
-            required: false
           CashDistribAgentAcctNumber:
-            type: field
-            required: false
           CashDistribPayRef:
-            type: field
-            required: false
 
   RegistrationInstructionsResponse:
     msgtype: p
     msgcat: app
     fields:
       RegistID:
-        type: field
         required: true
       RegistTransType:
-        type: field
         required: true
       RegistRefID:
-        type: field
         required: true
       ClOrdID:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       RegistStatus:
-        type: field
         required: true
       RegistRejReasonCode:
-        type: field
-        required: false
       RegistRejReasonText:
-        type: field
-        required: false
 
   OrderMassCancelRequest:
     msgtype: q
     msgcat: app
     fields:
       ClOrdID:
-        type: field
         required: true
       SecondaryClOrdID:
-        type: field
-        required: false
       MassCancelRequestType:
-        type: field
         required: true
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       Instrument:
         type: component
-        required: false
       UnderlyingInstrument:
         type: component
-        required: false
       Side:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   OrderMassCancelReport:
     msgtype: r
     msgcat: app
     fields:
       ClOrdID:
-        type: field
-        required: false
       SecondaryClOrdID:
-        type: field
-        required: false
       OrderID:
-        type: field
         required: true
       SecondaryOrderID:
-        type: field
-        required: false
       MassCancelRequestType:
-        type: field
         required: true
       MassCancelResponse:
-        type: field
         required: true
       MassCancelRejectReason:
-        type: field
-        required: false
       TotalAffectedOrders:
-        type: field
-        required: false
       NoAffectedOrders:
         type: group
-        required: false
         fields:
           OrigClOrdID:
-            type: field
-            required: false
           AffectedOrderID:
-            type: field
-            required: false
           AffectedSecondaryOrderID:
-            type: field
-            required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       Instrument:
         type: component
-        required: false
       UnderlyingInstrument:
         type: component
-        required: false
       Side:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   NewOrderCross:
     msgtype: s
     msgcat: app
     fields:
       CrossID:
-        type: field
         required: true
       CrossType:
-        type: field
         required: true
       CrossPrioritization:
-        type: field
         required: true
       NoSides:
         type: group
         required: true
         fields:
           Side:
-            type: field
             required: true
           ClOrdID:
-            type: field
             required: true
           SecondaryClOrdID:
-            type: field
-            required: false
           ClOrdLinkID:
-            type: field
-            required: false
           Parties:
             type: component
-            required: false
           TradeOriginationDate:
-            type: field
-            required: false
           Account:
-            type: field
-            required: false
           AccountType:
-            type: field
-            required: false
           DayBookingInst:
-            type: field
-            required: false
           BookingUnit:
-            type: field
-            required: false
           PreallocMethod:
-            type: field
-            required: false
           NoAllocs:
             type: group
-            required: false
             fields:
               AllocAccount:
-                type: field
-                required: false
               IndividualAllocID:
-                type: field
-                required: false
               NestedParties:
                 type: component
-                required: false
               AllocQty:
-                type: field
-                required: false
           QuantityType:
-            type: field
-            required: false
           OrderQtyData:
             type: component
             required: true
           CommissionData:
             type: component
-            required: false
           OrderCapacity:
-            type: field
-            required: false
           OrderRestrictions:
-            type: field
-            required: false
           CustOrderCapacity:
-            type: field
-            required: false
           ForexReq:
-            type: field
-            required: false
           SettlCurrency:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
           PositionEffect:
-            type: field
-            required: false
           CoveredOrUncovered:
-            type: field
-            required: false
           CashMargin:
-            type: field
-            required: false
           ClearingFeeIndicator:
-            type: field
-            required: false
           SolicitedFlag:
-            type: field
-            required: false
           SideComplianceID:
-            type: field
-            required: false
       Instrument:
         type: component
         required: true
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
-        required: false
       MinQty:
-        type: field
-        required: false
       MaxFloor:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       NoTradingSessions:
         type: group
-        required: false
         fields:
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
       ProcessCode:
-        type: field
-        required: false
       PrevClosePx:
-        type: field
-        required: false
       LocateReqd:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       Stipulations:
         type: component
-        required: false
       OrdType:
-        type: field
         required: true
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       StopPx:
-        type: field
-        required: false
       SpreadOrBenchmarkCurveData:
         type: component
-        required: false
       YieldData:
         type: component
-        required: false
       Currency:
-        type: field
-        required: false
       ComplianceID:
-        type: field
-        required: false
       IOIid:
-        type: field
-        required: false
       QuoteID:
-        type: field
-        required: false
       TimeInForce:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       ExpireDate:
-        type: field
-        required: false
       ExpireTime:
-        type: field
-        required: false
       GTBookingInst:
-        type: field
-        required: false
       MaxShow:
-        type: field
-        required: false
       PegDifference:
-        type: field
-        required: false
       DiscretionInst:
-        type: field
-        required: false
       DiscretionOffset:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       Designation:
-        type: field
-        required: false
       AccruedInterestRate:
-        type: field
-        required: false
       AccruedInterestAmt:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
 
   CrossOrderCancelRequest:
     msgtype: u
     msgcat: app
     fields:
       OrderID:
-        type: field
-        required: false
       CrossID:
-        type: field
         required: true
       OrigCrossID:
-        type: field
         required: true
       CrossType:
-        type: field
         required: true
       CrossPrioritization:
-        type: field
         required: true
       NoSides:
         type: group
         required: true
         fields:
           Side:
-            type: field
             required: true
           OrigClOrdID:
-            type: field
             required: true
           ClOrdID:
-            type: field
             required: true
           SecondaryClOrdID:
-            type: field
-            required: false
           ClOrdLinkID:
-            type: field
-            required: false
           OrigOrdModTime:
-            type: field
-            required: false
           Parties:
             type: component
-            required: false
           TradeOriginationDate:
-            type: field
-            required: false
           OrderQtyData:
             type: component
             required: true
           ComplianceID:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
       Instrument:
         type: component
         required: true
       TransactTime:
-        type: field
         required: true
 
   CrossOrderCancelReplaceRequest:
@@ -8777,1326 +6145,612 @@ messages:
     msgcat: app
     fields:
       OrderID:
-        type: field
-        required: false
       CrossID:
-        type: field
         required: true
       OrigCrossID:
-        type: field
         required: true
       CrossType:
-        type: field
         required: true
       CrossPrioritization:
-        type: field
         required: true
       NoSides:
         type: group
         required: true
         fields:
           Side:
-            type: field
             required: true
           OrigClOrdID:
-            type: field
             required: true
           ClOrdID:
-            type: field
             required: true
           SecondaryClOrdID:
-            type: field
-            required: false
           ClOrdLinkID:
-            type: field
-            required: false
           OrigOrdModTime:
-            type: field
-            required: false
           Parties:
             type: component
-            required: false
           TradeOriginationDate:
-            type: field
-            required: false
           Account:
-            type: field
-            required: false
           AccountType:
-            type: field
-            required: false
           DayBookingInst:
-            type: field
-            required: false
           BookingUnit:
-            type: field
-            required: false
           PreallocMethod:
-            type: field
-            required: false
           NoAllocs:
             type: group
-            required: false
             fields:
               AllocAccount:
-                type: field
-                required: false
               IndividualAllocID:
-                type: field
-                required: false
               NestedParties:
                 type: component
-                required: false
               AllocQty:
-                type: field
-                required: false
           QuantityType:
-            type: field
-            required: false
           OrderQtyData:
             type: component
             required: true
           CommissionData:
             type: component
-            required: false
           OrderCapacity:
-            type: field
-            required: false
           OrderRestrictions:
-            type: field
-            required: false
           CustOrderCapacity:
-            type: field
-            required: false
           ForexReq:
-            type: field
-            required: false
           SettlCurrency:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
           PositionEffect:
-            type: field
-            required: false
           CoveredOrUncovered:
-            type: field
-            required: false
           CashMargin:
-            type: field
-            required: false
           ClearingFeeIndicator:
-            type: field
-            required: false
           SolicitedFlag:
-            type: field
-            required: false
           SideComplianceID:
-            type: field
-            required: false
       Instrument:
         type: component
         required: true
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
-        required: false
       MinQty:
-        type: field
-        required: false
       MaxFloor:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       NoTradingSessions:
         type: group
-        required: false
         fields:
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
       ProcessCode:
-        type: field
-        required: false
       PrevClosePx:
-        type: field
-        required: false
       LocateReqd:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       Stipulations:
         type: component
-        required: false
       OrdType:
-        type: field
         required: true
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       StopPx:
-        type: field
-        required: false
       SpreadOrBenchmarkCurveData:
         type: component
-        required: false
       YieldData:
         type: component
-        required: false
       Currency:
-        type: field
-        required: false
       ComplianceID:
-        type: field
-        required: false
       IOIid:
-        type: field
-        required: false
       QuoteID:
-        type: field
-        required: false
       TimeInForce:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       ExpireDate:
-        type: field
-        required: false
       ExpireTime:
-        type: field
-        required: false
       GTBookingInst:
-        type: field
-        required: false
       MaxShow:
-        type: field
-        required: false
       PegDifference:
-        type: field
-        required: false
       DiscretionInst:
-        type: field
-        required: false
       DiscretionOffset:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       Designation:
-        type: field
-        required: false
       AccruedInterestRate:
-        type: field
-        required: false
       AccruedInterestAmt:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
 
   SecurityTypeRequest:
     msgtype: v
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
   SecurityTypes:
     msgtype: w
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       SecurityResponseID:
-        type: field
         required: true
       SecurityResponseType:
-        type: field
         required: true
       TotalNumSecurityTypes:
-        type: field
-        required: false
       NoSecurityTypes:
         type: group
-        required: false
         fields:
           SecurityType:
-            type: field
-            required: false
           Product:
-            type: field
-            required: false
           CFICode:
-            type: field
-            required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       SubscriptionRequestType:
-        type: field
-        required: false
 
   SecurityListRequest:
     msgtype: x
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       SecurityListRequestType:
-        type: field
         required: true
       Instrument:
         type: component
-        required: false
       Currency:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       SubscriptionRequestType:
-        type: field
-        required: false
 
   SecurityList:
     msgtype: y
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       SecurityResponseID:
-        type: field
         required: true
       SecurityRequestResult:
-        type: field
         required: true
       TotalNumSecurities:
-        type: field
-        required: false
       NoRelatedSym:
         type: group
-        required: false
         fields:
           Instrument:
             type: component
-            required: false
           Currency:
-            type: field
-            required: false
           NoLegs:
             type: group
-            required: false
             fields:
               InstrumentLeg:
                 type: component
-                required: false
               LegCurrency:
-                type: field
-                required: false
           RoundLot:
-            type: field
-            required: false
           MinTradeVol:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
 
   DerivativeSecurityListRequest:
     msgtype: z
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       SecurityListRequestType:
-        type: field
         required: true
       UnderlyingInstrument:
         type: component
-        required: false
       Currency:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       SubscriptionRequestType:
-        type: field
-        required: false
 
   DerivativeSecurityList:
     msgtype: AA
     msgcat: app
     fields:
       SecurityReqID:
-        type: field
         required: true
       SecurityResponseID:
-        type: field
         required: true
       SecurityRequestResult:
-        type: field
         required: true
       UnderlyingInstrument:
         type: component
-        required: false
       TotalNumSecurities:
-        type: field
-        required: false
       NoRelatedSym:
         type: group
-        required: false
         fields:
           Instrument:
             type: component
-            required: false
           Currency:
-            type: field
-            required: false
           NoLegs:
             type: group
-            required: false
             fields:
               InstrumentLeg:
                 type: component
-                required: false
               LegCurrency:
-                type: field
-                required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
 
   NewOrderMultileg:
     msgtype: AB
     msgcat: app
     fields:
       ClOrdID:
-        type: field
         required: true
       SecondaryClOrdID:
-        type: field
-        required: false
       ClOrdLinkID:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       DayBookingInst:
-        type: field
-        required: false
       BookingUnit:
-        type: field
-        required: false
       PreallocMethod:
-        type: field
-        required: false
       NoAllocs:
         type: group
-        required: false
         fields:
           AllocAccount:
-            type: field
-            required: false
           IndividualAllocID:
-            type: field
-            required: false
           AllocQty:
-            type: field
-            required: false
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       CashMargin:
-        type: field
-        required: false
       ClearingFeeIndicator:
-        type: field
-        required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
-        required: false
       MinQty:
-        type: field
-        required: false
       MaxFloor:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       NoTradingSessions:
         type: group
-        required: false
         fields:
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
       ProcessCode:
-        type: field
-        required: false
       Side:
-        type: field
         required: true
       Instrument:
         type: component
         required: true
       PrevClosePx:
-        type: field
-        required: false
       NoLegs:
         type: group
         required: true
         fields:
           InstrumentLeg:
             type: component
-            required: false
           LegPositionEffect:
-            type: field
-            required: false
           LegCoveredOrUncovered:
-            type: field
-            required: false
           NestedParties:
             type: component
-            required: false
           LegRefID:
-            type: field
-            required: false
           LegPrice:
-            type: field
-            required: false
           LegSettlmntTyp:
-            type: field
-            required: false
           LegFutSettDate:
-            type: field
-            required: false
       LocateReqd:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       QuantityType:
-        type: field
-        required: false
       OrderQtyData:
         type: component
         required: true
       OrdType:
-        type: field
         required: true
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       StopPx:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       ComplianceID:
-        type: field
-        required: false
       SolicitedFlag:
-        type: field
-        required: false
       IOIid:
-        type: field
-        required: false
       QuoteID:
-        type: field
-        required: false
       TimeInForce:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       ExpireDate:
-        type: field
-        required: false
       ExpireTime:
-        type: field
-        required: false
       GTBookingInst:
-        type: field
-        required: false
       CommissionData:
         type: component
-        required: false
       OrderCapacity:
-        type: field
-        required: false
       OrderRestrictions:
-        type: field
-        required: false
       CustOrderCapacity:
-        type: field
-        required: false
       ForexReq:
-        type: field
-        required: false
       SettlCurrency:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       PositionEffect:
-        type: field
-        required: false
       CoveredOrUncovered:
-        type: field
-        required: false
       MaxShow:
-        type: field
-        required: false
       PegDifference:
-        type: field
-        required: false
       DiscretionInst:
-        type: field
-        required: false
       DiscretionOffset:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       Designation:
-        type: field
-        required: false
       MultiLegRptTypeReq:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
 
   MultilegOrderCancelReplaceRequest:
     msgtype: AC
     msgcat: app
     fields:
       OrderID:
-        type: field
-        required: false
       OrigClOrdID:
-        type: field
         required: true
       ClOrdID:
-        type: field
         required: true
       SecondaryClOrdID:
-        type: field
-        required: false
       ClOrdLinkID:
-        type: field
-        required: false
       OrigOrdModTime:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       DayBookingInst:
-        type: field
-        required: false
       BookingUnit:
-        type: field
-        required: false
       PreallocMethod:
-        type: field
-        required: false
       NoAllocs:
         type: group
-        required: false
         fields:
           AllocAccount:
-            type: field
-            required: false
           IndividualAllocID:
-            type: field
-            required: false
           AllocQty:
-            type: field
-            required: false
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       CashMargin:
-        type: field
-        required: false
       ClearingFeeIndicator:
-        type: field
-        required: false
       HandlInst:
-        type: field
         required: true
       ExecInst:
-        type: field
-        required: false
       MinQty:
-        type: field
-        required: false
       MaxFloor:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       NoTradingSessions:
         type: group
-        required: false
         fields:
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
       ProcessCode:
-        type: field
-        required: false
       Side:
-        type: field
         required: true
       Instrument:
         type: component
         required: true
       PrevClosePx:
-        type: field
-        required: false
       NoLegs:
         type: group
         required: true
         fields:
           InstrumentLeg:
             type: component
-            required: false
           LegPositionEffect:
-            type: field
-            required: false
           LegCoveredOrUncovered:
-            type: field
-            required: false
           NestedParties:
             type: component
-            required: false
           LegRefID:
-            type: field
-            required: false
           LegPrice:
-            type: field
-            required: false
           LegSettlmntTyp:
-            type: field
-            required: false
           LegFutSettDate:
-            type: field
-            required: false
       LocateReqd:
-        type: field
-        required: false
       TransactTime:
-        type: field
         required: true
       QuantityType:
-        type: field
-        required: false
       OrderQtyData:
         type: component
         required: true
       OrdType:
-        type: field
         required: true
       PriceType:
-        type: field
-        required: false
       Price:
-        type: field
-        required: false
       StopPx:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       ComplianceID:
-        type: field
-        required: false
       SolicitedFlag:
-        type: field
-        required: false
       IOIid:
-        type: field
-        required: false
       QuoteID:
-        type: field
-        required: false
       TimeInForce:
-        type: field
-        required: false
       EffectiveTime:
-        type: field
-        required: false
       ExpireDate:
-        type: field
-        required: false
       ExpireTime:
-        type: field
-        required: false
       GTBookingInst:
-        type: field
-        required: false
       CommissionData:
         type: component
-        required: false
       OrderCapacity:
-        type: field
-        required: false
       OrderRestrictions:
-        type: field
-        required: false
       CustOrderCapacity:
-        type: field
-        required: false
       ForexReq:
-        type: field
-        required: false
       SettlCurrency:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       PositionEffect:
-        type: field
-        required: false
       CoveredOrUncovered:
-        type: field
-        required: false
       MaxShow:
-        type: field
-        required: false
       PegDifference:
-        type: field
-        required: false
       DiscretionInst:
-        type: field
-        required: false
       DiscretionOffset:
-        type: field
-        required: false
       CancellationRights:
-        type: field
-        required: false
       MoneyLaunderingStatus:
-        type: field
-        required: false
       RegistID:
-        type: field
-        required: false
       Designation:
-        type: field
-        required: false
       MultiLegRptTypeReq:
-        type: field
-        required: false
       NetMoney:
-        type: field
-        required: false
   TradeCaptureReportRequest:
     msgtype: AD
     msgcat: app
     fields:
       TradeRequestID:
-        type: field
         required: true
       TradeRequestType:
-        type: field
         required: true
       SubscriptionRequestType:
-        type: field
-        required: false
       ExecID:
-        type: field
-        required: false
       OrderID:
-        type: field
-        required: false
       ClOrdID:
-        type: field
-        required: false
       MatchStatus:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Instrument:
         type: component
-        required: false
       NoDates:
         type: group
-        required: false
         fields:
           TradeDate:
-            type: field
-            required: false
           TransactTime:
-            type: field
-            required: false
       Side:
-        type: field
-        required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
       TradeInputSource:
-        type: field
-        required: false
       TradeInputDevice:
-        type: field
-        required: false
 
   TradeCaptureReport:
     msgtype: AE
     msgcat: app
     fields:
       TradeReportID:
-        type: field
         required: true
       TradeReportTransType:
-        type: field
-        required: false
       TradeRequestID:
-        type: field
-        required: false
       ExecType:
-        type: field
         required: true
       TradeReportRefID:
-        type: field
-        required: false
       ExecID:
-        type: field
-        required: false
       SecondaryExecID:
-        type: field
-        required: false
       ExecRestatementReason:
-        type: field
-        required: false
       PreviouslyReported:
-        type: field
         required: true
       Instrument:
         type: component
         required: true
       OrderQtyData:
         type: component
-        required: false
       LastQty:
-        type: field
         required: true
       LastPx:
-        type: field
         required: true
       LastSpotRate:
-        type: field
-        required: false
       LastForwardPoints:
-        type: field
-        required: false
       LastMkt:
-        type: field
-        required: false
       TradeDate:
-        type: field
         required: true
       TransactTime:
-        type: field
         required: true
       SettlmntTyp:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       MatchStatus:
-        type: field
-        required: false
       MatchType:
-        type: field
-        required: false
       NoSides:
         type: group
         required: true
         fields:
           Side:
-            type: field
             required: true
           OrderID:
-            type: field
             required: true
           SecondaryOrderID:
-            type: field
-            required: false
           ClOrdID:
-            type: field
-            required: false
           Parties:
             type: component
-            required: false
           Account:
-            type: field
-            required: false
           AccountType:
-            type: field
-            required: false
           ProcessCode:
-            type: field
-            required: false
           OddLot:
-            type: field
-            required: false
           NoClearingInstructions:
             type: group
-            required: false
             fields:
               ClearingInstruction:
-                type: field
-                required: false
           ClearingFeeIndicator:
-            type: field
-            required: false
           TradeInputSource:
-            type: field
-            required: false
           TradeInputDevice:
-            type: field
-            required: false
           Currency:
-            type: field
-            required: false
           ComplianceID:
-            type: field
-            required: false
           SolicitedFlag:
-            type: field
-            required: false
           OrderCapacity:
-            type: field
-            required: false
           OrderRestrictions:
-            type: field
-            required: false
           CustOrderCapacity:
-            type: field
-            required: false
           TransBkdTime:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           CommissionData:
             type: component
-            required: false
           GrossTradeAmt:
-            type: field
-            required: false
           NumDaysInterest:
-            type: field
-            required: false
           ExDate:
-            type: field
-            required: false
           AccruedInterestRate:
-            type: field
-            required: false
           AccruedInterestAmt:
-            type: field
-            required: false
           Concession:
-            type: field
-            required: false
           TotalTakedown:
-            type: field
-            required: false
           NetMoney:
-            type: field
-            required: false
           SettlCurrAmt:
-            type: field
-            required: false
           SettlCurrency:
-            type: field
-            required: false
           SettlCurrFxRate:
-            type: field
-            required: false
           SettlCurrFxRateCalc:
-            type: field
-            required: false
           PositionEffect:
-            type: field
-            required: false
           Text:
-            type: field
-            required: false
           EncodedTextLen:
-            type: field
-            required: false
           EncodedText:
-            type: field
-            required: false
           MultiLegReportingType:
-            type: field
-            required: false
           NoContAmts:
             type: group
-            required: false
             fields:
               ContAmtType:
-                type: field
-                required: false
               ContAmtValue:
-                type: field
-                required: false
               ContAmtCurr:
-                type: field
-                required: false
           NoMiscFees:
             type: group
-            required: false
             fields:
               MiscFeeAmt:
-                type: field
-                required: false
               MiscFeeCurr:
-                type: field
-                required: false
               MiscFeeType:
-                type: field
-                required: false
 
   OrderMassStatusRequest:
     msgtype: AF
     msgcat: app
     fields:
       MassStatusReqID:
-        type: field
         required: true
       MassStatusReqType:
-        type: field
         required: true
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       Instrument:
         type: component
-        required: false
       UnderlyingInstrument:
         type: component
-        required: false
       Side:
-        type: field
-        required: false
 
   QuoteRequestReject:
     msgtype: AG
     msgcat: app
     fields:
       QuoteReqID:
-        type: field
         required: true
       RFQReqID:
-        type: field
-        required: false
       QuoteRequestRejectReason:
-        type: field
         required: true
       NoRelatedSym:
         type: group
@@ -10106,93 +6760,41 @@ messages:
             type: component
             required: true
           PrevClosePx:
-            type: field
-            required: false
           QuoteRequestType:
-            type: field
-            required: false
           QuoteType:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
           TradeOriginationDate:
-            type: field
-            required: false
           Stipulations:
             type: component
-            required: false
           Side:
-            type: field
-            required: false
           QuantityType:
-            type: field
-            required: false
           OrderQty:
-            type: field
-            required: false
           CashOrderQty:
-            type: field
-            required: false
           SettlmntTyp:
-            type: field
-            required: false
           FutSettDate:
-            type: field
-            required: false
           OrdType:
-            type: field
-            required: false
           FutSettDate2:
-            type: field
-            required: false
           OrderQty2:
-            type: field
-            required: false
           ExpireTime:
-            type: field
-            required: false
           TransactTime:
-            type: field
-            required: false
           Currency:
-            type: field
-            required: false
           SpreadOrBenchmarkCurveData:
             type: component
-            required: false
           PriceType:
-            type: field
-            required: false
           Price:
-            type: field
-            required: false
           Price2:
-            type: field
-            required: false
           YieldData:
             type: component
-            required: false
       Text:
-        type: field
-        required: false
       EncodedTextLen:
-        type: field
-        required: false
       EncodedText:
-        type: field
-        required: false
 
   RFQRequest:
     msgtype: AH
     msgcat: app
     fields:
       RFQReqID:
-        type: field
         required: true
       NoRelatedSym:
         type: group
@@ -10202,154 +6804,60 @@ messages:
             type: component
             required: true
           PrevClosePx:
-            type: field
-            required: false
           QuoteRequestType:
-            type: field
-            required: false
           QuoteType:
-            type: field
-            required: false
           TradingSessionID:
-            type: field
-            required: false
           TradingSessionSubID:
-            type: field
-            required: false
       SubscriptionRequestType:
-        type: field
-        required: false
         
   QuoteStatusReport:
     msgtype: AI
     msgcat: app
     fields:
       QuoteStatusReqID:
-        type: field
-        required: false
       QuoteReqID:
-        type: field
-        required: false
       QuoteID:
-        type: field
         required: true
       QuoteType:
-        type: field
-        required: false
       Parties:
         type: component
-        required: false
       Account:
-        type: field
-        required: false
       AccountType:
-        type: field
-        required: false
       TradingSessionID:
-        type: field
-        required: false
       TradingSessionSubID:
-        type: field
-        required: false
       Instrument:
         type: component
         required: true
       BidPx:
-        type: field
-        required: false
       OfferPx:
-        type: field
-        required: false
       MktBidPx:
-        type: field
-        required: false
       MktOfferPx:
-        type: field
-        required: false
       MinBidSize:
-        type: field
-        required: false
       BidSize:
-        type: field
-        required: false
       MinOfferSize:
-        type: field
-        required: false
       OfferSize:
-        type: field
-        required: false
       ValidUntilTime:
-        type: field
-        required: false
       BidSpotRate:
-        type: field
-        required: false
       OfferSpotRate:
-        type: field
-        required: false
       BidForwardPoints:
-        type: field
-        required: false
       OfferForwardPoints:
-        type: field
-        required: false
       MidPx:
-        type: field
-        required: false
       BidYield:
-        type: field
-        required: false
       MidYield:
-        type: field
-        required: false
       OfferYield:
-        type: field
-        required: false
       TransactTime:
-        type: field
-        required: false
       FutSettDate:
-        type: field
-        required: false
       OrdType:
-        type: field
-        required: false
       FutSettDate2:
-        type: field
-        required: false
       OrderQty2:
-        type: field
-        required: false
       BidForwardPoints2:
-        type: field
-        required: false
       OfferForwardPoints2:
-        type: field
-        required: false
       Currency:
-        type: field
-        required: false
       SettlCurrBidFxRate:
-        type: field
-        required: false
       SettlCurrOfferFxRate:
-        type: field
-        required: false
       SettlCurrFxRateCalc:
-        type: field
-        required: false
       Commission:
-        type: field
-        required: false
       CommType:
-        type: field
-        required: false
       CustOrderCapacity:
-        type: field
-        required: false
       ExDestination:
-        type: field
-        required: false
       QuoteStatus:
-        type: field
-        required: false

@@ -23,13 +23,14 @@ def test_encode_logon():
         is_float_decimal=True,
         is_bool_enum=False
     )
+    sending_time = datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone.utc)
     messages = [
         {
             'MsgType': 'LOGON',
             'MsgSeqNum': 42,
             'SenderCompID': "SENDER",
             'TargetCompID': "TARGET",
-            'SendingTime': datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone.utc),
+            'SendingTime': sending_time,
             'EncryptMethod': "NONE",
             'HeartBtInt': 30
         },
@@ -38,21 +39,21 @@ def test_encode_logon():
             'MsgSeqNum': 43,
             'SenderCompID': "SENDER",
             'TargetCompID': "TARGET",
-            'SendingTime': datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone.utc)
+            'SendingTime': sending_time
         },
         {
             'MsgType': 'HEARTBEAT',
             'MsgSeqNum': 43,
             'SenderCompID': "SENDER",
             'TargetCompID': "TARGET",
-            'SendingTime': datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone.utc)
+            'SendingTime': sending_time
         },
         {
             'MsgType': 'RESEND_REQUEST',
             'MsgSeqNum': 42,
             'SenderCompID': "SENDER",
             'TargetCompID': "TARGET",
-            'SendingTime': datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone.utc),
+            'SendingTime': sending_time,
             'BeginSeqNo': 10,
             'EndSeqNo': 12
         },
@@ -61,7 +62,7 @@ def test_encode_logon():
             'MsgSeqNum': 42,
             'SenderCompID': "SENDER",
             'TargetCompID': "TARGET",
-            'SendingTime': datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone.utc),
+            'SendingTime': sending_time,
             'TestReqID': "This is not a test"
         },
         {
@@ -69,7 +70,7 @@ def test_encode_logon():
             'MsgSeqNum': 42,
             'SenderCompID': "SENDER",
             'TargetCompID': "TARGET",
-            'SendingTime': datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone.utc),
+            'SendingTime': sending_time,
             'GapFillFlag': False,
             'NewSeqNo': 12
         }
