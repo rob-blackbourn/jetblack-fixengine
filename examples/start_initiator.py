@@ -7,7 +7,7 @@ from typing import Mapping, Any, Optional
 
 import pytz
 
-from aiofix.loader import load_protocol
+from jetblack_fixparser.loader import load_yaml_protocol
 from aiofix.persistence import FileStore
 from aiofix.transports import start_initiator, InitiatorHandler
 
@@ -24,7 +24,7 @@ PORT = 10101
 SENDER_COMP_ID = 'CLIENT'
 TARGET_COMP_ID = 'SERVER'
 HEARTBEAT_TIMEOUT = 30
-PROTOCOL = load_protocol('etc/FIX42.yaml')
+PROTOCOL = load_yaml_protocol('etc/FIX42.yaml')
 TZ = pytz.timezone('Europe/London')
 
 

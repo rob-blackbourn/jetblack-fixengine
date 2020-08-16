@@ -6,8 +6,8 @@ from datetime import datetime, time, tzinfo
 import logging
 from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple, cast
 
-from ..fix_message import FixMessageFactory, FixMessage
-from ..meta_data import ProtocolMetaData
+from jetblack_fixparser.fix_message import FixMessageFactory, FixMessage
+from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 

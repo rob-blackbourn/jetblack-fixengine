@@ -7,7 +7,7 @@ import logging
 from ssl import SSLContext
 from typing import Optional, Tuple, Callable, Type
 
-from ..meta_data import ProtocolMetaData
+from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..transports import InitiatorHandler, create_initiator
 from ..types import Store
 from ..transports import initiate

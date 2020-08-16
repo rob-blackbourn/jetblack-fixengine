@@ -4,7 +4,7 @@ from collections import deque
 from enum import IntEnum
 from typing import Deque, Optional, Tuple, Union
 
-from ..fix_message import SOH, calc_checksum
+from jetblack_fixparser.fix_message import SOH, calc_checksum
 
 from .fix_events import (
     FixReadEvent,

@@ -7,7 +7,7 @@ import logging
 from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple
 import uuid
 
-from ..meta_data import ProtocolMetaData
+from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 

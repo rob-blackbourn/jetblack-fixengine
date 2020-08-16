@@ -7,9 +7,9 @@ from ssl import SSLContext
 from typing import Optional, Callable, Type, Tuple
 
 from ..types import Handler, Store
-from ..meta_data import ProtocolMetaData
+from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..utils.cancellation import register_cancellation_token
-from ..fix_message import SOH
+from jetblack_fixparser.fix_message import SOH
 
 from .fix_transport import fix_stream_processor
 from .fix_read_buffer import FixReadBuffer
