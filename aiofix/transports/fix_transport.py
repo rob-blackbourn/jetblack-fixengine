@@ -4,7 +4,7 @@ import asyncio
 from asyncio import Queue, Task, StreamWriter
 from enum import IntEnum
 import logging
-from typing import AsyncIterator, Callable, Optional, cast
+from typing import Any, AsyncIterator, Callable, Optional, cast
 
 from ..types import Handler, Event
 
