@@ -1,4 +1,4 @@
-"""Parsing FX messages"""
+"""FIX message"""
 
 from __future__ import annotations
 
