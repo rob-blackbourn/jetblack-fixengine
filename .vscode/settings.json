@@ -9,6 +9,8 @@
         "aiofiles",
         "aiofix",
         "aiosqlite",
+        "aiter",
+        "anext",
         "asyncio",
         "autopep",
         "deque",

@@ -31,41 +31,6 @@ async def _cancel_await(
             callback()
 
 
-async def _send_event(queue: "Queue[Event]", event: Event) -> None:
-    await queue.put(event)
-
-
-async def _send_event_connected(queue: "Queue[Event]") -> None:
-    event = {
-        'type': 'connected'
-    }
-    await _send_event(queue, event)
-
-
-async def _send_event_disconnect(queue: "Queue[Event]") -> None:
-    event = {
-        'type': 'disconnect'
-    }
-    await _send_event(queue, event)
-
-
-# async def _send_event_error(queue: "Queue[Event]", reason: str, message: bytes) -> None:
-#     event = {
-#         'type': 'error',
-#         'reason': reason,
-#         'message': message
-#     }
-#     await _send_event(queue, event)
-
-
-async def _send_event_fix(queue: "Queue[Event]", message: bytes) -> None:
-    event = {
-        'type': 'fix',
-        'message': message
-    }
-    await _send_event(queue, event)
-
-
 async def fix_stream_processor(
         handler: Handler,
         shutdown_timeout: float,
@@ -85,7 +50,9 @@ async def fix_stream_processor(
     async def send(evt: Event) -> None:
         await write_queue.put(evt)
 
-    await _send_event_connected(read_queue)
+    await read_queue.put({
+        'type': 'connected'
+    })
 
     state = FixState.OK
     message: bytes = b''
@@ -148,7 +115,10 @@ async def fix_stream_processor(
                     message = cast(bytes, task.result())
                     logger.debug('Received "%s"', message)
                     # Notify the client and reset the state.
-                    await _send_event_fix(read_queue, message)
+                    await read_queue.put({
+                        'type': 'fix',
+                        'message': message
+                    })
                     message = b''
                     # Read the field.
                     read_task = asyncio.create_task(reader_iter.__anext__())
@@ -167,7 +137,9 @@ async def fix_stream_processor(
         writer.close()
     else:
         # Notify the client of the disconnection.
-        await _send_event_disconnect(read_queue)
+        await read_queue.put({
+            'type': 'disconnect'
+        })
 
         write_task.cancel()
         try:
