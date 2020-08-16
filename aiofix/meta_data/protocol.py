@@ -74,6 +74,12 @@ class ProtocolMetaData:
     def trailer(self) -> Mapping[str, MessageMemberMetaData]:
         return self._trailer
 
+    def is_valid_message_name(self, name: str) -> bool:
+        message_type_field = self.fields_by_name['MsgType']
+        if message_type_field.values_by_name is None:
+            raise ValueError('No messages names in protocol')
+        return name in message_type_field.values_by_name
+
     def __str__(self) -> str:
         return f'<ProtocolMetaData: version="{self.version}", begin_string={self.begin_string}'
 

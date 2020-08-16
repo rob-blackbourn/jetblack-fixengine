@@ -71,8 +71,3 @@ MessageFieldMetaDataMapping = Mapping[
     str,
     Union[MessageMemberMetaData, 'MessageFieldMetaDataMapping']
 ]
-
-FieldMessageDataMap = MutableMapping[
-    str,
-    Union[Any, List['FieldMessageDataMap']]
-]

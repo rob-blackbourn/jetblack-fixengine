@@ -1,6 +1,5 @@
 """FIX message factory"""
 
-from aiofix.meta_data.message_member import MessageMemberMetaData
 from datetime import datetime
 from typing import Any, Mapping, Optional
 
@@ -10,6 +9,7 @@ from .fix_message import FixMessage, SOH
 
 
 class FixMessageFactory:
+    """A factory for encoding and decoding FIX messages"""
 
     def __init__(
             self,
@@ -23,6 +23,22 @@ class FixMessageFactory:
             convert_sep_for_checksum: bool = True,
             header_kwargs: Optional[Mapping[str, Any]] = None
     ) -> None:
+        """Initialise the message factory
+
+        Args:
+            protocol (ProtocolMetaData): The protocol meta data.
+            sender_comp_id (str): The sender comp id.
+            target_comp_id (str): The target comp id.
+            strict (bool, optional): If true use strict validation. Defaults to
+                True.
+            validate (bool, optional): If true validate the message. Defaults to
+                True.
+            sep (bytes, optional): The field separator to use. Defaults to SOH.
+            convert_sep_for_checksum (bool, optional): If true convert the field
+                separator before calculating the checksum. Defaults to True.
+            header_kwargs (Optional[Mapping[str, Any]], optional): Extra header
+                args. Defaults to None.
+        """
         self.protocol = protocol
         self.sender_comp_id = sender_comp_id
         self.target_comp_id = target_comp_id
@@ -41,7 +57,23 @@ class FixMessageFactory:
             header_kwargs: Optional[Mapping[str, Any]] = None,
             trailer_kwargs: Optional[Mapping[str, Any]] = None
     ) -> FixMessage:
-        assert msg_type in self.protocol.fields_by_name['MsgType'].values_by_name
+        """Create a FIX message
+
+        Args:
+            msg_type (str): The message type.
+            msg_seq_num (int): The message sequence number.
+            sending_time (datetime): The sending time.
+            body_kwargs (Optional[Mapping[str, Any]], optional): The message
+                body. Defaults to None.
+            header_kwargs (Optional[Mapping[str, Any]], optional): Extra header
+                args. Defaults to None.
+            trailer_kwargs (Optional[Mapping[str, Any]], optional): Extra
+                trailer args. Defaults to None.
+
+        Returns:
+            FixMessage: The FIX message.
+        """
+        assert self.protocol.is_valid_message_name(msg_type)
 
         header_args = {
             'BeginString': self.protocol.begin_string,
@@ -74,10 +106,18 @@ class FixMessageFactory:
 
         return FixMessage(self.protocol, data)
 
-    def decode(self, message: bytes) -> FixMessage:
+    def decode(self, buffer: bytes) -> FixMessage:
+        """Decode a FIX message byte buffer.
+
+        Args:
+            buffer (bytes): The FIX bytes buffer
+
+        Returns:
+            FixMessage: A decoded message.
+        """
         return FixMessage.decode(
             self.protocol,
-            message,
+            buffer,
             strict=self.strict,
             validate=self.validate,
             sep=self.sep,

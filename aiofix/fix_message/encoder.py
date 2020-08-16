@@ -1,13 +1,12 @@
 """Encode a FIX message"""
 
-from typing import Iterator, List, Tuple, cast
+from typing import Any, Iterator, List, Mapping, MutableMapping, Tuple, cast
 
 from ..meta_data import (
     message_member_iter,
     MessageMemberMetaData,
     MessageMetaData,
-    ProtocolMetaData,
-    FieldMessageDataMap
+    ProtocolMetaData
 )
 from ..meta_data.message_member import FieldMetaData
 
@@ -19,7 +18,7 @@ from .value_encoders import encode_value
 def _encode_fields(
         protocol: ProtocolMetaData,
         encoded_message: List[Tuple[bytes, bytes]],
-        data: FieldMessageDataMap,
+        data: Mapping[str, Any],
         meta_data: Iterator[MessageMemberMetaData]
 ) -> None:
     for meta_datum in meta_data:
@@ -38,7 +37,7 @@ def _encode_fields(
             encoded_message.append((field_member.number, value))
         elif meta_datum.type == 'group':
             field_member = cast(FieldMetaData, meta_datum.member)
-            item_list = cast(List[FieldMessageDataMap], item_data)
+            item_list = cast(List[Mapping[str, Any]], item_data)
             value = encode_value(protocol, field_member, len(item_list))
             encoded_message.append((field_member.number, value))
             assert meta_datum.children is not None
@@ -93,7 +92,7 @@ def _regenerate_integrity(
 
 def encode(
         protocol: ProtocolMetaData,
-        data: FieldMessageDataMap,
+        data: MutableMapping[str, Any],
         meta_data: MessageMetaData,
         *,
         sep: bytes = SOH,

@@ -69,4 +69,4 @@ def test_fix_message_factory():
     for fix_message in fix_messages:
         encoded_message = fix_message.encode(regenerate_integrity=True)
         roundtrip = FixMessage.decode(protocol, encoded_message)
-        assert fix_message.data == roundtrip.data
+        assert fix_message.message == roundtrip.message

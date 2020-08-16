@@ -71,7 +71,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         self._last_send_time_utc = send_time_utc
 
     async def _send_fix_message(self, fix_message: FixMessage, send_time_utc: datetime) -> None:
-        logger.info('sending: %s', fix_message.data)
+        logger.info('sending: %s', fix_message.message)
         event = {
             'type': 'fix',
             'message': fix_message.encode(regenerate_integrity=True)
@@ -208,11 +208,11 @@ class InitiatorHandler(metaclass=ABCMeta):
 
             msgcat = cast(str, fix_message.meta_data.msgcat)
             if msgcat == 'admin':
-                status = await self._on_admin_message(fix_message.data)
+                status = await self._on_admin_message(fix_message.message)
             else:
-                status = await self.on_application_message(fix_message.data)
+                status = await self.on_application_message(fix_message.message)
 
-            msg_seq_num: int = cast(int, fix_message.data['MsgSeqNum'])
+            msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
             await self._set_incoming_seqnum(msg_seq_num)
 
             self._last_receive_time_utc = datetime.utcnow()

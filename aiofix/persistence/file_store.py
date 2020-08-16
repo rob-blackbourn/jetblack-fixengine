@@ -95,7 +95,7 @@ class FileStore(Store):
             message_style: Optional[str] = 'urlencode'
     ) -> None:
         if not os.path.exists(directory):
-            os.makedirs(directory)
+            os.makedirs(directory)  # type: ignore
         elif not os.path.isdir(directory):
             raise RuntimeError(f'not a directory "{directory}"')
 

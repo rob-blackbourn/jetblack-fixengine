@@ -4,7 +4,6 @@ from .message_member import (
     FieldMetaData,
     ComponentMetaData,
     MessageMemberMetaData,
-    FieldMessageDataMap,
     MessageFieldMetaDataMapping
 )
 from .message import MessageMetaData
@@ -15,7 +14,6 @@ __all__ = [
     'FieldMetaData',
     'ComponentMetaData',
     'MessageMetaData',
-    'FieldMessageDataMap',
     'MessageFieldMetaDataMapping',
     'MessageMemberMetaData',
     'ProtocolMetaData',
