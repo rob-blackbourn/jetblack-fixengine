@@ -1,19 +1,9 @@
 """Tests for encoding"""
 
-from typing import Any, Mapping
-
-from aiofix.loader import load_protocol
-from aiofix.fix_message import FixMessage, find_message_meta_data
-from aiofix.meta_data import FieldMessageDataMap
-
 from datetime import datetime, timezone
 
-
-def _is_match(source: Mapping[str, Any], dest: Mapping[str, Any]) -> bool:
-    for name, value in source.items():
-        if value != dest[name]:
-            return False
-    return True
+from aiofix.loader import load_protocol
+from aiofix.fix_message import FixMessage
 
 
 def test_encode_logon():

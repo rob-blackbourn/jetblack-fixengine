@@ -12,7 +12,8 @@ from ..meta_data import (
 from ..meta_data.message_member import FieldMetaData
 
 from .errors import EncodingError
-from .common import SOH, encode_value
+from .common import SOH
+from .value_encoders import encode_value
 
 
 def _encode_fields(

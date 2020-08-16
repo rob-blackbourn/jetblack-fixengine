@@ -1,9 +1,9 @@
 """Tests for factory encoding"""
 
+from datetime import datetime, timezone
+
 from aiofix.loader import load_protocol
 from aiofix.fix_message import FixMessage, FixMessageFactory
-
-from datetime import datetime, timezone
 
 
 def test_fix_message_factory():
