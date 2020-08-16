@@ -1,9 +1,13 @@
+"""The FIX protocol meta data"""
+
 from typing import Mapping
+
 from .message_member import FieldMetaData, ComponentMetaData, MessageMemberMetaData
 from .message import MessageMetaData
 
 
 class ProtocolMetaData:
+    """FIX protocol meta data"""
 
     def __init__(
             self,
@@ -19,62 +23,54 @@ class ProtocolMetaData:
             is_float_decimal: bool = False,
             is_bool_enum: bool = False
     ) -> None:
-        self._version = version
-        self._begin_string = begin_string
-        self._fields_by_name = fields
-        self._fields_by_number = {
+        """Initialise the FIX protocol meta data.
+
+        Args:
+            version (str): The version.
+            begin_string (bytes): The begin string
+            fields (Mapping[str, FieldMetaData]): Field definitions
+            components (Mapping[str, ComponentMetaData]): Component definitions
+            messages (Mapping[str, MessageMetaData]): Messages
+            header (Mapping[str, MessageMemberMetaData]): The header meta data
+            trailer (Mapping[str, MessageMemberMetaData]): The trailer meta data
+            is_millisecond_time (bool, optional): If true the time has
+                millisecond accuracy. Defaults to True.
+            is_float_decimal (bool, optional): If true use Decimal to represent
+                floating point values. Defaults to False.
+            is_bool_enum (bool, optional): If true use enum names for boolean
+                values. Defaults to False.
+        """
+        self.version = version
+        self.begin_string = begin_string
+        self.fields_by_name = fields
+        self.fields_by_number = {
             field.number: field
             for field in fields.values()
         }
-        self._components = components
-        self._messages_by_name = messages
-        self._messages_by_type = {
+        self.components = components
+        self.messages_by_name = messages
+        self.messages_by_type = {
             message.msgtype: message
             for message in messages.values()
         }
-        self._header = header
-        self._trailer = trailer
+        self.header = header
+        self.trailer = trailer
         self.is_millisecond_time = is_millisecond_time
         self.is_float_decimal = is_float_decimal
         self.is_bool_enum = is_bool_enum
 
-    @property
-    def version(self) -> str:
-        return self._version
-
-    @property
-    def begin_string(self) -> bytes:
-        return self._begin_string
-
-    @property
-    def fields_by_name(self) -> Mapping[str, FieldMetaData]:
-        return self._fields_by_name
-
-    @property
-    def fields_by_number(self) -> Mapping[bytes, FieldMetaData]:
-        return self._fields_by_number
-
-    @property
-    def components(self) -> Mapping[str, ComponentMetaData]:
-        return self._components
-
-    @property
-    def messages_by_name(self) -> Mapping[str, MessageMetaData]:
-        return self._messages_by_name
-
-    @property
-    def messages_by_type(self) -> Mapping[bytes, MessageMetaData]:
-        return self._messages_by_type
-
-    @property
-    def header(self) -> Mapping[str, MessageMemberMetaData]:
-        return self._header
-
-    @property
-    def trailer(self) -> Mapping[str, MessageMemberMetaData]:
-        return self._trailer
-
     def is_valid_message_name(self, name: str) -> bool:
+        """Check if the name is a valid message name
+
+        Args:
+            name (str): The name to check.
+
+        Raises:
+            ValueError: If there are no message names found.
+
+        Returns:
+            bool: True if the name was a valid message name
+        """
         message_type_field = self.fields_by_name['MsgType']
         if message_type_field.values_by_name is None:
             raise ValueError('No messages names in protocol')

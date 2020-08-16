@@ -9,7 +9,7 @@ from aiofix.transports.fix_events import (
 from aiofix.transports.fix_read_buffer import FixReadBuffer
 
 
-def bytes_writer(buf: bytes, chunk_size: int = -1) -> Iterator[bytes]:
+def _bytes_writer(buf: bytes, chunk_size: int = -1) -> Iterator[bytes]:
     if chunk_size == -1:
         yield buf
     else:
@@ -36,7 +36,7 @@ def test_read_valid_buffer():
     for message in messages:
         input_buf += message
 
-    writer = bytes_writer(input_buf, 200)
+    writer = _bytes_writer(input_buf, 200)
     # buf = next(writer)
     # reader.receive(buf)
     done = False
@@ -70,7 +70,7 @@ def test_read_corrupt_buffer():
 
     input_buf = b'8=FIX.4.4|9=94|35=3|49=A|56=AB|128=B1|34=214|50=U1|52=201003'
 
-    writer = bytes_writer(input_buf, 200)
+    writer = _bytes_writer(input_buf, 200)
     buf = next(writer)
     reader.receive(buf)
     done = False
@@ -89,9 +89,9 @@ def test_read_corrupt_buffer():
                 continue
             else:
                 assert False
-    except FixReadError as error:
+    except FixReadError:
         assert True
-    except BaseException as error:
+    except:  # pylint: disable=bare-except
         assert False
     else:
         assert False

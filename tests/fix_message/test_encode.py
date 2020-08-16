@@ -7,6 +7,7 @@ from aiofix.fix_message import FixMessage
 
 
 def test_encode_logon():
+    """Test encoding"""
     protocol = load_protocol(
         'etc/FIX44.yaml',
         is_millisecond_time=True,
