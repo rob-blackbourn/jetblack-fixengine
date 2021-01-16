@@ -9,7 +9,7 @@ from typing import AsyncIterator, Set, cast
 from ..types import Handler, Event
 from ..utils.cancellation import cancel_await
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class FixState(IntEnum):
@@ -101,7 +101,7 @@ async def fix_stream_processor(
 
                 if event['type'] == 'fix':
                     # Send data to the handler and renew the write task.
-                    logger.debug('Sending "%s"', event["message"])
+                    LOGGER.debug('Sending "%s"', event["message"])
                     writer.write(event['message'])
                     await writer.drain()
                     write_task = asyncio.create_task(write_queue.get())
@@ -112,14 +112,14 @@ async def fix_stream_processor(
                     state = FixState.HANDLER_CLOSED
                     continue
                 else:
-                    logger.debug('Invalid event "%s"', event["type"])
+                    LOGGER.debug('Invalid event "%s"', event["type"])
                     raise RuntimeError(f'Invalid event "{event["type"]}"')
 
             elif task == read_task:
 
                 try:
                     message = cast(bytes, task.result())
-                    logger.debug('Received "%s"', message)
+                    LOGGER.debug('Received "%s"', message)
                     # Notify the client and reset the state.
                     await read_queue.put({
                         'type': 'fix',
@@ -157,19 +157,19 @@ async def fix_stream_processor(
             await cancel_await(read_task)
 
         if not handler_task.cancelled():
-            logger.info(
+            LOGGER.info(
                 'Waiting %s seconds for the handler to complete.',
                 shutdown_timeout
             )
             try:
                 await asyncio.wait_for(handler_task, timeout=shutdown_timeout)
             except asyncio.TimeoutError:
-                logger.error('Cancelling the handler')
+                LOGGER.error('Cancelling the handler')
                 await cancel_await(
                     handler_task,
-                    lambda: logger.warning(
+                    lambda: LOGGER.warning(
                         'The handler task did not complete and has been cancelled'
                     )
                 )
 
-    logger.debug('Shutdown complete.')
+    LOGGER.debug('Shutdown complete.')

@@ -8,7 +8,7 @@ from .fix_transport import fix_stream_processor
 from ..types import Handler
 from ..utils.cancellation import register_cancellation_event
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 ClientFactory = Callable[[], Handler]
 
@@ -44,8 +44,8 @@ def start_acceptor(
     except asyncio.CancelledError:
         pass
     finally:
-        logger.debug('Closing server')
+        LOGGER.debug('Closing server')
         server.close()
         loop.run_until_complete(server.wait_closed())
-        logger.debug('closing event loop')
+        LOGGER.debug('closing event loop')
         loop.close()

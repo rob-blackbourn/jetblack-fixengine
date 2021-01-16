@@ -17,7 +17,7 @@ from .fix_read_buffer import FixReadBuffer
 from .fix_reader_async import fix_read_async
 from .initiator_handler import InitiatorHandler
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 InitiatorFactory = Callable[
     [ProtocolMetaData, str, str, Store, int, asyncio.Event],
@@ -36,9 +36,8 @@ async def initiate(
         sep: bytes = SOH,
         convert_sep_to_soh_for_checksum: bool = False,
         validate: bool = True
-
 ) -> None:
-    logger.info(
+    LOGGER.info(
         'connecting to %s:%s%s',
         host,
         port,
@@ -56,7 +55,7 @@ async def initiate(
         cancellation_event
     )
 
-    logger.info(
+    LOGGER.info(
         'disconnected from %s:%s%s',
         host,
         port,

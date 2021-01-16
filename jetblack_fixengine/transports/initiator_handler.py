@@ -11,7 +11,7 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 STATE_DISCONNECTED = 'disconnected'
 STATE_CONNECTED = 'connected'
@@ -77,7 +77,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         self._last_send_time_utc = send_time_utc
 
     async def _send_fix_message(self, fix_message: FixMessage, send_time_utc: datetime) -> None:
-        logger.info('sending: %s', fix_message.message)
+        LOGGER.info('sending: %s', fix_message.message)
         event = {
             'type': 'fix',
             'message': fix_message.encode(regenerate_integrity=True)
@@ -193,7 +193,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_fix_message(fix_message, send_time_utc)
 
     async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
-        logger.info('on_admin_message: %s', message)
+        LOGGER.info('on_admin_message: %s', message)
 
         # Only handle if unhandled by the overrideing method.
         override_status = await self.on_admin_message(message)
@@ -219,7 +219,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             self._state = STATE_LOGGED_OUT
             return False
         else:
-            logger.warning(
+            LOGGER.warning(
                 'unhandled admin message type "%s".',
                 message["MsgType"]
             )
@@ -277,7 +277,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             return status
 
         elif event['type'] == 'error':
-            logger.warning('error')
+            LOGGER.warning('error')
             return False
         elif event['type'] == 'disconnect':
             return False
@@ -320,7 +320,7 @@ class InitiatorHandler(metaclass=ABCMeta):
     async def _wait_till_logon_time(self) -> Optional[datetime]:
         if self.logon_time_range:
             start_time, end_time = self.logon_time_range
-            logger.info('Logon from %s to %s', start_time, end_time)
+            LOGGER.info('Logon from %s to %s', start_time, end_time)
             end_datetime = await wait_for_time_period(
                 datetime.now(tz=self.tz),
                 start_time,
@@ -341,7 +341,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         event = await receive()
 
         if event['type'] == 'connected':
-            logger.info('connected')
+            LOGGER.info('connected')
             self._state = STATE_CONNECTED
 
             end_datetime = await self._wait_till_logon_time()
@@ -372,5 +372,5 @@ class InitiatorHandler(metaclass=ABCMeta):
         else:
             raise RuntimeError('Failed to connect')
 
-        logger.info('disconnected')
+        LOGGER.info('disconnected')
         self._state = STATE_DISCONNECTED
