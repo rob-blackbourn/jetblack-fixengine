@@ -1,10 +1,10 @@
 """FIX Transport"""
 
 import asyncio
-from asyncio import Queue, Task, StreamWriter
+from asyncio import Queue, Task, StreamWriter, Future
 from enum import IntEnum
 import logging
-from typing import Any, AsyncIterator, Callable, Optional, cast
+from typing import Any, AsyncIterator, Callable, Set, Optional, cast
 
 from ..types import Handler, Event
 
@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class FixState(IntEnum):
+    """The FIX state"""
     OK = 0
     EOF = 1
     HANDLER_COMPLETED = 3
@@ -38,6 +39,18 @@ async def fix_stream_processor(
         writer: StreamWriter,
         cancellation_token: asyncio.Event
 ) -> None:
+    """Create a processor for a stream of FIX data.
+
+    Args:
+        handler (Handler): The handler.
+        shutdown_timeout (float): The time to wait before shutting down.
+        reader (AsyncIterator[bytes]): The stream reader.
+        writer (StreamWriter): The stream writer.
+        cancellation_token (asyncio.Event): An event with which to cancel the processing.
+
+    Raises:
+        RuntimeError: If an invalid event was received.
+    """
     if cancellation_token.is_set():
         return
 
@@ -62,19 +75,22 @@ async def fix_stream_processor(
     # Create initial tasks.
     handler_task = asyncio.create_task(handler(send, receive))
     read_task: Task[bytes] = asyncio.create_task(reader_iter.__anext__())
-    write_task = asyncio.create_task(write_queue.get())
+    write_task: Task[Event] = asyncio.create_task(write_queue.get())
     cancellation_task = asyncio.create_task(cancellation_token.wait())
-
+    pending: Set[Future] = {
+        read_task,
+        write_task,
+        handler_task,
+        cancellation_task
+    }
     # Start the task service loop.
     while state == FixState.OK and not cancellation_token.is_set():
 
         # Wait for a task to be completed.
-        completed, _ = await asyncio.wait([
-            read_task,
-            write_task,
-            handler_task,
-            cancellation_task
-        ], return_when=asyncio.FIRST_COMPLETED)
+        completed, pending = await asyncio.wait(
+            pending,
+            return_when=asyncio.FIRST_COMPLETED
+        )
 
         # Handle the completed tasks. The pending tasks are left to become completed.
         for task in completed:
@@ -92,7 +108,7 @@ async def fix_stream_processor(
             elif task == write_task:
 
                 # Fetch the event sent by the handler.
-                event = cast(Event, task.result())
+                event = write_task.result()
 
                 if event['type'] == 'fix':
                     # Send data to the handler and renew the write task.
@@ -100,6 +116,7 @@ async def fix_stream_processor(
                     writer.write(event['message'])
                     await writer.drain()
                     write_task = asyncio.create_task(write_queue.get())
+                    pending.add(write_task)
                 elif event['type'] == 'close':
                     # Close the connection and exit the task service loop.
                     writer.close()
@@ -122,11 +139,14 @@ async def fix_stream_processor(
                     message = b''
                     # Read the field.
                     read_task = asyncio.create_task(reader_iter.__anext__())
+                    pending.add(read_task)
                 except StopAsyncIteration:
                     state = FixState.EOF
                     continue
             else:
                 raise AssertionError('Invalid task')
+
+    # Attempt to shutdown gracefully.
 
     if state == FixState.HANDLER_COMPLETED:
         # When the handler task has finished the session if over.
@@ -141,11 +161,7 @@ async def fix_stream_processor(
             'type': 'disconnect'
         })
 
-        write_task.cancel()
-        try:
-            await write_task
-        except asyncio.CancelledError:
-            pass
+        await _cancel_await(write_task)
 
         if state != FixState.EOF:
             writer.close()
@@ -160,11 +176,11 @@ async def fix_stream_processor(
                 await asyncio.wait_for(handler_task, timeout=shutdown_timeout)
             except asyncio.TimeoutError:
                 logger.error('Cancelling the handler')
-                handler_task.cancel()
-                try:
-                    await handler_task
-                except asyncio.CancelledError:
-                    logger.warning(
-                        'The handler task did not complete and has been cancelled')
+                await _cancel_await(
+                    handler_task,
+                    lambda: logger.warning(
+                        'The handler task did not complete and has been cancelled'
+                    )
+                )
 
     logger.debug('Shutdown complete.')

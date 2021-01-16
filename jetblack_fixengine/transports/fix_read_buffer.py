@@ -1,4 +1,7 @@
-"""FIX read buffer"""
+"""FIX read buffer
+
+Implements an IO agnostic state machine to handle parsing FIX protocol messages.
+"""
 
 from collections import deque
 from enum import IntEnum
@@ -16,14 +19,14 @@ from .fix_events import (
 
 
 class InputState(IntEnum):
-
+    """The input state"""
     EMPTY = 1
     HAS_DATA = 2
     EOF = 3
 
 
 class ReadState(IntEnum):
-
+    """The read state"""
     PROTOCOL_ERROR = 0x01
     STATE_ERROR = 0x02
     CLOSED = 0x03
@@ -41,6 +44,7 @@ StateResponse = Tuple[Optional[FixReadEvent], bool]
 
 
 class FixReadBuffer:
+    """A state machine to parse FIX messages"""
 
     def __init__(
             self,
@@ -59,7 +63,9 @@ class FixReadBuffer:
         self._index = 0
         self._required_length = -1
 
+        # The initial state is idle.
         self._state = ReadState.IDLE
+        # These are the state transitions.
         self._transitions = {
 
             (ReadState.IDLE, InputState.EMPTY): (
@@ -111,6 +117,11 @@ class FixReadBuffer:
 
     @property
     def input_state(self) -> InputState:
+        """The input state
+
+        Returns:
+            InputState: The state of the input
+        """
         if len(self._queue) == 0:
             return InputState.EMPTY
         elif not self._queue[0]:
@@ -119,9 +130,22 @@ class FixReadBuffer:
             return InputState.HAS_DATA
 
     def receive(self, buf: bytes):
+        """Receive data.
+
+        Args:
+            buf (bytes): The buffer to process.
+        """
         self._queue.append(buf)
 
     def next_event(self) -> FixReadEvent:
+        """Get the next event
+
+        Raises:
+            FixReadError: If a read error has occurred.
+
+        Returns:
+            FixReadEvent: The next event.
+        """
 
         event: Optional[FixReadEvent] = None
 
@@ -129,8 +153,8 @@ class FixReadBuffer:
             try:
                 transition = (self._state, self.input_state)
                 func, next_state = self._transitions[transition]
-            except KeyError:
-                raise FixReadError('Unknown transition')
+            except KeyError as error:
+                raise FixReadError('Unknown transition') from error
             else:
                 event, is_complete = func()
                 if is_complete:

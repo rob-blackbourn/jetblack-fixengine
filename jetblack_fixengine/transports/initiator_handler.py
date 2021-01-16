@@ -2,7 +2,7 @@
 
 from abc import ABCMeta, abstractmethod
 import asyncio
-from datetime import datetime, time, tzinfo
+from datetime import datetime, time, tzinfo, timezone
 import logging
 from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple, cast
 
@@ -19,6 +19,8 @@ STATE_LOGGING_ON = 'logon.start'
 STATE_LOGGED_ON = 'logon.ok'
 STATE_LOGGING_OFF = 'logout.start'
 STATE_LOGGED_OUT = 'logout.done'
+
+EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 
 class InitiatorHandler(metaclass=ABCMeta):
@@ -49,10 +51,12 @@ class InitiatorHandler(metaclass=ABCMeta):
         )
 
         self._state = STATE_DISCONNECTED
-        self._last_send_time_utc: Optional[datetime] = None
-        self._last_receive_time_utc: Optional[datetime] = None
+        self._last_send_time_utc: datetime = EPOCH_UTC
+        self._last_receive_time_utc: datetime = EPOCH_UTC
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
+        self._send: Optional[Callable[[Event], Awaitable[None]]] = None
+        self._receive: Optional[Callable[[], Awaitable[Event]]] = None
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
@@ -67,6 +71,8 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._session.set_incoming_seqnum(seqnum)
 
     async def _send_event(self, event: Event, send_time_utc: datetime) -> None:
+        if self._send is None:
+            raise ValueError('Not connected')
         await self._send(event)
         self._last_send_time_utc = send_time_utc
 
@@ -79,7 +85,9 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_event(event, send_time_utc)
 
     async def logon(self) -> None:
-        send_time_utc = datetime.utcnow()
+        """Send a logon message
+        """
+        send_time_utc = datetime.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         fix_message = self.fix_message_factory.create(
             'LOGON',
@@ -94,7 +102,9 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_fix_message(fix_message, send_time_utc)
 
     async def logout(self) -> None:
-        send_time_utc = datetime.utcnow()
+        """Send a logout message.
+        """
+        send_time_utc = datetime.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         fix_message = self.fix_message_factory.create(
             'LOGOUT',
@@ -105,7 +115,13 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_fix_message(fix_message, send_time_utc)
 
     async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
-        send_time_utc = datetime.utcnow()
+        """Send a heartbeat message.
+
+        Args:
+            test_req_id (Optional[str], optional): An optional test req id.
+                Defaults to None.
+        """
+        send_time_utc = datetime.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         body_kwargs = {}
         if test_req_id:
@@ -119,7 +135,13 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_fix_message(fix_message, send_time_utc)
 
     async def resend_request(self, begin_seqnum: int, end_seqnum: int = 0) -> None:
-        send_time_utc = datetime.utcnow()
+        """Send a resend request.
+
+        Args:
+            begin_seqnum (int): The begin seqnum
+            end_seqnum (int, optional): An optional end seqnum. Defaults to 0.
+        """
+        send_time_utc = datetime.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         fix_message = self.fix_message_factory.create(
             'RESEND_REQUEST',
@@ -133,7 +155,12 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_fix_message(fix_message, send_time_utc)
 
     async def test_request(self, test_req_id: str) -> None:
-        send_time_utc = datetime.utcnow()
+        """Send a test request.
+
+        Args:
+            test_req_id (str): The test req id.
+        """
+        send_time_utc = datetime.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         fix_message = self.fix_message_factory.create(
             'TEST_REQUEST',
@@ -146,7 +173,13 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_fix_message(fix_message, send_time_utc)
 
     async def sequence_reset(self, gap_fill: bool, new_seq_no: int) -> None:
-        send_time_utc = datetime.utcnow()
+        """Send a sequence reset.
+
+        Args:
+            gap_fill (bool): If true set the GapFillFlag.
+            new_seq_no (int): The new seqnum.
+        """
+        send_time_utc = datetime.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         fix_message = self.fix_message_factory.create(
             'SEQUENCE_RESET',
@@ -194,11 +227,35 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     @abstractmethod
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
-        raise NotImplementedError
+        """Handle an admin message
+
+        Args:
+            message (Mapping[str, Any]): The admin message that was sent by the
+                acceptor.
+
+        Raises:
+            NotImplementedError: [description]
+
+        Returns:
+            Optional[bool]: If true the message will override the base handler.
+        """
+        ...
 
     @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> bool:
-        raise NotImplementedError
+        """Handle an application message.
+
+        Args:
+            message (Mapping[str, Any]): The application message sent by the
+                acceptor.
+
+        Raises:
+            NotImplementedError: [description]
+
+        Returns:
+            bool: If true the base handler will not handle the message.
+        """
+        ...
 
     async def _handle_event(self, event: Event) -> bool:
         if event['type'] == 'fix':
@@ -215,7 +272,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
             await self._set_incoming_seqnum(msg_seq_num)
 
-            self._last_receive_time_utc = datetime.utcnow()
+            self._last_receive_time_utc = datetime.now(timezone.utc)
 
             return status
 
@@ -228,9 +285,10 @@ class InitiatorHandler(metaclass=ABCMeta):
             return False
 
     async def _handle_heartbeat(self) -> float:
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(timezone.utc)
         seconds_since_last_send = (
-            now_utc - self._last_send_time_utc).total_seconds()
+            now_utc - self._last_send_time_utc
+        ).total_seconds()
         if seconds_since_last_send >= self.heartbeat_timeout and self._state == STATE_LOGGED_ON:
             await self.heartbeat()
             seconds_since_last_send = 0
@@ -241,7 +299,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         if not self._state == STATE_LOGGED_ON:
             return
 
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc).total_seconds()
         if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
@@ -249,11 +307,15 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     @abstractmethod
     async def on_logon(self) -> None:
-        raise NotImplementedError
+        """Called when a logon message is received.
+        """
+        ...
 
     @abstractmethod
     async def on_logout(self) -> None:
-        raise NotImplementedError
+        """Called when a logout message is received.
+        """
+        ...
 
     async def _wait_till_logon_time(self) -> Optional[datetime]:
         if self.logon_time_range:
@@ -288,7 +350,11 @@ class InitiatorHandler(metaclass=ABCMeta):
             ok = True
             while ok:
                 try:
-                    if self._state == STATE_LOGGED_ON and end_datetime and datetime.now(tz=self.tz) >= end_datetime:
+                    if (
+                            self._state == STATE_LOGGED_ON and
+                            end_datetime and
+                            datetime.now(tz=self.tz) >= end_datetime
+                    ):
                         await self.logout()
                         await self.on_logout()
 
