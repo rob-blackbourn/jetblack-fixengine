@@ -40,18 +40,24 @@ class FixReadDataReady(FixReadEvent):
         self.data = data
 
     def __str__(self) -> str:
-        return f'<FixReadDataReadEvent: {super().__str__()}, data={self.data}>'
+        return '<FixReadDataReadEvent: {base}, data={data}>'.format(
+            base=super().__str__(),
+            data=self.data.decode('ascii')
+        )
 
 
 class FixReadEndOfFile(FixReadEvent):
-    """Event indicating the read has reaced the end of the input stream"""
+    """Event indicating the read has reached the end of the input stream"""
 
     def __init__(self) -> None:
         super().__init__(FixReadEventType.EOF)
 
     def __str__(self) -> str:
-        return f'<FixReadEndOfFile: {super().__str__()}>'
+        return '<FixReadEndOfFile: {base}>'.format(
+            base=super().__str__()
+        )
 
 
 class FixReadError(Exception):
+    """A FIX read error"""
     ...

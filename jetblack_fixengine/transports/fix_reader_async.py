@@ -3,10 +3,7 @@
 from asyncio import StreamReader
 from typing import AsyncIterator, cast
 
-from .fix_events import (
-    FixReadEventType,
-    FixReadDataReady
-)
+from .fix_events import FixReadEventType, FixReadDataReady
 from .fix_read_buffer import FixReadBuffer
 
 
@@ -15,6 +12,20 @@ async def fix_read_async(
         stream_reader: StreamReader,
         blksiz: int
 ) -> AsyncIterator[bytes]:
+    """An async reader for a stream of FIX messages.
+
+    Args:
+        read_buffer (FixReadBuffer): The FIX read buffer.
+        stream_reader (StreamReader): A stream reader.
+        blksiz (int): The read block size.
+
+    Raises:
+        Exception: If the reader is in an invalid state.
+
+    Yields:
+        Iterator[AsyncIterator[bytes]]: A bytes buffer containing a raw FIX
+            message.
+    """
     done = False
     while not done:
         fix_event = read_buffer.next_event()
@@ -28,4 +39,3 @@ async def fix_read_async(
             yield data_ready.data
         else:
             raise Exception('Invalid state')
-    print('done')

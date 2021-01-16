@@ -10,7 +10,7 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
 from ..types import Handler, Store
-from ..utils.cancellation import register_cancellation_token
+from ..utils.cancellation import register_cancellation_event
 
 from .fix_transport import fix_stream_processor
 from .fix_read_buffer import FixReadBuffer
@@ -29,7 +29,7 @@ async def initiate(
         host: str,
         port: int,
         handler: Handler,
-        cancellation_token: asyncio.Event,
+        cancellation_event: asyncio.Event,
         *,
         ssl: Optional[SSLContext] = None,
         shutdown_timeout: float = 10.0,
@@ -53,7 +53,7 @@ async def initiate(
         shutdown_timeout,
         buffered_reader,
         writer,
-        cancellation_token
+        cancellation_event
     )
 
     logger.info(
@@ -71,7 +71,7 @@ def create_initiator(
         target_comp_id: str,
         store: Store,
         heartbeat_timeout: int,
-        cancellation_token: asyncio.Event,
+        cancellation_event: asyncio.Event,
         *,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
@@ -83,7 +83,7 @@ def create_initiator(
         target_comp_id,
         store,
         heartbeat_timeout,
-        cancellation_token,
+        cancellation_event,
         heartbeat_threshold=heartbeat_threshold,
         logon_time_range=logon_time_range,
         tz=tz
@@ -108,9 +108,9 @@ def start_initiator(
         tz: Optional[tzinfo] = None
 
 ) -> None:
-    cancellation_token = asyncio.Event()
+    cancellation_event = asyncio.Event()
     loop = asyncio.get_event_loop()
-    register_cancellation_token(cancellation_token, loop)
+    register_cancellation_event(cancellation_event, loop)
 
     handler = create_initiator(
         klass,
@@ -119,7 +119,7 @@ def start_initiator(
         target_comp_id,
         store,
         heartbeat_timeout,
-        cancellation_token,
+        cancellation_event,
         heartbeat_threshold=heartbeat_threshold,
         logon_time_range=logon_time_range,
         tz=tz
@@ -130,7 +130,7 @@ def start_initiator(
             host,
             port,
             handler,
-            cancellation_token,
+            cancellation_event,
             ssl=ssl,
             shutdown_timeout=shutdown_timeout
         )

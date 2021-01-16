@@ -12,7 +12,7 @@ from ..transports import InitiatorHandler, create_initiator
 from ..types import Store
 from ..transports import initiate
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
-from ..utils.cancellation import register_cancellation_token
+from ..utils.cancellation import register_cancellation_event
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class InitiatorManager:
             handler_factory: Callable[[], InitiatorHandler],
             host: str,
             port: int,
-            cancellation_token: asyncio.Event,
+            cancellation_event: asyncio.Event,
             *,
             ssl: Optional[SSLContext] = None,
             session_dow_range: Optional[Tuple[int, int]] = None,
@@ -37,7 +37,7 @@ class InitiatorManager:
         self.host = host
         self.port = port
         self.ssl = ssl
-        self.cancellation_token = cancellation_token
+        self.cancellation_event = cancellation_event
         self.session_time_range = session_time_range
         self.session_dow_range = session_dow_range
         self.tz = tz
@@ -53,7 +53,7 @@ class InitiatorManager:
             await wait_for_day_of_week(
                 datetime.now(tz=self.tz),
                 *self.session_dow_range,
-                cancellation_token=self.cancellation_token)
+                cancellation_event=self.cancellation_event)
 
         if self.session_time_range:
             start_time, end_time = self.session_time_range
@@ -62,14 +62,14 @@ class InitiatorManager:
                 datetime.now(tz=self.tz),
                 start_time,
                 end_time,
-                cancellation_token=self.cancellation_token)
+                cancellation_event=self.cancellation_event)
 
             return end_datetime
 
         return None
 
     async def start(self, shutdown_timeout: float = 10.0) -> None:
-        while not self.cancellation_token.is_set():
+        while not self.cancellation_event.is_set():
             try:
                 # Wait for the seeion to start.
                 end_datetime = await self.sleep_until_session_starts()
@@ -90,7 +90,7 @@ class InitiatorManager:
                         self.host,
                         self.port,
                         handler,
-                        self.cancellation_token,
+                        self.cancellation_event,
                         shutdown_timeout=shutdown_timeout,
                         ssl=self.ssl
                     ),
@@ -104,7 +104,7 @@ class InitiatorManager:
                     await asyncio.wait(
                         [
                             handler,
-                            self.cancellation_token.wait()
+                            self.cancellation_event.wait()
                         ],
                         timeout=10,
                         return_when=asyncio.FIRST_COMPLETED
@@ -131,7 +131,7 @@ def start_initiator_manager(
         logon_time_range: Optional[Tuple[time, time]] = None,
         tz: tzinfo = None
 ) -> None:
-    cancellation_token = asyncio.Event()
+    cancellation_event = asyncio.Event()
 
     def initiator_factory() -> InitiatorHandler:
         return create_initiator(
@@ -141,7 +141,7 @@ def start_initiator_manager(
             target_comp_id,
             store,
             heartbeat_timeout,
-            cancellation_token,
+            cancellation_event,
             heartbeat_threshold=heartbeat_threshold,
             logon_time_range=logon_time_range,
             tz=tz
@@ -151,12 +151,12 @@ def start_initiator_manager(
         initiator_factory,
         host,
         port,
-        cancellation_token,
+        cancellation_event,
         ssl=ssl,
         session_dow_range=session_dow_range,
         session_time_range=session_time_range
     )
 
     loop = asyncio.get_event_loop()
-    register_cancellation_token(cancellation_token, loop)
+    register_cancellation_event(cancellation_event, loop)
     loop.run_until_complete(manager.start(shutdown_timeout))

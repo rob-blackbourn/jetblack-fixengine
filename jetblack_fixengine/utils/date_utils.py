@@ -44,7 +44,7 @@ def delay_for_time_period(now: datetime, start_time: time, end_time: time) -> Tu
     return time_to_wait, end_datetime
 
 
-async def wait_for_day_of_week(now: datetime, start_dow: int, end_dow: int, cancellation_token: asyncio.Event) -> None:
+async def wait_for_day_of_week(now: datetime, start_dow: int, end_dow: int, cancellation_event: asyncio.Event) -> None:
     while not is_dow_in_range(start_dow, end_dow, now.weekday()):
         logger.info(
             f'Today is {now:%A} - waiting for {day_name[start_dow]} to connect.')
@@ -54,7 +54,7 @@ async def wait_for_day_of_week(now: datetime, start_dow: int, end_dow: int, canc
         time_to_wait = (tomorrow - now)
 
         try:
-            await asyncio.wait_for(cancellation_token.wait(), time_to_wait.total_seconds())
+            await asyncio.wait_for(cancellation_event.wait(), time_to_wait.total_seconds())
             raise asyncio.CancelledError
         except asyncio.TimeoutError:
             now += time_to_wait
@@ -64,7 +64,7 @@ async def wait_for_time_period(
         now: datetime,
         start_time: time,
         end_time: time,
-        cancellation_token: asyncio.Event
+        cancellation_event: asyncio.Event
 ) -> datetime:
     # Wait for start time.
     time_to_wait, end_datetime = delay_for_time_period(
@@ -74,7 +74,7 @@ async def wait_for_time_period(
     else:
         logger.info(f'Waiting for {time_to_wait}')
         try:
-            await asyncio.wait_for(cancellation_token.wait(), timeout=time_to_wait.total_seconds())
+            await asyncio.wait_for(cancellation_event.wait(), timeout=time_to_wait.total_seconds())
             raise asyncio.CancelledError
         except asyncio.TimeoutError:
             now = datetime.now()

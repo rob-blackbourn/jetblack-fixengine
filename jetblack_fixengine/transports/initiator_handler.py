@@ -33,7 +33,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             target_comp_id: str,
             store: Store,
             heartbeat_timeout: int,
-            cancellation_token: asyncio.Event,
+            cancellation_event: asyncio.Event,
             *,
             heartbeat_threshold: int = 1,
             logon_time_range: Optional[Tuple[time, time]] = None,
@@ -41,7 +41,7 @@ class InitiatorHandler(metaclass=ABCMeta):
     ) -> None:
         self.heartbeat_timeout = heartbeat_timeout
         self.heartbeat_threshold = heartbeat_threshold
-        self.cancellation_token = cancellation_token
+        self.cancellation_event = cancellation_event
         self.logon_time_range = logon_time_range
         self.tz = tz
         self.fix_message_factory = FixMessageFactory(
@@ -325,7 +325,7 @@ class InitiatorHandler(metaclass=ABCMeta):
                 datetime.now(tz=self.tz),
                 start_time,
                 end_time,
-                cancellation_token=self.cancellation_token
+                cancellation_event=self.cancellation_event
             )
             return end_datetime
 

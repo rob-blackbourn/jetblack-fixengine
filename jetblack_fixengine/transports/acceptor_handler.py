@@ -2,7 +2,7 @@
 
 from abc import ABCMeta, abstractmethod
 import asyncio
-from datetime import datetime, time, tzinfo
+from datetime import datetime, time, tzinfo, timezone
 import logging
 from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple
 import uuid
@@ -11,7 +11,7 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 STATE_LOGGING_ON = 'logon.start'
 STATE_LOGGED_ON = 'logon.ok'
@@ -20,8 +20,11 @@ STATE_LOGGED_OUT = 'logout.done'
 STATE_TEST_HEARTBEAT = 'test.heartbeat'
 STATE_SYNCHRONISING = 'session.sync'
 
+EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
+
 
 class AcceptorHandler(metaclass=ABCMeta):
+    """The base class for acceptor handlers"""
 
     def __init__(
             self,
@@ -30,7 +33,7 @@ class AcceptorHandler(metaclass=ABCMeta):
             target_comp_id: str,
             store: Store,
             heartbeat_timeout: int,
-            cancellation_token: asyncio.Event,
+            cancellation_event: asyncio.Event,
             *,
             heartbeat_threshold: int = 1,
             logon_time_range: Optional[Tuple[time, time]] = None,
@@ -41,25 +44,31 @@ class AcceptorHandler(metaclass=ABCMeta):
         self.target_comp_id = target_comp_id
         self.heartbeat_timeout = heartbeat_timeout
         self.heartbeat_threshold = heartbeat_threshold
-        self.cancellation_token = cancellation_token
+        self.cancellation_event = cancellation_event
         self.logon_time_range = logon_time_range
         self.tz = tz
 
-        self._state = None
-        self._test_heartbeat_message = None
-        self._last_send_time_utc: Optional[datetime] = None
-        self._last_receive_time_utc: Optional[datetime] = None
+        self._state: Optional[str] = None
+        self._test_heartbeat_message: Optional[str] = None
+        self._last_send_time_utc: datetime = EPOCH_UTC
+        self._last_receive_time_utc: datetime = EPOCH_UTC
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
+        self._send: Optional[Callable[[Event], Awaitable[None]]] = None
+        self._receive: Optional[Callable[[], Awaitable[Event]]] = None
 
-    async def __call__(self, send: Callable[[Event], Awaitable[None]], receive: Callable[[], Awaitable[Event]]) -> None:
+    async def __call__(
+            self,
+            send: Callable[[Event], Awaitable[None]],
+            receive: Callable[[], Awaitable[Event]]
+    ) -> None:
         self._send, self._receive = send, receive
 
         # Wait for connection.
         event = await receive()
 
         if event['type'] == 'connected':
-            logger.info('connected')
+            LOGGER.info('connected')
             self._state = STATE_LOGGING_ON
 
             logout_time = await self._wait_till_logon_time()
@@ -89,7 +98,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         else:
             raise RuntimeError('Failed to connect')
 
-        logger.info('disconnected')
+        LOGGER.info('disconnected')
 
     async def _wait_till_logon_time(self) -> Optional[datetime]:
         if not self.logon_time_range:
@@ -100,7 +109,7 @@ class AcceptorHandler(metaclass=ABCMeta):
             datetime.now(tz=self.tz),
             start_time,
             end_time,
-            cancellation_token=self.cancellation_token
+            cancellation_event=self.cancellation_event
         )
         return logout_time
 
@@ -179,11 +188,13 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._session.set_incoming_seqnum(seqnum)
 
     async def _send_event(self, event: Event, send_time_utc: datetime) -> None:
+        if self._send is None:
+            raise ValueError("Not connected")
         await self._send(event)
         self._last_send_time_utc = send_time_utc
 
     async def _send_fix_message(self, message: Mapping[str, Any], send_time_utc: datetime) -> None:
-        logger.info(f'sending: {message}')
+        LOGGER.info('sending: %s', message)
         event = {
             'type': 'fix',
             'message_contents': message
@@ -191,6 +202,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send_event(event, send_time_utc)
 
     async def logon(self) -> None:
+        """Send a logon message"""
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
         message = {
@@ -206,6 +218,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send_fix_message(message, send_time_utc)
 
     async def send_logout(self) -> None:
+        """Send a logout message"""
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
         message = {
@@ -219,6 +232,12 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send_fix_message(message, send_time_utc)
 
     async def send_heartbeat(self, test_req_id: Optional[str] = None) -> None:
+        """Send a heartbeat
+
+        Args:
+            test_req_id (Optional[str], optional): An optional test req id.
+                Defaults to None.
+        """
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
         message = {
@@ -233,6 +252,12 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send_fix_message(message, send_time_utc)
 
     async def send_resend_request(self, begin_seqnum: int, end_seqnum: int = 0) -> None:
+        """Send a resend request.
+
+        Args:
+            begin_seqnum (int): The begin seqnum
+            end_seqnum (int, optional): An optional end seqnum. Defaults to 0.
+        """
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
         message = {
@@ -247,6 +272,11 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send_fix_message(message, send_time_utc)
 
     async def send_test_request(self, test_req_id: str) -> None:
+        """Send a test request.
+
+        Args:
+            test_req_id (str): The test req id.
+        """
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
         message = {
@@ -260,6 +290,12 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send_fix_message(message, send_time_utc)
 
     async def send_sequence_reset(self, gap_fill: bool, new_seq_no: int) -> None:
+        """Send a sequence reset.
+
+        Args:
+            gap_fill (bool): If true set the GapFillFlag.
+            new_seq_no (int): The new sequence number.
+        """
         send_time_utc = datetime.utcnow()
         msg_seq_num = await self._next_outgoing_seqnum()
         message = {
@@ -274,7 +310,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send_fix_message(message, send_time_utc)
 
     async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
-        logger.info(f'on_admin_message: {message}')
+        LOGGER.info('on_admin_message: %s', message)
 
         # Only handle if unhandled by the overrideing method.
         override_status = await self.on_admin_message(message)
@@ -298,13 +334,23 @@ class AcceptorHandler(metaclass=ABCMeta):
             self._state = STATE_LOGGED_OUT
             return False
         else:
-            logger.warning(
-                f'unhandled admin message type "{message["MsgType"]}".')
+            LOGGER.warning(
+                'unhandled admin message type "%s".',
+                message["MsgType"]
+            )
             return True
 
     @abstractmethod
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
-        raise NotImplementedError
+        """Handle an admin message.
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+
+        Returns:
+            Optional[bool]: If true override the base processing.
+        """
+        ...
 
     async def _on_login(self, message: Mapping[str, Any]) -> bool:
         if await self.on_logon(message):
@@ -321,13 +367,21 @@ class AcceptorHandler(metaclass=ABCMeta):
     @abstractmethod
     async def on_logon(self, message: Mapping[str, Any]) -> bool:
         """Return True if the login is valid"""
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     async def on_logout(self) -> None:
-        """Perform any logout lasks"""
-        raise NotImplementedError
+        """Perform any logout tasks"""
+        ...
 
     @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> bool:
-        raise NotImplementedError
+        """Handle an application message.
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+
+        Returns:
+            bool: If true, override any base processing.
+        """
+        ...

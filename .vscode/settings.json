@@ -14,6 +14,7 @@
     "cSpell.words": [
         "NUMINGROUP",
         "SEQNUM",
+        "SYNCHRONISING",
         "aiofiles",
         "aiosqlite",
         "aiter",
@@ -33,6 +34,7 @@
         "ruamel",
         "seqnums",
         "servicepack",
+        "signum",
         "strftime",
         "strptime",
         "tzinfo",

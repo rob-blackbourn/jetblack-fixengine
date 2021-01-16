@@ -4,9 +4,10 @@ import asyncio
 from asyncio import Queue, Task, StreamWriter, Future
 from enum import IntEnum
 import logging
-from typing import Any, AsyncIterator, Callable, Set, Optional, cast
+from typing import AsyncIterator, Set, cast
 
 from ..types import Handler, Event
+from ..utils.cancellation import cancel_await
 
 logger = logging.getLogger(__name__)
 
@@ -20,24 +21,12 @@ class FixState(IntEnum):
     HANDLER_CLOSED = 5
 
 
-async def _cancel_await(
-        task: "Task[Any]",
-        callback: Optional[Callable[[], None]] = None
-) -> None:
-    task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        if callback is not None:
-            callback()
-
-
 async def fix_stream_processor(
         handler: Handler,
         shutdown_timeout: float,
         reader: AsyncIterator[bytes],
         writer: StreamWriter,
-        cancellation_token: asyncio.Event
+        cancellation_event: asyncio.Event
 ) -> None:
     """Create a processor for a stream of FIX data.
 
@@ -46,12 +35,12 @@ async def fix_stream_processor(
         shutdown_timeout (float): The time to wait before shutting down.
         reader (AsyncIterator[bytes]): The stream reader.
         writer (StreamWriter): The stream writer.
-        cancellation_token (asyncio.Event): An event with which to cancel the processing.
+        cancellation_event (asyncio.Event): An event with which to cancel the processing.
 
     Raises:
         RuntimeError: If an invalid event was received.
     """
-    if cancellation_token.is_set():
+    if cancellation_event.is_set():
         return
 
     read_queue: "Queue[Event]" = Queue()
@@ -76,7 +65,7 @@ async def fix_stream_processor(
     handler_task = asyncio.create_task(handler(send, receive))
     read_task: Task[bytes] = asyncio.create_task(reader_iter.__anext__())
     write_task: Task[Event] = asyncio.create_task(write_queue.get())
-    cancellation_task = asyncio.create_task(cancellation_token.wait())
+    cancellation_task = asyncio.create_task(cancellation_event.wait())
     pending: Set[Future] = {
         read_task,
         write_task,
@@ -84,7 +73,7 @@ async def fix_stream_processor(
         cancellation_task
     }
     # Start the task service loop.
-    while state == FixState.OK and not cancellation_token.is_set():
+    while state == FixState.OK and not cancellation_event.is_set():
 
         # Wait for a task to be completed.
         completed, pending = await asyncio.wait(
@@ -152,8 +141,8 @@ async def fix_stream_processor(
         # When the handler task has finished the session if over.
         # Calling done will re-raise an exception.
         handler_task.done()
-        await _cancel_await(read_task)
-        await _cancel_await(write_task)
+        await cancel_await(read_task)
+        await cancel_await(write_task)
         writer.close()
     else:
         # Notify the client of the disconnection.
@@ -161,11 +150,11 @@ async def fix_stream_processor(
             'type': 'disconnect'
         })
 
-        await _cancel_await(write_task)
+        await cancel_await(write_task)
 
         if state != FixState.EOF:
             writer.close()
-            await _cancel_await(read_task)
+            await cancel_await(read_task)
 
         if not handler_task.cancelled():
             logger.info(
@@ -176,7 +165,7 @@ async def fix_stream_processor(
                 await asyncio.wait_for(handler_task, timeout=shutdown_timeout)
             except asyncio.TimeoutError:
                 logger.error('Cancelling the handler')
-                await _cancel_await(
+                await cancel_await(
                     handler_task,
                     lambda: logger.warning(
                         'The handler task did not complete and has been cancelled'
