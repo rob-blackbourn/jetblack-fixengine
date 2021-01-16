@@ -2,11 +2,11 @@
 
 from typing import Iterator, cast
 
-from aiofix.transports.fix_events import (
+from jetblack_fixengine.transports.fix_events import (
     FixReadError, FixReadEventType,
     FixReadDataReady
 )
-from aiofix.transports.fix_read_buffer import FixReadBuffer
+from jetblack_fixengine.transports.fix_read_buffer import FixReadBuffer
 
 
 def _bytes_writer(buf: bytes, chunk_size: int = -1) -> Iterator[bytes]:

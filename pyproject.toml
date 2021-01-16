@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "aiofix"
+name = "jetblack-fixengine"
 version = "0.1.0"
 description = "A pure Python implementation of the FIX protocol"
 authors = ["Rob Blackbourn <rob.blackbourn@googlemail.com>"]
 license = "Apache-2.0"
 packages = [
-    { include = "aiofix" }
+    { include = "jetblack_fixengine" }
 ]
-repository = "https://github.com/rob-blackbourn/aiofix"
+repository = "https://github.com/rob-blackbourn/jetblack-fixengine"
 
 [tool.poetry.dependencies]
 python = "^3.8"
