@@ -1,6 +1,10 @@
-import aiosqlite
+"""A sqlite2 store"""
+
 import sqlite3
 from typing import Any, List, Mapping, MutableMapping, Tuple
+
+import aiosqlite
+
 from ..types import Session, Store
 
 CREATE_SEQNUM_TABLE_SQL = """
@@ -21,7 +25,7 @@ WHERE sender_comp_id = ? AND target_comp_id = ?
 """
 
 SEQNUM_INSERT = """
-INSERT INTO initiator_seqnums(sender_comp_id, target_comp_id, outgoing_seqnum, incomping_seqnum)
+INSERT INTO initiator_seqnums(sender_comp_id, target_comp_id, outgoing_seqnum, incoming_seqnum)
 VALUES ( ?, ?, ?, ?)
 """
 
@@ -56,7 +60,7 @@ CREATE TABLE IF NOT EXISTS initiator_messages
 """
 
 MESSAGE_INSERT = """
-INSERT INTO initiator_messages(sender_comp_id, target_comp_id, outgoing_seqnum, incomping_seqnum, message)
+INSERT INTO initiator_messages(sender_comp_id, target_comp_id, outgoing_seqnum, incoming_seqnum, message)
 VALUES ( ?, ?, ?, ?, ?)
 """
 
