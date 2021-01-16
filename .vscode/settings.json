@@ -2,7 +2,6 @@
     "python.pythonPath": ".venv/bin/python",
     "python.linting.pylintUseMinimalCheckers": false,
     "python.linting.pylintEnabled": true,
-    "python.linting.mypyEnabled": true,
     "editor.formatOnSave": true,
     "cSpell.words": [
         "NUMINGROUP",
@@ -10,14 +9,24 @@
         "aiofiles",
         "aiofix",
         "aiosqlite",
+        "aiter",
+        "anext",
         "asyncio",
         "autopep",
+        "deque",
+        "fixparser",
+        "jetblack",
+        "klass",
         "mypy",
         "pylint",
         "pytest",
         "pytz",
+        "ruamel",
+        "seqnums",
+        "servicepack",
         "strftime",
         "strptime",
+        "tzinfo",
         "tzlocal"
     ],
     "python.testing.pytestArgs": [
@@ -25,5 +34,7 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticMode": "workspace"
 }

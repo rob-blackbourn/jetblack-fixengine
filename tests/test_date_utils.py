@@ -1,8 +1,14 @@
 """Tests for date utils"""
 
 from datetime import time, datetime
+
 import pytz
-from aiofix.utils.date_utils import is_dow_in_range, is_time_in_range, delay_for_time_period
+
+from aiofix.utils.date_utils import (
+    is_dow_in_range,
+    is_time_in_range,
+    delay_for_time_period
+)
 
 MONDAY = 0
 TUESDAY = 1
@@ -14,6 +20,7 @@ SUNDAY = 6
 
 
 def test_dow_range():
+    """Test day of week range"""
     assert is_dow_in_range(MONDAY, FRIDAY, MONDAY)
     assert is_dow_in_range(MONDAY, FRIDAY, WEDNESDAY)
     assert is_dow_in_range(MONDAY, FRIDAY, FRIDAY)
@@ -34,6 +41,7 @@ def test_dow_range():
 
 
 def test_time_range():
+    """Test time range"""
     assert is_time_in_range(time(0, 0, 0), time(17, 30, 0), time(0, 0, 0))
     assert is_time_in_range(time(0, 0, 0), time(17, 30, 0), time(12, 0, 0))
     assert is_time_in_range(time(0, 0, 0), time(17, 30, 0), time(17, 30, 0))
@@ -42,6 +50,7 @@ def test_time_range():
 
 
 def test_seconds_for_period():
+    """Test seconds in a period"""
     # now=6am, star=8am, end=4pm
     time_to_wait, end_datetime = delay_for_time_period(
         datetime(2019, 1, 1, 6, 0, 0),

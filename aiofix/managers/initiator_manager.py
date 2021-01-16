@@ -6,14 +6,15 @@ from datetime import datetime, time, tzinfo
 import logging
 from ssl import SSLContext
 from typing import Optional, Tuple, Callable, Type
-from ..meta_data import ProtocolMetaData
+
+from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..transports import InitiatorHandler, create_initiator
 from ..types import Store
 from ..transports import initiate
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_token
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 WEEKDAYS = ['Monday', 'Tuesday']
 
@@ -44,8 +45,11 @@ class InitiatorManager:
     async def sleep_until_session_starts(self) -> Optional[datetime]:
         if self.session_dow_range:
             start_dow, end_dow = self.session_dow_range
-            logger.info(
-                f'Session from {calendar.day_name[start_dow]} to {calendar.day_name[end_dow]}')
+            LOGGER.info(
+                'Session from %s to %s',
+                calendar.day_name[start_dow],
+                calendar.day_name[end_dow]
+            )
             await wait_for_day_of_week(
                 datetime.now(tz=self.tz),
                 *self.session_dow_range,
@@ -53,7 +57,7 @@ class InitiatorManager:
 
         if self.session_time_range:
             start_time, end_time = self.session_time_range
-            logger.info(f'Session from {start_time} to {end_time}')
+            LOGGER.info('Session from %s to %s', start_time, end_time)
             end_datetime = await wait_for_time_period(
                 datetime.now(tz=self.tz),
                 start_time,
@@ -78,7 +82,9 @@ class InitiatorManager:
             try:
                 # Start the initiator for the duration of the session.
                 session_timeout = (
-                    end_datetime - datetime.now(tz=self.tz)).total_seconds() if end_datetime else None
+                    end_datetime - datetime.now(tz=self.tz)
+                ).total_seconds() if end_datetime else None
+
                 await asyncio.wait_for(
                     initiate(
                         self.host,
@@ -96,7 +102,10 @@ class InitiatorManager:
 
                 try:
                     await asyncio.wait(
-                        [handler, self.cancellation_token.wait()],
+                        [
+                            handler,
+                            self.cancellation_token.wait()
+                        ],
                         timeout=10,
                         return_when=asyncio.FIRST_COMPLETED
                     )

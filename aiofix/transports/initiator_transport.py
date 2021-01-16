@@ -1,18 +1,28 @@
+"""Initiator transport"""
+
 import asyncio
 from datetime import tzinfo, time
 import logging
 from ssl import SSLContext
 from typing import Optional, Callable, Type, Tuple
+
+from jetblack_fixparser.meta_data import ProtocolMetaData
+from jetblack_fixparser.fix_message import SOH
+
 from ..types import Handler, Store
-from ..meta_data import ProtocolMetaData
 from ..utils.cancellation import register_cancellation_token
-from ..middlewares import mw, FixMessageMiddleware
+
 from .fix_transport import fix_stream_processor
+from .fix_read_buffer import FixReadBuffer
+from .fix_reader_async import fix_read_async
 from .initiator_handler import InitiatorHandler
 
 logger = logging.getLogger(__name__)
 
-InitiatorFactory = Callable[[ProtocolMetaData, str, str, Store, int, asyncio.Event], Handler]
+InitiatorFactory = Callable[
+    [ProtocolMetaData, str, str, Store, int, asyncio.Event],
+    Handler
+]
 
 
 async def initiate(
@@ -22,14 +32,36 @@ async def initiate(
         cancellation_token: asyncio.Event,
         *,
         ssl: Optional[SSLContext] = None,
-        shutdown_timeout: float = 10.0
+        shutdown_timeout: float = 10.0,
+        sep: bytes = SOH,
+        convert_sep_to_soh_for_checksum: bool = False,
+        validate: bool = True
+
 ) -> None:
-    logger.info(f'connecting to {host}:{port}{" over ssl" if ssl else ""}')
+    logger.info(
+        'connecting to %s:%s%s',
+        host,
+        port,
+        " over ssl" if ssl else ""
+    )
 
     reader, writer = await asyncio.open_connection(host, port, ssl=ssl)
-    await fix_stream_processor(handler, shutdown_timeout, reader, writer, cancellation_token)
+    read_buffer = FixReadBuffer(sep, convert_sep_to_soh_for_checksum, validate)
+    buffered_reader = fix_read_async(read_buffer, reader, 1024)
+    await fix_stream_processor(
+        handler,
+        shutdown_timeout,
+        buffered_reader,
+        writer,
+        cancellation_token
+    )
 
-    logger.info(f'disconnected from {host}:{port}{" over ssl" if ssl else ""}')
+    logger.info(
+        'disconnected from %s:%s%s',
+        host,
+        port,
+        " over ssl" if ssl else ""
+    )
 
 
 def create_initiator(
@@ -43,9 +75,9 @@ def create_initiator(
         *,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: tzinfo = None
+        tz: Optional[tzinfo] = None
 ) -> InitiatorHandler:
-    handler: Handler = klass(
+    handler = klass(
         protocol,
         sender_comp_id,
         target_comp_id,
@@ -56,8 +88,6 @@ def create_initiator(
         logon_time_range=logon_time_range,
         tz=tz
     )
-    middleware = FixMessageMiddleware(protocol)
-    handler: InitiatorHandler = mw([middleware], handler=handler)
     return handler
 
 
@@ -75,7 +105,7 @@ def start_initiator(
         shutdown_timeout: float = 10.0,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: tzinfo = None
+        tz: Optional[tzinfo] = None
 
 ) -> None:
     cancellation_token = asyncio.Event()

@@ -1,8 +1,12 @@
-import aiofiles
+"""File storage"""
+
 import os.path
 from typing import Optional
 from urllib.parse import quote_from_bytes
 from typing import MutableMapping, Tuple
+
+import aiofiles
+
 from ..types import Session, Store
 
 
@@ -17,12 +21,14 @@ class FileSession(Session):
             message_style: Optional[str] = 'urlencode'
     ) -> None:
         # The file for the sequence numbers.
-        self.seqnum_filename = os.path.join(directory, f'{sender_comp_id}-{target_comp_id}-initiator-seqnum.txt')
+        self.seqnum_filename = os.path.join(
+            directory, f'{sender_comp_id}-{target_comp_id}-initiator-seqnum.txt')
         if not os.path.exists(self.seqnum_filename):
             with open(self.seqnum_filename, 'wt') as f:
                 f.write("0:0\n")
         elif not os.path.isfile(self.seqnum_filename):
-            raise RuntimeError(f'session file "{self.seqnum_filename}" is not a file.')
+            raise RuntimeError(
+                f'session file "{self.seqnum_filename}" is not a file.')
 
         with open(self.seqnum_filename) as f:
             line = f.readline() or '0:0'
@@ -34,7 +40,8 @@ class FileSession(Session):
         self._incoming_seqnum = int(incoming_seqnum)
 
         # The file for the messages
-        self.message_filename = os.path.join(directory, f'{sender_comp_id}-{target_comp_id}-initiator-message.txt')
+        self.message_filename = os.path.join(
+            directory, f'{sender_comp_id}-{target_comp_id}-initiator-message.txt')
         self.message_style = message_style
 
     async def _save(self) -> None:
@@ -52,8 +59,8 @@ class FileSession(Session):
     async def get_seqnums(self) -> Tuple[int, int]:
         return self._outgoing_seqnum, self._incoming_seqnum
 
-    async def set_seqnums(self, outgoing_seqnum: int, incoming_seqnums: int) -> None:
-        self._outgoing_seqnum, self._incoming_seqnum = outgoing_seqnum, incoming_seqnums
+    async def set_seqnums(self, outgoing_seqnum: int, incoming_seqnum: int) -> None:
+        self._outgoing_seqnum, self._incoming_seqnum = outgoing_seqnum, incoming_seqnum
         await self._save()
 
     async def get_outgoing_seqnum(self) -> int:
@@ -88,7 +95,7 @@ class FileStore(Store):
             message_style: Optional[str] = 'urlencode'
     ) -> None:
         if not os.path.exists(directory):
-            os.makedirs(directory)
+            os.makedirs(directory)  # type: ignore
         elif not os.path.isdir(directory):
             raise RuntimeError(f'not a directory "{directory}"')
 
@@ -102,6 +109,7 @@ class FileStore(Store):
         if key in self._sessions:
             return self._sessions[key]
 
-        session = FileSession(self.directory, sender_comp_id, target_comp_id, message_style=self.message_style)
+        session = FileSession(self.directory, sender_comp_id,
+                              target_comp_id, message_style=self.message_style)
         self._sessions[key] = session
         return session

@@ -1,3 +1,5 @@
+"""Sart the initiator manager"""
+
 import calendar
 from datetime import time
 import logging
@@ -7,7 +9,7 @@ from typing import Optional, Mapping, Any
 from aiofix.transports import InitiatorHandler
 from aiofix.persistence import FileStore
 from aiofix.managers import start_initiator_manager
-from aiofix.loader import load_protocol
+from jetblack_fixparser.loader import load_yaml_protocol
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -21,7 +23,7 @@ HOST = '127.0.0.1'
 PORT = 10101
 SENDER_COMP_ID = 'CLIENT'
 TARGET_COMP_ID = 'SERVER'
-PROTOCOL = load_protocol(os.path.join(etc, 'FIX44.xml'))
+PROTOCOL = load_yaml_protocol(os.path.join(etc, 'FIX44.yaml'))
 HEARTBEAT_TIMEOUT = 30
 TZ = pytz.timezone('Europe/London')
 

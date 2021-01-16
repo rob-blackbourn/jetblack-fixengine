@@ -1,10 +1,13 @@
+"""Acceptor handler"""
+
 from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, time, tzinfo
 import logging
-from typing import Mapping, Any, Optional, Tuple
+from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple
 import uuid
-from ..meta_data import ProtocolMetaData
+
+from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 
@@ -31,7 +34,7 @@ class AcceptorHandler(metaclass=ABCMeta):
             *,
             heartbeat_threshold: int = 1,
             logon_time_range: Optional[Tuple[time, time]] = None,
-            tz: tzinfo = None
+            tz: Optional[tzinfo] = None
     ) -> None:
         self.protocol = protocol
         self.sender_comp_id = sender_comp_id
@@ -44,12 +47,12 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         self._state = None
         self._test_heartbeat_message = None
-        self._last_send_time_utc: datetime = None
-        self._last_receive_time_utc: datetime = None
+        self._last_send_time_utc: Optional[datetime] = None
+        self._last_receive_time_utc: Optional[datetime] = None
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
 
-    async def __call__(self, send, receive) -> None:
+    async def __call__(self, send: Callable[[Event], Awaitable[None]], receive: Callable[[], Awaitable[Event]]) -> None:
         self._send, self._receive = send, receive
 
         # Wait for connection.
@@ -112,7 +115,8 @@ class AcceptorHandler(metaclass=ABCMeta):
 
     async def _send_heartbeat_if_required(self) -> float:
         now_utc = datetime.utcnow()
-        seconds_since_last_send = (now_utc - self._last_send_time_utc).total_seconds()
+        seconds_since_last_send = (
+            now_utc - self._last_send_time_utc).total_seconds()
         if seconds_since_last_send >= self.heartbeat_timeout and self._state == STATE_LOGGED_ON:
             await self.send_heartbeat()
             seconds_since_last_send = 0
@@ -155,7 +159,8 @@ class AcceptorHandler(metaclass=ABCMeta):
             return
 
         now_utc = datetime.utcnow()
-        seconds_since_last_receive = (now_utc - self._last_receive_time_utc).total_seconds()
+        seconds_since_last_receive = (
+            now_utc - self._last_receive_time_utc).total_seconds()
         if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
             self._state = STATE_TEST_HEARTBEAT
             self._test_heartbeat_message = str(uuid.uuid4())
@@ -293,7 +298,8 @@ class AcceptorHandler(metaclass=ABCMeta):
             self._state = STATE_LOGGED_OUT
             return False
         else:
-            logger.warning(f'unhandled admin message type "{message["MsgType"]}".')
+            logger.warning(
+                f'unhandled admin message type "{message["MsgType"]}".')
             return True
 
     @abstractmethod
