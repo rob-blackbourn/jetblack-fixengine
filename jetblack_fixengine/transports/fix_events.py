@@ -29,7 +29,10 @@ class FixReadNeedsMoreData(FixReadEvent):
         self.length = length
 
     def __str__(self) -> str:
-        return f'<FixReadNeedsMoreData: {super().__str__()}, length={self.length}>'
+        return '<FixReadNeedsMoreData: {base}, length={length}>'.format(
+            base=super().__str__(),
+            length=self.length
+        )
 
 
 class FixReadDataReady(FixReadEvent):

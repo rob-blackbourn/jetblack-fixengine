@@ -23,6 +23,7 @@
         "autopep",
         "blksiz",
         "deque",
+        "docstrings",
         "fixengine",
         "fixparser",
         "jetblack",
