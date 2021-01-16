@@ -6,10 +6,11 @@ import logging
 from ssl import SSLContext
 from typing import Optional, Callable, Type, Tuple
 
-from ..types import Handler, Store
 from jetblack_fixparser.meta_data import ProtocolMetaData
-from ..utils.cancellation import register_cancellation_token
 from jetblack_fixparser.fix_message import SOH
+
+from ..types import Handler, Store
+from ..utils.cancellation import register_cancellation_token
 
 from .fix_transport import fix_stream_processor
 from .fix_read_buffer import FixReadBuffer

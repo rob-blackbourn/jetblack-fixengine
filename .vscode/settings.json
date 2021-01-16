@@ -14,6 +14,8 @@
         "asyncio",
         "autopep",
         "deque",
+        "fixparser",
+        "jetblack",
         "klass",
         "mypy",
         "pylint",

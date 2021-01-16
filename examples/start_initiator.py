@@ -20,11 +20,11 @@ etc = os.path.join(root, 'etc')
 
 STORE = FileStore(os.path.join(root, 'store'))
 HOST = '127.0.0.1'
-PORT = 10101
-SENDER_COMP_ID = 'CLIENT'
-TARGET_COMP_ID = 'SERVER'
+PORT = 9801
+SENDER_COMP_ID = 'INITIATOR1'
+TARGET_COMP_ID = 'ACCEPTOR'
 HEARTBEAT_TIMEOUT = 30
-PROTOCOL = load_yaml_protocol('etc/FIX42.yaml')
+PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 TZ = pytz.timezone('Europe/London')
 
 
@@ -56,6 +56,6 @@ start_initiator(
     STORE,
     HEARTBEAT_TIMEOUT,
     shutdown_timeout=10,
-    logon_time_range=(time(8, 0, 0), time(17, 0, 0)),
+    logon_time_range=(time(0, 30, 0), time(23, 30, 0)),
     tz=TZ
 )
