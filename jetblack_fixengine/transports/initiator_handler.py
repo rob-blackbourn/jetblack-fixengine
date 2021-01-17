@@ -76,7 +76,19 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send(event)
         self._last_send_time_utc = send_time_utc
 
-    async def _send_fix_message(self, fix_message: FixMessage, send_time_utc: datetime) -> None:
+    async def send_message(
+            self,
+            msg_type: str,
+            message: Optional[Mapping[str, Any]] = None
+    ) -> None:
+        send_time_utc = datetime.now(timezone.utc)
+        msg_seq_num = await self._next_outgoing_seqnum()
+        fix_message = self.fix_message_factory.create(
+            msg_type,
+            msg_seq_num,
+            send_time_utc,
+            message
+        )
         LOGGER.info('sending: %s', fix_message.message)
         event = {
             'type': 'fix',
@@ -85,34 +97,21 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self._send_event(event, send_time_utc)
 
     async def logon(self) -> None:
-        """Send a logon message
-        """
-        send_time_utc = datetime.now(timezone.utc)
-        msg_seq_num = await self._next_outgoing_seqnum()
-        fix_message = self.fix_message_factory.create(
+        """Send a logon message"""
+        self._state = STATE_LOGGING_ON
+        await self.send_message(
             'LOGON',
-            msg_seq_num,
-            send_time_utc,
             {
                 'EncryptMethod': 'NONE',
                 'HeartBtInt': self.heartbeat_timeout
             }
         )
-        self._state = STATE_LOGGING_ON
-        await self._send_fix_message(fix_message, send_time_utc)
 
     async def logout(self) -> None:
         """Send a logout message.
         """
-        send_time_utc = datetime.now(timezone.utc)
-        msg_seq_num = await self._next_outgoing_seqnum()
-        fix_message = self.fix_message_factory.create(
-            'LOGOUT',
-            msg_seq_num,
-            send_time_utc
-        )
         self._state = STATE_LOGGING_OFF
-        await self._send_fix_message(fix_message, send_time_utc)
+        await self.send_message('LOGOUT')
 
     async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
         """Send a heartbeat message.
@@ -121,18 +120,10 @@ class InitiatorHandler(metaclass=ABCMeta):
             test_req_id (Optional[str], optional): An optional test req id.
                 Defaults to None.
         """
-        send_time_utc = datetime.now(timezone.utc)
-        msg_seq_num = await self._next_outgoing_seqnum()
         body_kwargs = {}
         if test_req_id:
             body_kwargs['TestReqID'] = test_req_id
-        fix_message = self.fix_message_factory.create(
-            'HEARTBEAT',
-            msg_seq_num,
-            send_time_utc,
-            body_kwargs
-        )
-        await self._send_fix_message(fix_message, send_time_utc)
+        await self.send_message('HEARTBEAT', body_kwargs)
 
     async def resend_request(self, begin_seqnum: int, end_seqnum: int = 0) -> None:
         """Send a resend request.
@@ -141,18 +132,13 @@ class InitiatorHandler(metaclass=ABCMeta):
             begin_seqnum (int): The begin seqnum
             end_seqnum (int, optional): An optional end seqnum. Defaults to 0.
         """
-        send_time_utc = datetime.now(timezone.utc)
-        msg_seq_num = await self._next_outgoing_seqnum()
-        fix_message = self.fix_message_factory.create(
+        await self.send_message(
             'RESEND_REQUEST',
-            msg_seq_num,
-            send_time_utc,
             {
                 'BeginSeqNo': begin_seqnum,
                 'EndSeqNo': end_seqnum
             }
         )
-        await self._send_fix_message(fix_message, send_time_utc)
 
     async def test_request(self, test_req_id: str) -> None:
         """Send a test request.
@@ -160,17 +146,12 @@ class InitiatorHandler(metaclass=ABCMeta):
         Args:
             test_req_id (str): The test req id.
         """
-        send_time_utc = datetime.now(timezone.utc)
-        msg_seq_num = await self._next_outgoing_seqnum()
-        fix_message = self.fix_message_factory.create(
+        await self.send_message(
             'TEST_REQUEST',
-            msg_seq_num,
-            send_time_utc,
             {
                 'TestReqID': test_req_id
             }
         )
-        await self._send_fix_message(fix_message, send_time_utc)
 
     async def sequence_reset(self, gap_fill: bool, new_seq_no: int) -> None:
         """Send a sequence reset.
@@ -179,18 +160,13 @@ class InitiatorHandler(metaclass=ABCMeta):
             gap_fill (bool): If true set the GapFillFlag.
             new_seq_no (int): The new seqnum.
         """
-        send_time_utc = datetime.now(timezone.utc)
-        msg_seq_num = await self._next_outgoing_seqnum()
-        fix_message = self.fix_message_factory.create(
+        await self.send_message(
             'SEQUENCE_RESET',
-            msg_seq_num,
-            send_time_utc,
             {
                 'GapFillFlag': gap_fill,
                 'NewSeqNo': new_seq_no
             }
         )
-        await self._send_fix_message(fix_message, send_time_utc)
 
     async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
         LOGGER.info('on_admin_message: %s', message)
