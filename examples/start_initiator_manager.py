@@ -1,4 +1,4 @@
-"""Sart the initiator manager"""
+"""Start the initiator manager"""
 
 import calendar
 from datetime import time
@@ -6,6 +6,7 @@ import logging
 import os.path
 import pytz
 from typing import Optional, Mapping, Any
+
 from jetblack_fixengine.transports import InitiatorHandler
 from jetblack_fixengine.persistence import FileStore
 from jetblack_fixengine.managers import start_initiator_manager

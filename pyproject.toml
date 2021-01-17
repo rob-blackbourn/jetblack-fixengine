@@ -17,7 +17,7 @@ pytz = "^2018.9"
 tzlocal = "^1.5"
 wheel = "^0.34.2"
 "ruamel.yaml" = "^0.16.10"
-jetblack-fixparser = "^1.0"
+jetblack-fixparser = "^2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.2"

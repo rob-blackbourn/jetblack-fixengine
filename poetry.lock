@@ -84,7 +84,7 @@ colors = ["colorama (>=0.4.3,<0.5.0)"]
 
 [[package]]
 name = "jetblack-fixparser"
-version = "1.0.1"
+version = "2.0.0"
 description = "A parser for FIX messages"
 category = "main"
 optional = false
@@ -343,7 +343,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "2047cfc650a624b049db2558aa8fcb46acf9cdd51b99defde53c4b4792d392ae"
+content-hash = "07ff6d260f9e82219dc86974b5b3ae7d3edec1a22889c3ffd5141b57fc1737fc"
 
 [metadata.files]
 aiofiles = [
@@ -377,8 +377,8 @@ isort = [
     {file = "isort-5.7.0.tar.gz", hash = "sha256:c729845434366216d320e936b8ad6f9d681aab72dc7cbc2d51bedc3582f3ad1e"},
 ]
 jetblack-fixparser = [
-    {file = "jetblack-fixparser-1.0.1.tar.gz", hash = "sha256:cc7e27cc7de9d912ff649b1727b33b0c59fabd32e1b549e7341d37573a5f28c1"},
-    {file = "jetblack_fixparser-1.0.1-py3-none-any.whl", hash = "sha256:ef82588a7a5806cca0f9413dd018c3ec0fed1c6e164dfb820c6dfb7d965b4b70"},
+    {file = "jetblack-fixparser-2.0.0.tar.gz", hash = "sha256:435f0cd48ca8d702ea7d726d2b8543e164c590b9e799019e96cfcb802dcd26b2"},
+    {file = "jetblack_fixparser-2.0.0-py3-none-any.whl", hash = "sha256:7ffdc7f8a0a589c7bef3798fb5f31a37d1965816ca70846ade3214a086e84e76"},
 ]
 lazy-object-proxy = [
     {file = "lazy-object-proxy-1.4.3.tar.gz", hash = "sha256:f3900e8a5de27447acbf900b4750b0ddfd7ec1ea7fbaf11dfa911141bc522af0"},
