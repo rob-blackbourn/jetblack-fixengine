@@ -9,7 +9,6 @@ from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple, cast
 from jetblack_fixparser.fix_message import FixMessageFactory, FixMessage
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
-from ..utils.date_utils import wait_for_time_period
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,15 +34,11 @@ class InitiatorHandler(metaclass=ABCMeta):
             heartbeat_timeout: int,
             cancellation_event: asyncio.Event,
             *,
-            heartbeat_threshold: int = 1,
-            logon_time_range: Optional[Tuple[time, time]] = None,
-            tz: Optional[tzinfo] = None
+            heartbeat_threshold: int = 1
     ) -> None:
         self.heartbeat_timeout = heartbeat_timeout
         self.heartbeat_threshold = heartbeat_threshold
         self.cancellation_event = cancellation_event
-        self.logon_time_range = logon_time_range
-        self.tz = tz
         self.fix_message_factory = FixMessageFactory(
             protocol,
             sender_comp_id,
@@ -293,20 +288,6 @@ class InitiatorHandler(metaclass=ABCMeta):
         """
         ...
 
-    async def _wait_till_logon_time(self) -> Optional[datetime]:
-        if self.logon_time_range:
-            start_time, end_time = self.logon_time_range
-            LOGGER.info('Logon from %s to %s', start_time, end_time)
-            end_datetime = await wait_for_time_period(
-                datetime.now(tz=self.tz),
-                start_time,
-                end_time,
-                cancellation_event=self.cancellation_event
-            )
-            return end_datetime
-
-        return None
-
     async def __call__(
             self,
             send: Callable[[Event], Awaitable[None]],
@@ -320,20 +301,11 @@ class InitiatorHandler(metaclass=ABCMeta):
             LOGGER.info('connected')
             self._state = STATE_CONNECTED
 
-            end_datetime = await self._wait_till_logon_time()
             await self.logon()
 
             ok = True
             while ok:
                 try:
-                    if (
-                            self._state == STATE_LOGGED_ON and
-                            end_datetime and
-                            datetime.now(tz=self.tz) >= end_datetime
-                    ):
-                        await self.logout()
-                        await self.on_logout()
-
                     timeout = await self._handle_heartbeat()
                     event = await asyncio.wait_for(receive(), timeout=timeout)
 

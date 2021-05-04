@@ -1,11 +1,11 @@
 """File storage"""
 
 import os.path
-from typing import Optional
+from typing import MutableMapping, Optional, Tuple
 from urllib.parse import quote_from_bytes
-from typing import MutableMapping, Tuple
 
 import aiofiles
+from jetblack_fixparser.fix_message import SOH
 
 from ..types import Session, Store
 
@@ -18,7 +18,7 @@ class FileSession(Session):
             sender_comp_id: str,
             target_comp_id: str,
             *,
-            message_style: Optional[str] = 'urlencode'
+            message_style: Optional[str] = 'text'
     ) -> None:
         # The file for the sequence numbers.
         self.seqnum_filename = os.path.join(
@@ -45,8 +45,8 @@ class FileSession(Session):
         self.message_style = message_style
 
     async def _save(self) -> None:
-        async with aiofiles.open(self.seqnum_filename, 'wt') as f:
-            await f.write(f'{self._outgoing_seqnum}:{self._incoming_seqnum}\n')
+        async with aiofiles.open(self.seqnum_filename, 'wt') as file_ptr:  # type: ignore
+            await file_ptr.write(f'{self._outgoing_seqnum}:{self._incoming_seqnum}\n')
 
     @property
     def sender_comp_id(self) -> str:
@@ -78,12 +78,14 @@ class FileSession(Session):
         await self._save()
 
     async def save_message(self, buf: bytes) -> None:
-        async with aiofiles.open(self.message_filename, 'at') as f:
-            if self.message_style == 'urlencode':
-                await f.write(quote_from_bytes(buf) + '\n')
+        async with aiofiles.open(self.message_filename, 'at') as file_ptr:  # type: ignore
+            if self.message_style == 'text':
+                await file_ptr.write(buf.replace(SOH, b'|').decode() + '\n')
+            elif self.message_style == 'urlencode':
+                await file_ptr.write(quote_from_bytes(buf) + '\n')
             else:
-                await f.write(buf)
-            f.flush()
+                await file_ptr.write(buf.hex())
+            file_ptr.flush()
 
 
 class FileStore(Store):
@@ -92,7 +94,7 @@ class FileStore(Store):
             self,
             directory: str,
             *,
-            message_style: Optional[str] = 'urlencode'
+            message_style: Optional[str] = 'text'
     ) -> None:
         if not os.path.exists(directory):
             os.makedirs(directory)  # type: ignore

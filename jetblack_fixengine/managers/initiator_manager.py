@@ -143,7 +143,6 @@ def start_initiator_manager(
             heartbeat_timeout,
             cancellation_event,
             heartbeat_threshold=heartbeat_threshold,
-            logon_time_range=logon_time_range,
             tz=tz
         )
 
