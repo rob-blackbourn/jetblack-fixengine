@@ -80,11 +80,15 @@ class InitiatorHandler():
                 self._handle_fix_event,
                 ConnectionState.CONNECTED
             ),
+            (ConnectionState.CONNECTED, 'timeout'): (
+                self._handle_timeout,
+                ConnectionState.CONNECTED
+            ),
             (ConnectionState.CONNECTED, 'error'): (
                 self._handle_error_event,
                 ConnectionState.DISCONNECTED
             ),
-            (ConnectionState.CONNECTED, 'disconnected'): (
+            (ConnectionState.CONNECTED, 'disconnect'): (
                 self._handle_disconnect_event,
                 ConnectionState.DISCONNECTED
             )
@@ -258,17 +262,11 @@ class InitiatorHandler():
     async def _handle_disconnect_event(self, _event: Event) -> None:
         LOGGER.info('Disconnected')
 
-    async def _handle_connection_event(self, event: Event) -> None:
+    async def _handle_event(self, event: Event) -> None:
         handler, self._connection_state = self._connection_transitions[
             (self._connection_state, event['type'])
         ]
         await handler(event)
-
-    async def _handle_event(self, event: Optional[Event]) -> None:
-        if event is None:
-            await self._handle_timeout()
-        else:
-            await self._handle_connection_event(event)
 
     async def _send_heartbeat_if_required(self) -> float:
         if self._connection_state != ConnectionState.CONNECTED:
@@ -287,7 +285,7 @@ class InitiatorHandler():
 
         return self.heartbeat_timeout - seconds_since_last_send
 
-    async def _handle_timeout(self) -> None:
+    async def _handle_timeout(self, _event: Event) -> None:
         if not self._admin_state == AdminState.LOGGED_ON:
             return
 
@@ -308,12 +306,14 @@ class InitiatorHandler():
     async def _next_event(
             self,
             receive: Callable[[], Awaitable[Event]]
-    ) -> Optional[Event]:
+    ) -> Event:
         try:
             timeout = await self._send_heartbeat_if_required()
             return await asyncio.wait_for(receive(), timeout=timeout)
         except asyncio.TimeoutError:
-            return None
+            return {
+                'type': 'timeout'
+            }
 
     async def _handle_connected(self, _event: Event) -> None:
         """Send a logon message"""
@@ -336,7 +336,7 @@ class InitiatorHandler():
         while True:
             event = await self._next_event(receive)
             await self._handle_event(event)
-            if not self._connection_state == ConnectionState.CONNECTED:
+            if self._connection_state != ConnectionState.CONNECTED:
                 break
 
         LOGGER.info('disconnected')
