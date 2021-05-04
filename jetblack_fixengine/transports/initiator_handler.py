@@ -206,27 +206,35 @@ class InitiatorHandler(metaclass=ABCMeta):
                 message["MsgType"]
             )
 
+    async def _handle_fix_event(self, event: Event) -> None:
+        await self._session.save_message(event['message'])
+
+        fix_message = self.fix_message_factory.decode(event['message'])
+        msgcat = cast(str, fix_message.meta_data.msgcat)
+        if msgcat == 'admin':
+            await self._handle_admin_message(fix_message.message)
+        else:
+            await self.on_application_message(fix_message.message)
+
+        msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
+        await self._set_incoming_seqnum(msg_seq_num)
+
+        self._last_receive_time_utc = datetime.now(timezone.utc)
+
+    async def _handle_error_event(self, event: Event) -> None:
+        LOGGER.warning('error')
+        self._state = InitiatorState.ERROR
+
+    async def _handle_disconnect_event(self, event: Event) -> None:
+        self._state = InitiatorState.DISCONNECTED
+
     async def _handle_event(self, event: Event) -> None:
         if event['type'] == 'fix':
-            await self._session.save_message(event['message'])
-
-            fix_message = self.fix_message_factory.decode(event['message'])
-            msgcat = cast(str, fix_message.meta_data.msgcat)
-            if msgcat == 'admin':
-                await self._handle_admin_message(fix_message.message)
-            else:
-                await self.on_application_message(fix_message.message)
-
-            msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
-            await self._set_incoming_seqnum(msg_seq_num)
-
-            self._last_receive_time_utc = datetime.now(timezone.utc)
-
+            await self._handle_fix_event(event)
         elif event['type'] == 'error':
-            LOGGER.warning('error')
-            self._state = InitiatorState.ERROR
+            await self._handle_error_event(event)
         elif event['type'] == 'disconnect':
-            self._state = InitiatorState.DISCONNECTED
+            await self._handle_disconnect_event(event)
         else:
             raise ValueError(f"Unknown event type: {event['type']}")
 
