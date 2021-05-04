@@ -5,7 +5,7 @@ import asyncio
 from datetime import datetime, timezone
 from enum import Enum
 import logging
-from typing import Awaitable, Callable, Mapping, Any, Optional, cast
+from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple, cast
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
@@ -14,15 +14,24 @@ from ..types import Store, Event
 LOGGER = logging.getLogger(__name__)
 
 
-class InitiatorState(Enum):
+class AdminState(Enum):
+    LOGON_REQUIRED = 'logon.required'
+    LOGON_SENT = 'logon.sent'
+    LOGGED_ON = 'logon.ok'
+    # LOGGING_OFF = 'logout.start'
+    LOGGED_OUT = 'logout.done'
+
+
+class ConnectionState(Enum):
     DISCONNECTED = 'disconnected'
     CONNECTED = 'connected'
-    LOGGING_ON = 'logon.start'
-    LOGGED_ON = 'logon.ok'
-    LOGGING_OFF = 'logout.start'
-    LOGGED_OUT = 'logout.done'
     ERROR = 'error'
 
+
+EventHandler = Callable[[Event], Awaitable[None]]
+AdminTransitionKey = Tuple[AdminState, Optional[str]]
+AdminTransitionValue = Tuple[EventHandler, AdminState]
+AdminTransitionMapping = Mapping[AdminTransitionKey, AdminTransitionValue]
 
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
@@ -50,13 +59,45 @@ class InitiatorHandler(metaclass=ABCMeta):
             target_comp_id
         )
 
-        self._state = InitiatorState.DISCONNECTED
+        self._connection_state = ConnectionState.DISCONNECTED
+        self._admin_state = AdminState.LOGON_REQUIRED
         self._last_send_time_utc: datetime = EPOCH_UTC
         self._last_receive_time_utc: datetime = EPOCH_UTC
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
+
+        self._admin_transitions: AdminTransitionMapping = {
+            (AdminState.LOGON_REQUIRED, None): (
+                self._handle_logon_required,
+                AdminState.LOGON_SENT
+            ),
+            (AdminState.LOGON_SENT, 'LOGON'): (
+                self._handle_logon_received,
+                AdminState.LOGGED_ON
+            ),
+            (AdminState.LOGGED_ON, 'HEARTBEAT'): (
+                self._handle_heartbeat_received,
+                AdminState.LOGGED_ON
+            ),
+            (AdminState.LOGGED_ON, 'TEST_REQUEST'): (
+                self._handle_test_request,
+                AdminState.LOGGED_ON
+            ),
+            (AdminState.LOGGED_ON, 'RESEND_REQUEST'): (
+                self._handle_resend_request,
+                AdminState.LOGGED_ON
+            ),
+            (AdminState.LOGGED_ON, 'SEQUENCE_RESET'): (
+                self._handle_sequence_reset,
+                AdminState.LOGGED_ON
+            ),
+            (AdminState.LOGGED_ON, 'LOGOUT'): (
+                self._handle_acceptor_logout,
+                AdminState.LOGGED_OUT
+            )
+        }
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
@@ -96,9 +137,9 @@ class InitiatorHandler(metaclass=ABCMeta):
         }
         await self._send_event(event, send_time_utc)
 
-    async def logon(self) -> None:
+    async def _handle_logon_required(self, _message: Mapping[str, Any]) -> None:
         """Send a logon message"""
-        self._state = InitiatorState.LOGGING_ON
+        self._admin_state = AdminState.LOGON_SENT
         await self.send_message(
             'LOGON',
             {
@@ -110,7 +151,7 @@ class InitiatorHandler(metaclass=ABCMeta):
     async def logout(self) -> None:
         """Send a logout message.
         """
-        self._state = InitiatorState.LOGGING_OFF
+        # self._admin_state = AdminState.LOGGING_OFF
         await self.send_message('LOGOUT')
 
     async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
@@ -140,7 +181,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             }
         )
 
-    async def _handle_test_request(self, message: Mapping[str, Any]) -> bool:
+    async def _handle_test_request(self, message: Mapping[str, Any]) -> None:
         # Respond to the server with the token it sent.
         await self.send_message(
             'TEST_REQUEST',
@@ -148,12 +189,11 @@ class InitiatorHandler(metaclass=ABCMeta):
                 'TestReqID': message['TestReqID']
             }
         )
-        return True
 
     async def _handle_resend_request(
             self,
             _message: Mapping[str, Any]
-    ) -> bool:
+    ) -> None:
         new_seq_no = await self._session.get_outgoing_seqnum() + 2
         await self.send_message(
             'SEQUENCE_RESET',
@@ -162,23 +202,18 @@ class InitiatorHandler(metaclass=ABCMeta):
                 'NewSeqNo': new_seq_no
             }
         )
-        return True
 
-    async def _handle_logon(self, _message: Mapping[str, Any]) -> bool:
+    async def _handle_logon_received(self, _message: Mapping[str, Any]) -> None:
         await self.on_logon()
-        self._state = InitiatorState.LOGGED_ON
-        return True
 
-    async def _handle_heartbeat(self, _message: Mapping[str, Any]) -> bool:
-        return True
+    async def _handle_heartbeat_received(self, _message: Mapping[str, Any]) -> None:
+        await self.on_heartbeat()
 
-    async def _handle_sequence_reset(self, message: Mapping[str, Any]) -> bool:
+    async def _handle_sequence_reset(self, message: Mapping[str, Any]) -> None:
         await self._set_incoming_seqnum(message['NewSeqNo'])
-        return True
 
-    async def _handle_logout(self, _message: Mapping[str, Any]) -> bool:
-        self._state = InitiatorState.LOGGED_OUT
-        return False
+    async def _handle_acceptor_logout(self, _message: Mapping[str, Any]) -> None:
+        await self.on_logout()
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('on_admin_message: %s', message)
@@ -188,19 +223,12 @@ class InitiatorHandler(metaclass=ABCMeta):
         if override_status is not None:
             return
 
-        if message['MsgType'] == 'LOGON':
-            await self._handle_logon(message)
-        elif message['MsgType'] == 'HEARTBEAT':
-            await self._handle_heartbeat(message)
-        elif message['MsgType'] == 'TEST_REQUEST':
-            await self._handle_test_request(message)
-        elif message['MsgType'] == 'RESEND_REQUEST':
-            await self._handle_resend_request(message)
-        elif message['MsgType'] == 'SEQUENCE_RESET':
-            await self._handle_sequence_reset(message)
-        elif message['MsgType'] == 'LOGOUT':
-            await self._handle_logout(message)
-        else:
+        try:
+            handler, self._admin_state = self._admin_transitions[
+                (self._admin_state, message['MsgType'])
+            ]
+            await handler(message)
+        except KeyError:
             LOGGER.warning(
                 'unhandled admin message type "%s".',
                 message["MsgType"]
@@ -221,12 +249,12 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         self._last_receive_time_utc = datetime.now(timezone.utc)
 
-    async def _handle_error_event(self, event: Event) -> None:
+    async def _handle_error_event(self, _event: Event) -> None:
         LOGGER.warning('error')
-        self._state = InitiatorState.ERROR
+        self._connection_state = ConnectionState.ERROR
 
-    async def _handle_disconnect_event(self, event: Event) -> None:
-        self._state = InitiatorState.DISCONNECTED
+    async def _handle_disconnect_event(self, _event: Event) -> None:
+        self._connection_state = ConnectionState.DISCONNECTED
 
     async def _handle_event(self, event: Event) -> None:
         if event['type'] == 'fix':
@@ -245,7 +273,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         ).total_seconds()
         if (
                 seconds_since_last_send >= self.heartbeat_timeout and
-                self._state == InitiatorState.LOGGED_ON
+                self._admin_state == AdminState.LOGGED_ON
         ):
             await self.heartbeat()
             seconds_since_last_send = 0
@@ -253,7 +281,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         return self.heartbeat_timeout - seconds_since_last_send
 
     async def _handle_timeout(self) -> None:
-        if not self._state == InitiatorState.LOGGED_ON:
+        if not self._admin_state == AdminState.LOGGED_ON:
             return
 
         now_utc = datetime.now(timezone.utc)
@@ -281,15 +309,11 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         if event['type'] == 'connected':
             LOGGER.info('connected')
-            self._state = InitiatorState.CONNECTED
+            self._connection_state = ConnectionState.CONNECTED
 
-            await self.logon()
+            await self._handle_logon_required({})
 
-            while self._state not in (
-                    InitiatorState.LOGGED_OUT,
-                    InitiatorState.DISCONNECTED,
-                    InitiatorState.ERROR
-            ):
+            while self._connection_state == ConnectionState.CONNECTED:
                 try:
                     timeout = await self._send_heartbeat_if_required()
                     event = await asyncio.wait_for(receive(), timeout=timeout)
@@ -300,7 +324,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             raise RuntimeError('Failed to connect')
 
         LOGGER.info('disconnected')
-        self._state = InitiatorState.DISCONNECTED
+        self._connection_state = ConnectionState.DISCONNECTED
 
     @abstractmethod
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
@@ -342,3 +366,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         """Called when a logout message is received.
         """
         ...
+
+    async def on_heartbeat(self) -> None:
+        """Called when a heartbeat is received.
+        """

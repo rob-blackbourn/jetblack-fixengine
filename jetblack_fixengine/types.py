@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Awaitable, MutableMapping, Any, Tuple
+from typing import Callable, Awaitable, Mapping, MutableMapping, Any, Tuple
 
-Event = MutableMapping[str, Any]
+Event = Mapping[str, Any]
 Send = Callable[[Event], Awaitable[None]]
 Receive = Callable[[], Awaitable[Event]]
 Handler = Callable[[Send, Receive], Awaitable[None]]
