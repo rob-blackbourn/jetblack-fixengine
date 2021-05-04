@@ -135,33 +135,45 @@ class InitiatorHandler(metaclass=ABCMeta):
             }
         )
 
-    async def test_request(self, test_req_id: str) -> None:
-        """Send a test request.
-
-        Args:
-            test_req_id (str): The test req id.
-        """
+    async def _handle_test_request(self, message: Mapping[str, Any]) -> bool:
+        # Respond to the server with the token it sent.
         await self.send_message(
             'TEST_REQUEST',
             {
-                'TestReqID': test_req_id
+                'TestReqID': message['TestReqID']
             }
         )
+        return True
 
-    async def sequence_reset(self, gap_fill: bool, new_seq_no: int) -> None:
-        """Send a sequence reset.
-
-        Args:
-            gap_fill (bool): If true set the GapFillFlag.
-            new_seq_no (int): The new seqnum.
-        """
+    async def _handle_resend_request(
+            self,
+            _message: Mapping[str, Any]
+    ) -> bool:
+        new_seq_no = await self._session.get_outgoing_seqnum() + 2
         await self.send_message(
             'SEQUENCE_RESET',
             {
-                'GapFillFlag': gap_fill,
+                'GapFillFlag': False,
                 'NewSeqNo': new_seq_no
             }
         )
+        return True
+
+    async def _handle_logon(self, _message: Mapping[str, Any]) -> bool:
+        await self.on_logon()
+        self._state = STATE_LOGGED_ON
+        return True
+
+    async def _handle_heartbeat(self, _message: Mapping[str, Any]) -> bool:
+        return True
+
+    async def _handle_sequence_reset(self, message: Mapping[str, Any]) -> bool:
+        await self._set_incoming_seqnum(message['NewSeqNo'])
+        return True
+
+    async def _handle_logout(self, _message: Mapping[str, Any]) -> bool:
+        self._state = STATE_LOGGED_OUT
+        return False
 
     async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
         LOGGER.info('on_admin_message: %s', message)
@@ -172,23 +184,17 @@ class InitiatorHandler(metaclass=ABCMeta):
             return override_status
 
         if message['MsgType'] == 'LOGON':
-            await self.on_logon()
-            self._state = STATE_LOGGED_ON
-            return True
+            return await self._handle_logon(message)
         elif message['MsgType'] == 'HEARTBEAT':
-            return True
+            return await self._handle_heartbeat(message)
         elif message['MsgType'] == 'TEST_REQUEST':
-            await self.test_request(message['TestReqID'])
-            return True
+            return await self._handle_test_request(message)
         elif message['MsgType'] == 'RESEND_REQUEST':
-            await self.sequence_reset(False, await self._session.get_outgoing_seqnum() + 2)
-            return True
+            return await self._handle_resend_request(message)
         elif message['MsgType'] == 'SEQUENCE_RESET':
-            await self._set_incoming_seqnum(message['NewSeqNo'])
-            return True
+            return await self._handle_sequence_reset(message)
         elif message['MsgType'] == 'LOGOUT':
-            self._state = STATE_LOGGED_OUT
-            return False
+            return await self._handle_logout(message)
         else:
             LOGGER.warning(
                 'unhandled admin message type "%s".',
@@ -254,12 +260,15 @@ class InitiatorHandler(metaclass=ABCMeta):
         else:
             return False
 
-    async def _handle_heartbeat(self) -> float:
+    async def _send_heartbeat_if_required(self) -> float:
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_send = (
             now_utc - self._last_send_time_utc
         ).total_seconds()
-        if seconds_since_last_send >= self.heartbeat_timeout and self._state == STATE_LOGGED_ON:
+        if (
+                seconds_since_last_send >= self.heartbeat_timeout and
+                self._state == STATE_LOGGED_ON
+        ):
             await self.heartbeat()
             seconds_since_last_send = 0
 
@@ -271,9 +280,17 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
-            now_utc - self._last_receive_time_utc).total_seconds()
+            now_utc - self._last_receive_time_utc
+        ).total_seconds()
         if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
-            await self.test_request('TEST')
+            # Send a test request to the acceptor to ensure the connection is
+            # still active.
+            await self.send_message(
+                'TEST_REQUEST',
+                {
+                    'TestReqID': 'TEST'
+                }
+            )
 
     @abstractmethod
     async def on_logon(self) -> None:
@@ -305,7 +322,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             ok = True
             while ok:
                 try:
-                    timeout = await self._handle_heartbeat()
+                    timeout = await self._send_heartbeat_if_required()
                     event = await asyncio.wait_for(receive(), timeout=timeout)
                     ok = await self._handle_event(event)
                 except asyncio.TimeoutError:
