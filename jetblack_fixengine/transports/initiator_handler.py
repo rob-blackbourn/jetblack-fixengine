@@ -252,8 +252,10 @@ class InitiatorHandler():
     async def _handle_disconnect_event(self, _event: Event) -> None:
         self._connection_state = ConnectionState.DISCONNECTED
 
-    async def _handle_event(self, event: Event) -> None:
-        if event['type'] == 'fix':
+    async def _handle_event(self, event: Optional[Event]) -> None:
+        if event is None:
+            await self._handle_timeout()
+        elif event['type'] == 'fix':
             await self._handle_fix_event(event)
         elif event['type'] == 'error':
             await self._handle_error_event(event)
@@ -294,6 +296,16 @@ class InitiatorHandler():
                 }
             )
 
+    async def _next_event(
+            self,
+            receive: Callable[[], Awaitable[Event]]
+    ) -> Optional[Event]:
+        try:
+            timeout = await self._send_heartbeat_if_required()
+            return await asyncio.wait_for(receive(), timeout=timeout)
+        except asyncio.TimeoutError:
+            return None
+
     async def __call__(
             self,
             send: Callable[[Event], Awaitable[None]],
@@ -301,21 +313,17 @@ class InitiatorHandler():
     ) -> None:
         self._send, self._receive = send, receive
 
-        event = await receive()
+        event: Optional[Event] = await receive()
 
-        if event['type'] == 'connected':
+        if event and event['type'] == 'connected':
             LOGGER.info('connected')
             self._connection_state = ConnectionState.CONNECTED
 
             await self._handle_logon_required({})
 
             while self._connection_state == ConnectionState.CONNECTED:
-                try:
-                    timeout = await self._send_heartbeat_if_required()
-                    event = await asyncio.wait_for(receive(), timeout=timeout)
-                    await self._handle_event(event)
-                except asyncio.TimeoutError:
-                    await self._handle_timeout()
+                event = await self._next_event(receive)
+                await self._handle_event(event)
         else:
             raise RuntimeError('Failed to connect')
 
