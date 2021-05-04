@@ -1,12 +1,12 @@
-"""The Initiator base class"""
+"""The Initiator handler class"""
 
 from abc import ABCMeta, abstractmethod
 import asyncio
-from datetime import datetime, time, tzinfo, timezone
+from datetime import datetime, timezone
 import logging
-from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple, cast
+from typing import Awaitable, Callable, Mapping, Any, Optional, cast
 
-from jetblack_fixparser.fix_message import FixMessageFactory, FixMessage
+from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 
@@ -232,8 +232,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         if event['type'] == 'fix':
             await self._session.save_message(event['message'])
 
-            fix_message: FixMessage = event['fix_message']
-
+            fix_message = self.fix_message_factory.decode(event['message'])
             msgcat = cast(str, fix_message.meta_data.msgcat)
             if msgcat == 'admin':
                 status = await self._on_admin_message(fix_message.message)
@@ -308,12 +307,6 @@ class InitiatorHandler(metaclass=ABCMeta):
                 try:
                     timeout = await self._handle_heartbeat()
                     event = await asyncio.wait_for(receive(), timeout=timeout)
-
-                    if event['type'] == 'fix':
-                        event['fix_message'] = self.fix_message_factory.decode(
-                            event['message']
-                        )
-
                     ok = await self._handle_event(event)
                 except asyncio.TimeoutError:
                     await self._handle_timeout()
