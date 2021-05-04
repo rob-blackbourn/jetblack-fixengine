@@ -121,6 +121,7 @@ def start_initiator_manager(
         sender_comp_id: str,
         target_comp_id: str,
         store: Store,
+        logon_timeout: int,
         heartbeat_timeout: int,
         *,
         ssl: Optional[SSLContext] = None,
@@ -140,10 +141,10 @@ def start_initiator_manager(
             sender_comp_id,
             target_comp_id,
             store,
+            logon_timeout,
             heartbeat_timeout,
             cancellation_event,
-            heartbeat_threshold=heartbeat_threshold,
-            tz=tz
+            heartbeat_threshold=heartbeat_threshold
         )
 
     manager = InitiatorManager(

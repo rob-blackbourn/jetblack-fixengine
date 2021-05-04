@@ -21,6 +21,7 @@ HOST = '127.0.0.1'
 PORT = 9801
 SENDER_COMP_ID = 'INITIATOR1'
 TARGET_COMP_ID = 'ACCEPTOR'
+LOGON_TIMEOUT = 60
 HEARTBEAT_TIMEOUT = 30
 PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
@@ -34,13 +35,11 @@ class MyInitiatorHandler(InitiatorHandler):
     async def on_logout(self) -> None:
         LOGGER.info('on_logout')
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
+    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('on_admin_message %s', message)
-        return None
 
-    async def on_application_message(self, message: Mapping[str, Any]) -> bool:
+    async def on_application_message(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('on_application_message %s', message)
-        return True
 
 
 start_initiator(
@@ -51,6 +50,7 @@ start_initiator(
     SENDER_COMP_ID,
     TARGET_COMP_ID,
     STORE,
+    LOGON_TIMEOUT,
     HEARTBEAT_TIMEOUT,
     shutdown_timeout=10
 )

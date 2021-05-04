@@ -1,7 +1,6 @@
 """Initiator transport"""
 
 import asyncio
-from datetime import tzinfo
 import logging
 from ssl import SSLContext
 from typing import Optional, Callable, Type
@@ -69,6 +68,7 @@ def create_initiator(
         sender_comp_id: str,
         target_comp_id: str,
         store: Store,
+        logon_timeout: int,
         heartbeat_timeout: int,
         cancellation_event: asyncio.Event,
         *,
@@ -79,6 +79,7 @@ def create_initiator(
         sender_comp_id,
         target_comp_id,
         store,
+        logon_timeout,
         heartbeat_timeout,
         cancellation_event,
         heartbeat_threshold=heartbeat_threshold
@@ -94,6 +95,7 @@ def start_initiator(
         sender_comp_id: str,
         target_comp_id: str,
         store: Store,
+        logon_timeout: int,
         heartbeat_timeout: int,
         *,
         ssl: Optional[SSLContext] = None,
@@ -110,6 +112,7 @@ def start_initiator(
         sender_comp_id,
         target_comp_id,
         store,
+        logon_timeout,
         heartbeat_timeout,
         cancellation_event,
         heartbeat_threshold=heartbeat_threshold

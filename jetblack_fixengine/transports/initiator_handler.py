@@ -48,11 +48,13 @@ class InitiatorHandler():
             sender_comp_id: str,
             target_comp_id: str,
             store: Store,
+            logon_timeout: int,
             heartbeat_timeout: int,
             cancellation_event: asyncio.Event,
             *,
             heartbeat_threshold: int = 1
     ) -> None:
+        self.logon_timeout = logon_timeout
         self.heartbeat_timeout = heartbeat_timeout
         self.heartbeat_threshold = heartbeat_threshold
         self.cancellation_event = cancellation_event
@@ -262,15 +264,9 @@ class InitiatorHandler():
     async def _handle_disconnect_event(self, _event: Event) -> None:
         LOGGER.info('Disconnected')
 
-    async def _handle_event(self, event: Event) -> None:
-        handler, self._connection_state = self._connection_transitions[
-            (self._connection_state, event['type'])
-        ]
-        await handler(event)
-
     async def _send_heartbeat_if_required(self) -> float:
         if self._connection_state != ConnectionState.CONNECTED:
-            return self.heartbeat_timeout
+            return self.logon_timeout
 
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_send = (
@@ -303,6 +299,17 @@ class InitiatorHandler():
                 }
             )
 
+    async def _handle_connected(self, _event: Event) -> None:
+        """Send a logon message"""
+        LOGGER.info('connected')
+        await self.send_message(
+            'LOGON',
+            {
+                'EncryptMethod': 'NONE',
+                'HeartBtInt': self.heartbeat_timeout
+            }
+        )
+
     async def _next_event(
             self,
             receive: Callable[[], Awaitable[Event]]
@@ -315,16 +322,11 @@ class InitiatorHandler():
                 'type': 'timeout'
             }
 
-    async def _handle_connected(self, _event: Event) -> None:
-        """Send a logon message"""
-        LOGGER.info('connected')
-        await self.send_message(
-            'LOGON',
-            {
-                'EncryptMethod': 'NONE',
-                'HeartBtInt': self.heartbeat_timeout
-            }
-        )
+    async def _handle_event(self, event: Event) -> None:
+        handler, self._connection_state = self._connection_transitions[
+            (self._connection_state, event['type'])
+        ]
+        await handler(event)
 
     async def __call__(
             self,
