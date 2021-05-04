@@ -26,9 +26,15 @@ class ConnectionState(Enum):
 
 
 EventHandler = Callable[[Event], Awaitable[None]]
+
 AdminTransitionKey = Tuple[AdminState, Optional[str]]
 AdminTransitionValue = Tuple[EventHandler, AdminState]
 AdminTransitionMapping = Mapping[AdminTransitionKey, AdminTransitionValue]
+
+ConnectionTransitionKey = Tuple[ConnectionState, Optional[str]]
+ConnectionTransitionValue = Tuple[EventHandler, ConnectionState]
+ConnectionTransitionMapping = Mapping[ConnectionTransitionKey,
+                                      ConnectionTransitionValue]
 
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
@@ -65,6 +71,24 @@ class InitiatorHandler():
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
 
+        self._connection_transitions: ConnectionTransitionMapping = {
+            (ConnectionState.DISCONNECTED, 'connected'): (
+                self._handle_connected,
+                ConnectionState.CONNECTED
+            ),
+            (ConnectionState.CONNECTED, 'fix'): (
+                self._handle_fix_event,
+                ConnectionState.CONNECTED
+            ),
+            (ConnectionState.CONNECTED, 'error'): (
+                self._handle_error_event,
+                ConnectionState.DISCONNECTED
+            ),
+            (ConnectionState.CONNECTED, 'disconnected'): (
+                self._handle_disconnect_event,
+                ConnectionState.DISCONNECTED
+            )
+        }
         self._admin_transitions: AdminTransitionMapping = {
             (AdminState.LOGON_REQUIRED, 'LOGON'): (
                 self._handle_logon_received,
@@ -228,26 +252,23 @@ class InitiatorHandler():
 
         self._last_receive_time_utc = datetime.now(timezone.utc)
 
-    async def _handle_error_event(self, _event: Event) -> None:
-        LOGGER.warning('error')
-        self._connection_state = ConnectionState.ERROR
+    async def _handle_error_event(self, event: Event) -> None:
+        LOGGER.warning('error: %s', event)
 
     async def _handle_disconnect_event(self, _event: Event) -> None:
-        self._connection_state = ConnectionState.DISCONNECTED
+        LOGGER.info('Disconnected')
+
+    async def _handle_connection_event(self, event: Event) -> None:
+        handler, self._connection_state = self._connection_transitions[
+            (self._connection_state, event['type'])
+        ]
+        await handler(event)
 
     async def _handle_event(self, event: Optional[Event]) -> None:
         if event is None:
             await self._handle_timeout()
-        elif event['type'] == 'connected':
-            await self._handle_connected(event)
-        elif event['type'] == 'fix':
-            await self._handle_fix_event(event)
-        elif event['type'] == 'error':
-            await self._handle_error_event(event)
-        elif event['type'] == 'disconnect':
-            await self._handle_disconnect_event(event)
         else:
-            raise ValueError(f"Unknown event type: {event['type']}")
+            await self._handle_connection_event(event)
 
     async def _send_heartbeat_if_required(self) -> float:
         if self._connection_state != ConnectionState.CONNECTED:
@@ -304,7 +325,6 @@ class InitiatorHandler():
                 'HeartBtInt': self.heartbeat_timeout
             }
         )
-        self._connection_state = ConnectionState.CONNECTED
 
     async def __call__(
             self,
