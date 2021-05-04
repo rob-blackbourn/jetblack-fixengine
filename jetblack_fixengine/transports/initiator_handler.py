@@ -15,9 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 class AdminState(Enum):
     LOGON_REQUIRED = 'logon.required'
-    LOGON_SENT = 'logon.sent'
     LOGGED_ON = 'logon.ok'
-    # LOGGING_OFF = 'logout.start'
     LOGGED_OUT = 'logout.done'
 
 
@@ -68,11 +66,7 @@ class InitiatorHandler():
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
 
         self._admin_transitions: AdminTransitionMapping = {
-            (AdminState.LOGON_REQUIRED, None): (
-                self._handle_logon_required,
-                AdminState.LOGON_SENT
-            ),
-            (AdminState.LOGON_SENT, 'LOGON'): (
+            (AdminState.LOGON_REQUIRED, 'LOGON'): (
                 self._handle_logon_received,
                 AdminState.LOGGED_ON
             ),
@@ -135,17 +129,6 @@ class InitiatorHandler():
             'message': fix_message.encode(regenerate_integrity=True)
         }
         await self._send_event(event, send_time_utc)
-
-    async def _handle_logon_required(self, _message: Mapping[str, Any]) -> None:
-        """Send a logon message"""
-        self._admin_state = AdminState.LOGON_SENT
-        await self.send_message(
-            'LOGON',
-            {
-                'EncryptMethod': 'NONE',
-                'HeartBtInt': self.heartbeat_timeout
-            }
-        )
 
     async def logout(self) -> None:
         """Send a logout message.
@@ -255,6 +238,8 @@ class InitiatorHandler():
     async def _handle_event(self, event: Optional[Event]) -> None:
         if event is None:
             await self._handle_timeout()
+        elif event['type'] == 'connected':
+            await self._handle_connected(event)
         elif event['type'] == 'fix':
             await self._handle_fix_event(event)
         elif event['type'] == 'error':
@@ -265,6 +250,9 @@ class InitiatorHandler():
             raise ValueError(f"Unknown event type: {event['type']}")
 
     async def _send_heartbeat_if_required(self) -> float:
+        if self._connection_state != ConnectionState.CONNECTED:
+            return self.heartbeat_timeout
+
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_send = (
             now_utc - self._last_send_time_utc
@@ -306,6 +294,18 @@ class InitiatorHandler():
         except asyncio.TimeoutError:
             return None
 
+    async def _handle_connected(self, _event: Event) -> None:
+        """Send a logon message"""
+        LOGGER.info('connected')
+        await self.send_message(
+            'LOGON',
+            {
+                'EncryptMethod': 'NONE',
+                'HeartBtInt': self.heartbeat_timeout
+            }
+        )
+        self._connection_state = ConnectionState.CONNECTED
+
     async def __call__(
             self,
             send: Callable[[Event], Awaitable[None]],
@@ -313,19 +313,11 @@ class InitiatorHandler():
     ) -> None:
         self._send, self._receive = send, receive
 
-        event: Optional[Event] = await receive()
-
-        if event and event['type'] == 'connected':
-            LOGGER.info('connected')
-            self._connection_state = ConnectionState.CONNECTED
-
-            await self._handle_logon_required({})
-
-            while self._connection_state == ConnectionState.CONNECTED:
-                event = await self._next_event(receive)
-                await self._handle_event(event)
-        else:
-            raise RuntimeError('Failed to connect')
+        while True:
+            event = await self._next_event(receive)
+            await self._handle_event(event)
+            if not self._connection_state == ConnectionState.CONNECTED:
+                break
 
         LOGGER.info('disconnected')
         self._connection_state = ConnectionState.DISCONNECTED
