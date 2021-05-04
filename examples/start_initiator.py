@@ -29,10 +29,10 @@ PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 class MyInitiatorHandler(InitiatorHandler):
     """An instance of the initiator"""
 
-    async def on_logon(self) -> None:
+    async def on_logon(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('on_logon')
 
-    async def on_logout(self) -> None:
+    async def on_logout(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('on_logout')
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:

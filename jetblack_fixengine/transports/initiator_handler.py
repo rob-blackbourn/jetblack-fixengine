@@ -79,7 +79,7 @@ class InitiatorHandler():
                 ConnectionState.CONNECTED
             ),
             (ConnectionState.CONNECTED, 'fix'): (
-                self._handle_fix_event,
+                self._handle_fix,
                 ConnectionState.CONNECTED
             ),
             (ConnectionState.CONNECTED, 'timeout'): (
@@ -87,11 +87,11 @@ class InitiatorHandler():
                 ConnectionState.CONNECTED
             ),
             (ConnectionState.CONNECTED, 'error'): (
-                self._handle_error_event,
+                self._handle_error,
                 ConnectionState.DISCONNECTED
             ),
             (ConnectionState.CONNECTED, 'disconnect'): (
-                self._handle_disconnect_event,
+                self._handle_disconnect,
                 ConnectionState.DISCONNECTED
             )
         }
@@ -105,19 +105,19 @@ class InitiatorHandler():
                 AdminState.LOGGED_ON
             ),
             (AdminState.LOGGED_ON, 'TEST_REQUEST'): (
-                self._handle_test_request,
+                self._handle_test_request_received,
                 AdminState.LOGGED_ON
             ),
             (AdminState.LOGGED_ON, 'RESEND_REQUEST'): (
-                self._handle_resend_request,
+                self._handle_resend_request_received,
                 AdminState.LOGGED_ON
             ),
             (AdminState.LOGGED_ON, 'SEQUENCE_RESET'): (
-                self._handle_sequence_reset,
+                self._handle_sequence_reset_received,
                 AdminState.LOGGED_ON
             ),
             (AdminState.LOGGED_ON, 'LOGOUT'): (
-                self._handle_acceptor_logout,
+                self._handle_acceptor_logout_received,
                 AdminState.LOGGED_OUT
             )
         }
@@ -128,7 +128,11 @@ class InitiatorHandler():
         await self._session.set_outgoing_seqnum(seqnum)
         return seqnum
 
-    async def _set_seqnums(self, outgoing_seqnum: int, incoming_seqnum: int) -> None:
+    async def _set_seqnums(
+            self,
+            outgoing_seqnum: int,
+            incoming_seqnum: int
+    ) -> None:
         await self._session.set_seqnums(outgoing_seqnum, incoming_seqnum)
 
     async def _set_incoming_seqnum(self, seqnum: int) -> None:
@@ -178,7 +182,11 @@ class InitiatorHandler():
             body_kwargs['TestReqID'] = test_req_id
         await self.send_message('HEARTBEAT', body_kwargs)
 
-    async def resend_request(self, begin_seqnum: int, end_seqnum: int = 0) -> None:
+    async def resend_request(
+            self,
+            begin_seqnum: int,
+            end_seqnum: int = 0
+    ) -> None:
         """Send a resend request.
 
         Args:
@@ -193,7 +201,10 @@ class InitiatorHandler():
             }
         )
 
-    async def _handle_test_request(self, message: Mapping[str, Any]) -> None:
+    async def _handle_test_request_received(
+            self,
+            message: Mapping[str, Any]
+    ) -> None:
         # Respond to the server with the token it sent.
         await self.send_message(
             'TEST_REQUEST',
@@ -202,7 +213,7 @@ class InitiatorHandler():
             }
         )
 
-    async def _handle_resend_request(
+    async def _handle_resend_request_received(
             self,
             _message: Mapping[str, Any]
     ) -> None:
@@ -215,17 +226,29 @@ class InitiatorHandler():
             }
         )
 
-    async def _handle_logon_received(self, _message: Mapping[str, Any]) -> None:
-        await self.on_logon()
+    async def _handle_logon_received(
+            self,
+            message: Mapping[str, Any]
+    ) -> None:
+        await self.on_logon(message)
 
-    async def _handle_heartbeat_received(self, _message: Mapping[str, Any]) -> None:
-        await self.on_heartbeat()
+    async def _handle_heartbeat_received(
+            self,
+            message: Mapping[str, Any]
+    ) -> None:
+        await self.on_heartbeat(message)
 
-    async def _handle_sequence_reset(self, message: Mapping[str, Any]) -> None:
+    async def _handle_sequence_reset_received(
+            self,
+            message: Mapping[str, Any]
+    ) -> None:
         await self._set_incoming_seqnum(message['NewSeqNo'])
 
-    async def _handle_acceptor_logout(self, _message: Mapping[str, Any]) -> None:
-        await self.on_logout()
+    async def _handle_acceptor_logout_received(
+            self,
+            message: Mapping[str, Any]
+    ) -> None:
+        await self.on_logout(message)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('Admin message: %s', message)
@@ -243,7 +266,7 @@ class InitiatorHandler():
                 message["MsgType"]
             )
 
-    async def _handle_fix_event(self, event: Event) -> None:
+    async def _handle_fix(self, event: Event) -> None:
         await self._session.save_message(event['message'])
 
         fix_message = self.fix_message_factory.decode(event['message'])
@@ -258,10 +281,10 @@ class InitiatorHandler():
 
         self._last_receive_time_utc = datetime.now(timezone.utc)
 
-    async def _handle_error_event(self, event: Event) -> None:
+    async def _handle_error(self, event: Event) -> None:
         LOGGER.warning('error: %s', event)
 
-    async def _handle_disconnect_event(self, _event: Event) -> None:
+    async def _handle_disconnect(self, _event: Event) -> None:
         LOGGER.info('Disconnected')
 
     async def _send_heartbeat_if_required(self) -> float:
@@ -360,14 +383,14 @@ class InitiatorHandler():
                 acceptor.
         """
 
-    async def on_logon(self) -> None:
+    async def on_logon(self, message: Mapping[str, Any]) -> None:
         """Called when a logon message is received.
         """
 
-    async def on_logout(self) -> None:
+    async def on_logout(self, message: Mapping[str, Any]) -> None:
         """Called when a logout message is received.
         """
 
-    async def on_heartbeat(self) -> None:
+    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
         """Called when a heartbeat is received.
         """
