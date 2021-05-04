@@ -1,6 +1,5 @@
 """The Initiator handler class"""
 
-from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, timezone
 from enum import Enum
@@ -36,8 +35,8 @@ AdminTransitionMapping = Mapping[AdminTransitionKey, AdminTransitionValue]
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 
-class InitiatorHandler(metaclass=ABCMeta):
-    """The base class for initiators"""
+class InitiatorHandler():
+    """The base class for initiator handlers"""
 
     def __init__(
             self,
@@ -216,12 +215,9 @@ class InitiatorHandler(metaclass=ABCMeta):
         await self.on_logout()
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
-        LOGGER.info('on_admin_message: %s', message)
+        LOGGER.info('Admin message: %s', message)
 
-        # Only handle if unhandled by the overrideing method.
-        override_status = await self.on_admin_message(message)
-        if override_status is not None:
-            return
+        await self.on_admin_message(message)
 
         try:
             handler, self._admin_state = self._admin_transitions[
@@ -326,46 +322,29 @@ class InitiatorHandler(metaclass=ABCMeta):
         LOGGER.info('disconnected')
         self._connection_state = ConnectionState.DISCONNECTED
 
-    @abstractmethod
-    async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
-        """Handle an admin message
+    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
+        """Called when an admin message is received.
 
         Args:
             message (Mapping[str, Any]): The admin message that was sent by the
                 acceptor.
-
-        Raises:
-            NotImplementedError: [description]
-
-        Returns:
-            Optional[bool]: If true the message will override the base handler.
         """
-        ...
 
-    @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> None:
-        """Handle an application message.
+        """Called when an application message is received.
 
         Args:
             message (Mapping[str, Any]): The application message sent by the
                 acceptor.
-
-        Raises:
-            NotImplementedError: [description]
         """
-        ...
 
-    @abstractmethod
     async def on_logon(self) -> None:
         """Called when a logon message is received.
         """
-        ...
 
-    @abstractmethod
     async def on_logout(self) -> None:
         """Called when a logout message is received.
         """
-        ...
 
     async def on_heartbeat(self) -> None:
         """Called when a heartbeat is received.
