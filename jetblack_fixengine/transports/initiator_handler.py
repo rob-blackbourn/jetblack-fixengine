@@ -3,6 +3,7 @@
 from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, timezone
+from enum import Enum
 import logging
 from typing import Awaitable, Callable, Mapping, Any, Optional, cast
 
@@ -12,12 +13,16 @@ from ..types import Store, Event
 
 LOGGER = logging.getLogger(__name__)
 
-STATE_DISCONNECTED = 'disconnected'
-STATE_CONNECTED = 'connected'
-STATE_LOGGING_ON = 'logon.start'
-STATE_LOGGED_ON = 'logon.ok'
-STATE_LOGGING_OFF = 'logout.start'
-STATE_LOGGED_OUT = 'logout.done'
+
+class InitiatorState(Enum):
+    DISCONNECTED = 'disconnected'
+    CONNECTED = 'connected'
+    LOGGING_ON = 'logon.start'
+    LOGGED_ON = 'logon.ok'
+    LOGGING_OFF = 'logout.start'
+    LOGGED_OUT = 'logout.done'
+    ERROR = 'error'
+
 
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
@@ -45,7 +50,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             target_comp_id
         )
 
-        self._state = STATE_DISCONNECTED
+        self._state = InitiatorState.DISCONNECTED
         self._last_send_time_utc: datetime = EPOCH_UTC
         self._last_receive_time_utc: datetime = EPOCH_UTC
         self._store = store
@@ -93,7 +98,7 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     async def logon(self) -> None:
         """Send a logon message"""
-        self._state = STATE_LOGGING_ON
+        self._state = InitiatorState.LOGGING_ON
         await self.send_message(
             'LOGON',
             {
@@ -105,7 +110,7 @@ class InitiatorHandler(metaclass=ABCMeta):
     async def logout(self) -> None:
         """Send a logout message.
         """
-        self._state = STATE_LOGGING_OFF
+        self._state = InitiatorState.LOGGING_OFF
         await self.send_message('LOGOUT')
 
     async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
@@ -161,7 +166,7 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     async def _handle_logon(self, _message: Mapping[str, Any]) -> bool:
         await self.on_logon()
-        self._state = STATE_LOGGED_ON
+        self._state = InitiatorState.LOGGED_ON
         return True
 
     async def _handle_heartbeat(self, _message: Mapping[str, Any]) -> bool:
@@ -172,35 +177,122 @@ class InitiatorHandler(metaclass=ABCMeta):
         return True
 
     async def _handle_logout(self, _message: Mapping[str, Any]) -> bool:
-        self._state = STATE_LOGGED_OUT
+        self._state = InitiatorState.LOGGED_OUT
         return False
 
-    async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
+    async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('on_admin_message: %s', message)
 
         # Only handle if unhandled by the overrideing method.
         override_status = await self.on_admin_message(message)
         if override_status is not None:
-            return override_status
+            return
 
         if message['MsgType'] == 'LOGON':
-            return await self._handle_logon(message)
+            await self._handle_logon(message)
         elif message['MsgType'] == 'HEARTBEAT':
-            return await self._handle_heartbeat(message)
+            await self._handle_heartbeat(message)
         elif message['MsgType'] == 'TEST_REQUEST':
-            return await self._handle_test_request(message)
+            await self._handle_test_request(message)
         elif message['MsgType'] == 'RESEND_REQUEST':
-            return await self._handle_resend_request(message)
+            await self._handle_resend_request(message)
         elif message['MsgType'] == 'SEQUENCE_RESET':
-            return await self._handle_sequence_reset(message)
+            await self._handle_sequence_reset(message)
         elif message['MsgType'] == 'LOGOUT':
-            return await self._handle_logout(message)
+            await self._handle_logout(message)
         else:
             LOGGER.warning(
                 'unhandled admin message type "%s".',
                 message["MsgType"]
             )
-            return True
+
+    async def _handle_event(self, event: Event) -> None:
+        if event['type'] == 'fix':
+            await self._session.save_message(event['message'])
+
+            fix_message = self.fix_message_factory.decode(event['message'])
+            msgcat = cast(str, fix_message.meta_data.msgcat)
+            if msgcat == 'admin':
+                await self._handle_admin_message(fix_message.message)
+            else:
+                await self.on_application_message(fix_message.message)
+
+            msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
+            await self._set_incoming_seqnum(msg_seq_num)
+
+            self._last_receive_time_utc = datetime.now(timezone.utc)
+
+        elif event['type'] == 'error':
+            LOGGER.warning('error')
+            self._state = InitiatorState.ERROR
+        elif event['type'] == 'disconnect':
+            self._state = InitiatorState.DISCONNECTED
+        else:
+            raise ValueError(f"Unknown event type: {event['type']}")
+
+    async def _send_heartbeat_if_required(self) -> float:
+        now_utc = datetime.now(timezone.utc)
+        seconds_since_last_send = (
+            now_utc - self._last_send_time_utc
+        ).total_seconds()
+        if (
+                seconds_since_last_send >= self.heartbeat_timeout and
+                self._state == InitiatorState.LOGGED_ON
+        ):
+            await self.heartbeat()
+            seconds_since_last_send = 0
+
+        return self.heartbeat_timeout - seconds_since_last_send
+
+    async def _handle_timeout(self) -> None:
+        if not self._state == InitiatorState.LOGGED_ON:
+            return
+
+        now_utc = datetime.now(timezone.utc)
+        seconds_since_last_receive = (
+            now_utc - self._last_receive_time_utc
+        ).total_seconds()
+        if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
+            # Send a test request to the acceptor to ensure the connection is
+            # still active.
+            await self.send_message(
+                'TEST_REQUEST',
+                {
+                    'TestReqID': 'TEST'
+                }
+            )
+
+    async def __call__(
+            self,
+            send: Callable[[Event], Awaitable[None]],
+            receive: Callable[[], Awaitable[Event]]
+    ) -> None:
+        self._send, self._receive = send, receive
+
+        event = await receive()
+
+        if event['type'] == 'connected':
+            LOGGER.info('connected')
+            self._state = InitiatorState.CONNECTED
+
+            await self.logon()
+
+            while self._state not in (
+                    InitiatorState.LOGGED_OUT,
+                    InitiatorState.DISCONNECTED,
+                    InitiatorState.ERROR
+            ):
+                try:
+                    timeout = await self._send_heartbeat_if_required()
+                    event = await asyncio.wait_for(receive(), timeout=timeout)
+                    await self._handle_event(event)
+                except asyncio.TimeoutError:
+                    await self._handle_timeout()
+        else:
+            raise RuntimeError('Failed to connect')
+
+        LOGGER.info('disconnected')
+        self._state = InitiatorState.DISCONNECTED
 
     @abstractmethod
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
@@ -219,7 +311,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    async def on_application_message(self, message: Mapping[str, Any]) -> bool:
+    async def on_application_message(self, message: Mapping[str, Any]) -> None:
         """Handle an application message.
 
         Args:
@@ -228,69 +320,8 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         Raises:
             NotImplementedError: [description]
-
-        Returns:
-            bool: If true the base handler will not handle the message.
         """
         ...
-
-    async def _handle_event(self, event: Event) -> bool:
-        if event['type'] == 'fix':
-            await self._session.save_message(event['message'])
-
-            fix_message = self.fix_message_factory.decode(event['message'])
-            msgcat = cast(str, fix_message.meta_data.msgcat)
-            if msgcat == 'admin':
-                status = await self._on_admin_message(fix_message.message)
-            else:
-                status = await self.on_application_message(fix_message.message)
-
-            msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
-            await self._set_incoming_seqnum(msg_seq_num)
-
-            self._last_receive_time_utc = datetime.now(timezone.utc)
-
-            return status
-
-        elif event['type'] == 'error':
-            LOGGER.warning('error')
-            return False
-        elif event['type'] == 'disconnect':
-            return False
-        else:
-            return False
-
-    async def _send_heartbeat_if_required(self) -> float:
-        now_utc = datetime.now(timezone.utc)
-        seconds_since_last_send = (
-            now_utc - self._last_send_time_utc
-        ).total_seconds()
-        if (
-                seconds_since_last_send >= self.heartbeat_timeout and
-                self._state == STATE_LOGGED_ON
-        ):
-            await self.heartbeat()
-            seconds_since_last_send = 0
-
-        return self.heartbeat_timeout - seconds_since_last_send
-
-    async def _handle_timeout(self) -> None:
-        if not self._state == STATE_LOGGED_ON:
-            return
-
-        now_utc = datetime.now(timezone.utc)
-        seconds_since_last_receive = (
-            now_utc - self._last_receive_time_utc
-        ).total_seconds()
-        if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
-            # Send a test request to the acceptor to ensure the connection is
-            # still active.
-            await self.send_message(
-                'TEST_REQUEST',
-                {
-                    'TestReqID': 'TEST'
-                }
-            )
 
     @abstractmethod
     async def on_logon(self) -> None:
@@ -303,32 +334,3 @@ class InitiatorHandler(metaclass=ABCMeta):
         """Called when a logout message is received.
         """
         ...
-
-    async def __call__(
-            self,
-            send: Callable[[Event], Awaitable[None]],
-            receive: Callable[[], Awaitable[Event]]
-    ) -> None:
-        self._send, self._receive = send, receive
-
-        event = await receive()
-
-        if event['type'] == 'connected':
-            LOGGER.info('connected')
-            self._state = STATE_CONNECTED
-
-            await self.logon()
-
-            ok = True
-            while ok:
-                try:
-                    timeout = await self._send_heartbeat_if_required()
-                    event = await asyncio.wait_for(receive(), timeout=timeout)
-                    ok = await self._handle_event(event)
-                except asyncio.TimeoutError:
-                    await self._handle_timeout()
-        else:
-            raise RuntimeError('Failed to connect')
-
-        LOGGER.info('disconnected')
-        self._state = STATE_DISCONNECTED
