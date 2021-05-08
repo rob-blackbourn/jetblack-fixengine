@@ -4,7 +4,8 @@ import asyncio
 import logging
 from typing import Callable, Optional
 from ssl import SSLContext
-from .fix_transport import fix_stream_processor
+
+from ..transports import fix_stream_processor
 from ..types import Handler
 from ..utils.cancellation import register_cancellation_event
 
