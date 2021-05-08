@@ -109,7 +109,7 @@ class InitiatorHandler():
             send_time_utc,
             message
         )
-        LOGGER.info('sending: %s', fix_message.message)
+        LOGGER.info('Sending %s', fix_message.message)
         event = {
             'type': 'fix',
             'message': fix_message.encode(regenerate_integrity=True)
@@ -203,8 +203,6 @@ class InitiatorHandler():
         await self.on_logout(message)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
-        LOGGER.info('Admin message: %s', message)
-
         await self.on_admin_message(message)
 
         try:
@@ -221,6 +219,8 @@ class InitiatorHandler():
         await self._session.save_message(event['message'])
 
         fix_message = self.fix_message_factory.decode(event['message'])
+        LOGGER.info('Received %s', fix_message.message)
+
         msgcat = cast(str, fix_message.meta_data.msgcat)
         if msgcat == 'admin':
             await self._handle_admin_message(fix_message.message)

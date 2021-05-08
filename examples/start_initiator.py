@@ -1,9 +1,8 @@
 """A simple Initiator"""
 
-from datetime import time
 import logging
 import os.path
-from typing import Mapping, Any, Optional
+from typing import Mapping, Any
 
 from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine.persistence import FileStore
@@ -29,17 +28,17 @@ PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 class MyInitiatorHandler(InitiatorHandler):
     """An instance of the initiator"""
 
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
+    async def on_logon(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_logon')
 
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
+    async def on_logout(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_logout')
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
-        LOGGER.info('on_admin_message %s', message)
+    async def on_admin_message(self, _message: Mapping[str, Any]) -> None:
+        LOGGER.info('on_admin_message')
 
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
-        LOGGER.info('on_application_message %s', message)
+    async def on_application_message(self, _message: Mapping[str, Any]) -> None:
+        LOGGER.info('on_application_message')
 
 
 start_initiator(
