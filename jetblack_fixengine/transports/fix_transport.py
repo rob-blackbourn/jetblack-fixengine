@@ -6,6 +6,8 @@ from enum import IntEnum
 import logging
 from typing import AsyncIterator, Set, cast
 
+from jetblack_fixparser.fix_message import SOH
+
 from ..types import Handler, Event
 from ..utils.cancellation import cancel_await
 
@@ -99,8 +101,12 @@ async def fix_stream_processor(
 
                 if event['type'] == 'fix':
                     # Send data to the handler and renew the write task.
-                    LOGGER.debug('Sending "%s"', event["message"])
-                    writer.write(event['message'])
+                    message: bytes = event['message']
+                    LOGGER.debug(
+                        'Sending "%s"',
+                        message.replace(SOH, b'|').decode()
+                    )
+                    writer.write(message)
                     await writer.drain()
                     write_task = asyncio.create_task(write_queue.get())
                     pending.add(write_task)
@@ -117,14 +123,16 @@ async def fix_stream_processor(
 
                 try:
                     message = cast(bytes, task.result())
-                    LOGGER.debug('Received "%s"', message)
+                    LOGGER.debug(
+                        'Received "%s"',
+                        message.replace(SOH, b'|').decode()
+                    )
                     # Notify the client and reset the state.
                     await read_queue.put({
                         'type': 'fix',
                         'message': message
                     })
-                    message = b''
-                    # Read the field.
+                    # Create the new read task.
                     read_task = asyncio.create_task(reader_iter.__anext__())
                     pending.add(read_task)
                 except StopAsyncIteration:
