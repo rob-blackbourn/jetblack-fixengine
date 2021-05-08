@@ -96,32 +96,6 @@ class InitiatorHandler():
         await self._send(event)
         self._last_send_time_utc = send_time_utc
 
-    async def send_message(
-            self,
-            msg_type: str,
-            message: Optional[Mapping[str, Any]] = None
-    ) -> None:
-        send_time_utc = datetime.now(timezone.utc)
-        msg_seq_num = await self._next_outgoing_seqnum()
-        fix_message = self.fix_message_factory.create(
-            msg_type,
-            msg_seq_num,
-            send_time_utc,
-            message
-        )
-        LOGGER.info('Sending %s', fix_message.message)
-        event = {
-            'type': 'fix',
-            'message': fix_message.encode(regenerate_integrity=True)
-        }
-        await self._send_event(event, send_time_utc)
-
-    async def logout(self) -> None:
-        """Send a logout message.
-        """
-        # self._admin_state = AdminState.LOGGING_OFF
-        await self.send_message('LOGOUT')
-
     async def _handle_test_request_received(
             self,
             message: Mapping[str, Any]
@@ -284,6 +258,39 @@ class InitiatorHandler():
                 break
 
         LOGGER.info('disconnected')
+
+    async def send_message(
+            self,
+            msg_type: str,
+            message: Optional[Mapping[str, Any]] = None
+    ) -> None:
+        """Send a FIX message
+
+        Args:
+            msg_type (str): The message type.
+            message (Optional[Mapping[str, Any]], optional): The message.
+                Defaults to None.
+        """
+        send_time_utc = datetime.now(timezone.utc)
+        msg_seq_num = await self._next_outgoing_seqnum()
+        fix_message = self.fix_message_factory.create(
+            msg_type,
+            msg_seq_num,
+            send_time_utc,
+            message
+        )
+        LOGGER.info('Sending %s', fix_message.message)
+        event = {
+            'type': 'fix',
+            'message': fix_message.encode(regenerate_integrity=True)
+        }
+        await self._send_event(event, send_time_utc)
+
+    async def logout(self) -> None:
+        """Send a logout message.
+        """
+        # self._admin_state = AdminState.LOGGING_OFF
+        await self.send_message('LOGOUT')
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         """Called when an admin message is received.

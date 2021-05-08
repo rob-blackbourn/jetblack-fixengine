@@ -34,9 +34,6 @@ class MyInitiatorHandler(InitiatorHandler):
     async def on_logout(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_logout')
 
-    async def on_admin_message(self, _message: Mapping[str, Any]) -> None:
-        LOGGER.info('on_admin_message')
-
     async def on_application_message(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_application_message')
 
