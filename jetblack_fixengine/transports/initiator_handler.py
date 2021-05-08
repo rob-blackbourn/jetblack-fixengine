@@ -122,37 +122,6 @@ class InitiatorHandler():
         # self._admin_state = AdminState.LOGGING_OFF
         await self.send_message('LOGOUT')
 
-    async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
-        """Send a heartbeat message.
-
-        Args:
-            test_req_id (Optional[str], optional): An optional test req id.
-                Defaults to None.
-        """
-        body_kwargs = {}
-        if test_req_id:
-            body_kwargs['TestReqID'] = test_req_id
-        await self.send_message('HEARTBEAT', body_kwargs)
-
-    async def resend_request(
-            self,
-            begin_seqnum: int,
-            end_seqnum: int = 0
-    ) -> None:
-        """Send a resend request.
-
-        Args:
-            begin_seqnum (int): The begin seqnum
-            end_seqnum (int, optional): An optional end seqnum. Defaults to 0.
-        """
-        await self.send_message(
-            'RESEND_REQUEST',
-            {
-                'BeginSeqNo': begin_seqnum,
-                'EndSeqNo': end_seqnum
-            }
-        )
-
     async def _handle_test_request_received(
             self,
             message: Mapping[str, Any]
@@ -250,7 +219,7 @@ class InitiatorHandler():
                 seconds_since_last_send >= self.heartbeat_timeout and
                 self._admin_state_machine.state == AdminState.LOGGED_ON
         ):
-            await self.heartbeat()
+            await self.send_message('HEARTBEAT')
             seconds_since_last_send = 0
 
         return self.heartbeat_timeout - seconds_since_last_send
