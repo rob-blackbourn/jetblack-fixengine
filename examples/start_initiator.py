@@ -5,8 +5,8 @@ import os.path
 from typing import Mapping, Any
 
 from jetblack_fixparser.loader import load_yaml_protocol
-from jetblack_fixengine.persistence import FileStore
-from jetblack_fixengine.transports import start_initiator, InitiatorHandler
+from jetblack_fixengine import FileStore
+from jetblack_fixengine import start_initiator, InitiatorHandler
 
 logging.basicConfig(level=logging.DEBUG)
 
