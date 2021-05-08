@@ -7,6 +7,7 @@ import logging
 from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple
 import uuid
 
+from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
@@ -47,6 +48,11 @@ class AcceptorHandler(metaclass=ABCMeta):
         self.cancellation_event = cancellation_event
         self.logon_time_range = logon_time_range
         self.tz = tz
+        self.fix_message_factory = FixMessageFactory(
+            protocol,
+            sender_comp_id,
+            target_comp_id
+        )
 
         self._state: Optional[str] = None
         self._test_heartbeat_message: Optional[str] = None
@@ -119,15 +125,20 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         # Is it time to logout?
         if datetime.now(tz=self.tz) >= logout_time:
-            await self.send_logout()
-            await self.on_logout()
+            self._state = STATE_LOGGING_OFF
+            await self.send_message('LOGOUT')
+            await self.on_logout({})
 
     async def _send_heartbeat_if_required(self) -> float:
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(timezone.utc)
         seconds_since_last_send = (
-            now_utc - self._last_send_time_utc).total_seconds()
-        if seconds_since_last_send >= self.heartbeat_timeout and self._state == STATE_LOGGED_ON:
-            await self.send_heartbeat()
+            now_utc - self._last_send_time_utc
+        ).total_seconds()
+        if (
+                seconds_since_last_send >= self.heartbeat_timeout and
+                self._state == STATE_LOGGED_ON
+        ):
+            await self.send_message('HEARTBEAT')
             seconds_since_last_send = 0
 
         seconds_till_next_heartbeat = self.heartbeat_timeout - seconds_since_last_send
@@ -151,12 +162,12 @@ class AcceptorHandler(metaclass=ABCMeta):
                     self._state = STATE_LOGGED_ON
                 else:
                     self._state = STATE_LOGGING_OFF
-                    await self.send_logout()
+                    await self.send_message('LOGOUT')
 
         elif self._state == STATE_SYNCHRONISING:
             pass
         elif message_category == 'admin':
-            await self._on_admin_message(decoded_message)
+            await self._handle_admin_message(decoded_message)
         else:
             await self.on_application_message(decoded_message)
 
@@ -173,7 +184,12 @@ class AcceptorHandler(metaclass=ABCMeta):
         if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
             self._state = STATE_TEST_HEARTBEAT
             self._test_heartbeat_message = str(uuid.uuid4())
-            await self.send_test_request(self._test_heartbeat_message)
+            await self.send_message(
+                'TEST_REQUEST',
+                {
+                    'TestReqID': self._test_heartbeat_message
+                }
+            )
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
@@ -193,63 +209,44 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._send(event)
         self._last_send_time_utc = send_time_utc
 
-    async def _send_fix_message(self, message: Mapping[str, Any], send_time_utc: datetime) -> None:
-        LOGGER.info('sending: %s', message)
+    async def _send_fix_message(
+            self,
+            message: Mapping[str, Any],
+            send_time_utc: datetime
+    ) -> None:
+        LOGGER.info('Sending %s', message)
         event = {
             'type': 'fix',
             'message_contents': message
         }
         await self._send_event(event, send_time_utc)
 
-    async def logon(self) -> None:
-        """Send a logon message"""
-        send_time_utc = datetime.utcnow()
-        msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'LOGON',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'EncryptMethod': 'NONE',
-            'HeartBtInt': self.heartbeat_timeout
-        }
-        self._state = STATE_LOGGING_ON
-        await self._send_fix_message(message, send_time_utc)
-
-    async def send_logout(self) -> None:
-        """Send a logout message"""
-        send_time_utc = datetime.utcnow()
-        msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'LOGOUT',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc
-        }
-        self._state = STATE_LOGGING_OFF
-        await self._send_fix_message(message, send_time_utc)
-
-    async def send_heartbeat(self, test_req_id: Optional[str] = None) -> None:
-        """Send a heartbeat
+    async def send_message(
+            self,
+            msg_type: str,
+            message: Optional[Mapping[str, Any]] = None
+    ) -> None:
+        """Send a FIX message
 
         Args:
-            test_req_id (Optional[str], optional): An optional test req id.
+            msg_type (str): The message type.
+            message (Optional[Mapping[str, Any]], optional): The message.
                 Defaults to None.
         """
-        send_time_utc = datetime.utcnow()
+        send_time_utc = datetime.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'HEARTBEAT',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc
+        fix_message = self.fix_message_factory.create(
+            msg_type,
+            msg_seq_num,
+            send_time_utc,
+            message
+        )
+        LOGGER.info('Sending %s', fix_message.message)
+        event = {
+            'type': 'fix',
+            'message': fix_message.encode(regenerate_integrity=True)
         }
-        if test_req_id:
-            message['TestReqID'] = test_req_id
-        await self._send_fix_message(message, send_time_utc)
+        await self._send_event(event, send_time_utc)
 
     async def send_resend_request(self, begin_seqnum: int, end_seqnum: int = 0) -> None:
         """Send a resend request.
@@ -258,130 +255,117 @@ class AcceptorHandler(metaclass=ABCMeta):
             begin_seqnum (int): The begin seqnum
             end_seqnum (int, optional): An optional end seqnum. Defaults to 0.
         """
-        send_time_utc = datetime.utcnow()
-        msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'RESEND_REQUEST',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'BeginSeqNo': begin_seqnum,
-            'EndSeqNo': end_seqnum
-        }
-        await self._send_fix_message(message, send_time_utc)
+        await self.send_message(
+            'RESEND_REQUEST',
+            {
+                'BeginSeqNo': begin_seqnum,
+                'EndSeqNo': end_seqnum
+            }
+        )
 
-    async def send_test_request(self, test_req_id: str) -> None:
-        """Send a test request.
+    async def _handle_logon_received(self, message: Mapping[str, Any]) -> bool:
+        if await self.on_logon(message):
+            # Acknowledge the login
+            await self.send_message(
+                'LOGON',
+                {
+                    'EncryptMethod': 'NONE'
+                }
+            )
+            self._state = STATE_LOGGED_ON
+            return True
+        else:
+            # Reject the login.
+            self._state = STATE_LOGGING_OFF
+            await self.send_message('LOGOUT')
+            self._state = STATE_LOGGING_OFF
+            return False
 
-        Args:
-            test_req_id (str): The test req id.
-        """
-        send_time_utc = datetime.utcnow()
-        msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'TEST_REQUEST',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'TestReqID': test_req_id
-        }
-        await self._send_fix_message(message, send_time_utc)
+    async def _handle_heartbeat_received(
+            self,
+            message: Mapping[str, Any]
+    ) -> None:
+        await self.on_heartbeat(message)
 
-    async def send_sequence_reset(self, gap_fill: bool, new_seq_no: int) -> None:
-        """Send a sequence reset.
+    async def _handle_test_request(self, message: Mapping[str, Any]) -> None:
+        test_req_id = message['TestReqID']
+        await self.send_message(
+            'TEST_REQUEST',
+            {
+                'TestReqID': test_req_id
+            }
+        )
 
-        Args:
-            gap_fill (bool): If true set the GapFillFlag.
-            new_seq_no (int): The new sequence number.
-        """
-        send_time_utc = datetime.utcnow()
-        msg_seq_num = await self._next_outgoing_seqnum()
-        message = {
-            'MsgType': 'SEQUENCE_RESET',
-            'MsgSeqNum': msg_seq_num,
-            'SenderCompID': self.sender_comp_id,
-            'TargetCompID': self.target_comp_id,
-            'SendingTime': send_time_utc,
-            'GapFillFlag': gap_fill,
-            'NewSeqNo': new_seq_no
-        }
-        await self._send_fix_message(message, send_time_utc)
+    async def _handle_resend_request(self, _message: Mapping[str, Any]) -> None:
+        new_seq_no = await self._session.get_outgoing_seqnum() + 2
+        await self.send_message(
+            'SEQUENCE_RESET',
+            {
+                'GapFillFlag': False,
+                'NewSeqNo': new_seq_no
+            }
+        )
 
-    async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
+    async def _handle_sequence_reset(self, message: Mapping[str, Any]) -> None:
+        await self._set_incoming_seqnum(message['NewSeqNo'])
+
+    async def _handle_logout_received(self, message: Mapping[str, Any]) -> None:
+        self._state = STATE_LOGGED_OUT
+        await self.on_logout(message)
+
+    async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         LOGGER.info('on_admin_message: %s', message)
 
-        # Only handle if unhandled by the overrideing method.
-        override_status = await self.on_admin_message(message)
-        if override_status is not None:
-            return override_status
+        await self.on_admin_message(message)
 
         if message['MsgType'] == 'LOGON':
-            return await self._on_login(message)
+            await self._handle_logon_received(message)
         elif message['MsgType'] == 'HEARTBEAT':
-            return True
+            await self._handle_heartbeat_received(message)
         elif message['MsgType'] == 'TEST_REQUEST':
-            await self.send_test_request(message['TestReqID'])
-            return True
+            await self._handle_test_request(message)
         elif message['MsgType'] == 'RESEND_REQUEST':
-            await self.send_sequence_reset(False, await self._session.get_outgoing_seqnum() + 2)
-            return True
+            await self._handle_resend_request(message)
         elif message['MsgType'] == 'SEQUENCE_RESET':
-            await self._set_incoming_seqnum(message['NewSeqNo'])
-            return True
+            await self._handle_sequence_reset(message)
         elif message['MsgType'] == 'LOGOUT':
-            self._state = STATE_LOGGED_OUT
-            return False
+            await self._handle_logout_received(message)
         else:
             LOGGER.warning(
                 'unhandled admin message type "%s".',
                 message["MsgType"]
             )
-            return True
 
-    @abstractmethod
-    async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
+    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         """Handle an admin message.
 
         Args:
             message (Mapping[str, Any]): The message to handle.
-
-        Returns:
-            Optional[bool]: If true override the base processing.
         """
-        ...
 
-    async def _on_login(self, message: Mapping[str, Any]) -> bool:
-        if await self.on_logon(message):
-            # Acknowledge the login
-            await self.logon()
-            self._state = STATE_LOGGED_ON
-            return True
-        else:
-            # Reject the login.
-            await self.send_logout()
-            self._state = STATE_LOGGING_OFF
-            return False
+    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
+        pass
 
     @abstractmethod
-    async def on_logon(self, message: Mapping[str, Any]) -> bool:
-        """Return True if the login is valid"""
-        ...
+    async def on_logon(self, message: Mapping[str, Any]) -> None:
+        """Return True if the login is valid
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+        """
 
     @abstractmethod
-    async def on_logout(self) -> None:
-        """Perform any logout tasks"""
-        ...
+    async def on_logout(self, message: Mapping[str, Any]) -> None:
+        """Perform any logout tasks
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+        """
 
     @abstractmethod
-    async def on_application_message(self, message: Mapping[str, Any]) -> bool:
+    async def on_application_message(self, message: Mapping[str, Any]) -> None:
         """Handle an application message.
 
         Args:
             message (Mapping[str, Any]): The message to handle.
-
-        Returns:
-            bool: If true, override any base processing.
         """
-        ...
