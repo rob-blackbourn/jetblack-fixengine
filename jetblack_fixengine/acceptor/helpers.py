@@ -1,4 +1,4 @@
-"""The acceptor transport"""
+"""Acceptor helpers"""
 
 import asyncio
 import logging

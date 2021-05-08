@@ -1,4 +1,4 @@
-"""Initiator transport"""
+"""Initiator helpers"""
 
 import asyncio
 import logging
