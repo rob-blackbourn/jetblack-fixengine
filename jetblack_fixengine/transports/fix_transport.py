@@ -57,8 +57,6 @@ async def fix_stream_processor(
     })
 
     state = FixState.OK
-    message: bytes = b''
-
     reader_iter = reader.__aiter__()
 
     # Create initial tasks.

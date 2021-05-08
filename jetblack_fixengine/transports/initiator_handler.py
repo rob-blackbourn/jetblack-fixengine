@@ -2,41 +2,25 @@
 
 import asyncio
 from datetime import datetime, timezone
-from enum import Enum
 import logging
-from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple, cast
+from typing import Awaitable, Callable, Mapping, Any, Optional, cast
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..types import Store, Event
 
+from .initiator_state import (
+    AdminState,
+    AdminResponse,
+    AdminStateMachine,
+    ConnectionState,
+    ConnectionResponse,
+    ConnectionStateMachine)
+
 LOGGER = logging.getLogger(__name__)
-
-
-class AdminState(Enum):
-    LOGON_REQUIRED = 'logon.required'
-    LOGGED_ON = 'logon.ok'
-    LOGGED_OUT = 'logout.done'
-
-
-class ConnectionState(Enum):
-    DISCONNECTED = 'disconnected'
-    CONNECTED = 'connected'
-    ERROR = 'error'
-
+EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 EventHandler = Callable[[Event], Awaitable[None]]
-
-AdminTransitionKey = Tuple[AdminState, Optional[str]]
-AdminTransitionValue = Tuple[EventHandler, AdminState]
-AdminTransitionMapping = Mapping[AdminTransitionKey, AdminTransitionValue]
-
-ConnectionTransitionKey = Tuple[ConnectionState, Optional[str]]
-ConnectionTransitionValue = Tuple[EventHandler, ConnectionState]
-ConnectionTransitionMapping = Mapping[ConnectionTransitionKey,
-                                      ConnectionTransitionValue]
-
-EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 
 class InitiatorHandler():
@@ -64,8 +48,6 @@ class InitiatorHandler():
             target_comp_id
         )
 
-        self._connection_state = ConnectionState.DISCONNECTED
-        self._admin_state = AdminState.LOGON_REQUIRED
         self._last_send_time_utc: datetime = EPOCH_UTC
         self._last_receive_time_utc: datetime = EPOCH_UTC
         self._store = store
@@ -73,53 +55,23 @@ class InitiatorHandler():
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
 
-        self._connection_transitions: ConnectionTransitionMapping = {
-            (ConnectionState.DISCONNECTED, 'connected'): (
-                self._handle_connected,
-                ConnectionState.CONNECTED
-            ),
-            (ConnectionState.CONNECTED, 'fix'): (
-                self._handle_fix,
-                ConnectionState.CONNECTED
-            ),
-            (ConnectionState.CONNECTED, 'timeout'): (
-                self._handle_timeout,
-                ConnectionState.CONNECTED
-            ),
-            (ConnectionState.CONNECTED, 'error'): (
-                self._handle_error,
-                ConnectionState.DISCONNECTED
-            ),
-            (ConnectionState.CONNECTED, 'disconnect'): (
-                self._handle_disconnect,
-                ConnectionState.DISCONNECTED
-            )
+        self._connection_state_machine = ConnectionStateMachine()
+        self._connection_handlers = {
+            ConnectionResponse.PROCESS_CONNECTED: self._handle_connected,
+            ConnectionResponse.PROCESS_FIX: self._handle_fix,
+            ConnectionResponse.PROCESS_TIMEOUT: self._handle_timeout,
+            ConnectionResponse.PROCESS_ERROR: self._handle_error,
+            ConnectionResponse.PROCESS_DISCONNECT: self._handle_disconnect
         }
-        self._admin_transitions: AdminTransitionMapping = {
-            (AdminState.LOGON_REQUIRED, 'LOGON'): (
-                self._handle_logon_received,
-                AdminState.LOGGED_ON
-            ),
-            (AdminState.LOGGED_ON, 'HEARTBEAT'): (
-                self._handle_heartbeat_received,
-                AdminState.LOGGED_ON
-            ),
-            (AdminState.LOGGED_ON, 'TEST_REQUEST'): (
-                self._handle_test_request_received,
-                AdminState.LOGGED_ON
-            ),
-            (AdminState.LOGGED_ON, 'RESEND_REQUEST'): (
-                self._handle_resend_request_received,
-                AdminState.LOGGED_ON
-            ),
-            (AdminState.LOGGED_ON, 'SEQUENCE_RESET'): (
-                self._handle_sequence_reset_received,
-                AdminState.LOGGED_ON
-            ),
-            (AdminState.LOGGED_ON, 'LOGOUT'): (
-                self._handle_acceptor_logout_received,
-                AdminState.LOGGED_OUT
-            )
+        self._admin_state_machine = AdminStateMachine()
+        self._admin_handlers = {
+            AdminResponse.PROCESS_LOGON: self._handle_logon_received,
+            AdminResponse.PROCESS_HEARTBEAT: self._handle_heartbeat_received,
+            AdminResponse.PROCESS_TEST_REQUEST: self._handle_test_request_received,
+            AdminResponse.PROCESS_RESEND_REQUEST: self._handle_resend_request_received,
+            AdminResponse.PROCESS_SEQUENCE_RESET: self._handle_sequence_reset_received,
+            AdminResponse.PROCESS_LOGOUT: self._handle_acceptor_logout_received
+
         }
 
     async def _next_outgoing_seqnum(self) -> int:
@@ -256,9 +208,8 @@ class InitiatorHandler():
         await self.on_admin_message(message)
 
         try:
-            handler, self._admin_state = self._admin_transitions[
-                (self._admin_state, message['MsgType'])
-            ]
+            response = self._admin_state_machine.transition(message['MsgType'])
+            handler = self._admin_handlers[response]
             await handler(message)
         except KeyError:
             LOGGER.warning(
@@ -288,7 +239,7 @@ class InitiatorHandler():
         LOGGER.info('Disconnected')
 
     async def _send_heartbeat_if_required(self) -> float:
-        if self._connection_state != ConnectionState.CONNECTED:
+        if self._connection_state_machine.state != ConnectionState.CONNECTED:
             return self.logon_timeout
 
         now_utc = datetime.now(timezone.utc)
@@ -297,7 +248,7 @@ class InitiatorHandler():
         ).total_seconds()
         if (
                 seconds_since_last_send >= self.heartbeat_timeout and
-                self._admin_state == AdminState.LOGGED_ON
+                self._admin_state_machine.state == AdminState.LOGGED_ON
         ):
             await self.heartbeat()
             seconds_since_last_send = 0
@@ -305,7 +256,7 @@ class InitiatorHandler():
         return self.heartbeat_timeout - seconds_since_last_send
 
     async def _handle_timeout(self, _event: Event) -> None:
-        if not self._admin_state == AdminState.LOGGED_ON:
+        if not self._admin_state_machine.state == AdminState.LOGGED_ON:
             return
 
         now_utc = datetime.now(timezone.utc)
@@ -346,9 +297,8 @@ class InitiatorHandler():
             }
 
     async def _handle_event(self, event: Event) -> None:
-        handler, self._connection_state = self._connection_transitions[
-            (self._connection_state, event['type'])
-        ]
+        response = self._connection_state_machine.transition(event['type'])
+        handler = self._connection_handlers[response]
         await handler(event)
 
     async def __call__(
@@ -361,11 +311,10 @@ class InitiatorHandler():
         while True:
             event = await self._next_event(receive)
             await self._handle_event(event)
-            if self._connection_state != ConnectionState.CONNECTED:
+            if self._connection_state_machine.state != ConnectionState.CONNECTED:
                 break
 
         LOGGER.info('disconnected')
-        self._connection_state = ConnectionState.DISCONNECTED
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         """Called when an admin message is received.
