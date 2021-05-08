@@ -1,5 +1,6 @@
 """The Initiator handler class"""
 
+from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, timezone
 import logging
@@ -23,7 +24,7 @@ EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 EventHandler = Callable[[Event], Awaitable[None]]
 
 
-class InitiatorHandler():
+class InitiatorHandler(metaclass=ABCMeta):
     """The base class for initiator handlers"""
 
     def __init__(
@@ -300,6 +301,14 @@ class InitiatorHandler():
                 acceptor.
         """
 
+    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
+        """Called when a heartbeat is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
+        """
+
+    @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> None:
         """Called when an application message is received.
 
@@ -308,14 +317,18 @@ class InitiatorHandler():
                 acceptor.
         """
 
+    @abstractmethod
     async def on_logon(self, message: Mapping[str, Any]) -> None:
         """Called when a logon message is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
         """
 
+    @abstractmethod
     async def on_logout(self, message: Mapping[str, Any]) -> None:
         """Called when a logout message is received.
-        """
 
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
-        """Called when a heartbeat is received.
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
         """
