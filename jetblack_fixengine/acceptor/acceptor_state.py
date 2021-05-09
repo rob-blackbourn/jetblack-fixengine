@@ -9,7 +9,6 @@ class InvalidStateTransitionError(Exception):
 
 
 class AdminState(Enum):
-    DISCONNECTED = auto()
     LOGGING_ON = auto()
     LOGGED_ON = auto()
     LOGGING_OFF = auto()
