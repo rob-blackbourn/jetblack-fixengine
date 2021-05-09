@@ -4,7 +4,16 @@ from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, time, tzinfo, timezone
 import logging
-from typing import Awaitable, Callable, Mapping, Any, Optional, Tuple
+from typing import (
+    Awaitable,
+    Callable,
+    Mapping,
+    Any,
+    Optional,
+    Tuple,
+    Union,
+    cast
+)
 import uuid
 
 from jetblack_fixparser.fix_message import FixMessageFactory
@@ -38,6 +47,7 @@ class AcceptorHandler(metaclass=ABCMeta):
             *,
             heartbeat_threshold: int = 1,
             logon_time_range: Optional[Tuple[time, time]] = None,
+            logon_timeout: Union[float, int] = 60,
             tz: Optional[tzinfo] = None
     ) -> None:
         self.protocol = protocol
@@ -47,6 +57,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         self.heartbeat_threshold = heartbeat_threshold
         self.cancellation_event = cancellation_event
         self.logon_time_range = logon_time_range
+        self.logon_timeout = logon_timeout
         self.tz = tz
         self.fix_message_factory = FixMessageFactory(
             protocol,
@@ -86,11 +97,7 @@ class AcceptorHandler(metaclass=ABCMeta):
                     event = await asyncio.wait_for(receive(), timeout=seconds_till_next_heartbeat)
 
                     if event['type'] == 'fix':
-                        await self._on_event_fix(
-                            event['message'],
-                            event['message_contents'],
-                            event['message_category']
-                        )
+                        await self._on_fix_event(event)
 
                     elif event['type'] == 'error':
                         break
@@ -130,6 +137,9 @@ class AcceptorHandler(metaclass=ABCMeta):
             await self.on_logout({})
 
     async def _send_heartbeat_if_required(self) -> float:
+        if self._state == STATE_LOGGING_ON:
+            return self.logon_timeout
+
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_send = (
             now_utc - self._last_send_time_utc
@@ -145,40 +155,29 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         return seconds_till_next_heartbeat
 
-    async def _on_event_fix(
-            self,
-            encoded_message: bytes,
-            decoded_message: Mapping[str, Any],
-            message_category: str
-    ) -> None:
+    async def _on_fix_event(self, event: Event) -> None:
 
-        await self._session.save_message(encoded_message)
+        await self._session.save_message(event['message'])
 
-        if self._state == STATE_TEST_HEARTBEAT:
-            # Ignore all messages other than the heartbeat response
-            if decoded_message['MsgType'] == 'HEARTBEAT':
-                if decoded_message['TestReqID'] == self._test_heartbeat_message:
-                    # SWitch back to logged on
-                    self._state = STATE_LOGGED_ON
-                else:
-                    self._state = STATE_LOGGING_OFF
-                    await self.send_message('LOGOUT')
+        fix_message = self.fix_message_factory.decode(event['message'])
+        LOGGER.info('Received %s', fix_message.message)
 
-        elif self._state == STATE_SYNCHRONISING:
-            pass
-        elif message_category == 'admin':
-            await self._handle_admin_message(decoded_message)
+        msgcat = cast(str, fix_message.meta_data.msgcat)
+        if msgcat == 'admin':
+            await self._handle_admin_message(fix_message.message)
         else:
-            await self.on_application_message(decoded_message)
+            await self.on_application_message(fix_message.message)
 
-        await self._set_incoming_seqnum(decoded_message['MsgSeqNum'])
-        self._last_receive_time_utc = datetime.utcnow()
+        msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
+        await self._set_incoming_seqnum(msg_seq_num)
+
+        self._last_receive_time_utc = datetime.now(timezone.utc)
 
     async def _on_timeout(self) -> None:
         if self._state != STATE_LOGGED_ON:
             return
 
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc).total_seconds()
         if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
@@ -269,7 +268,8 @@ class AcceptorHandler(metaclass=ABCMeta):
             await self.send_message(
                 'LOGON',
                 {
-                    'EncryptMethod': 'NONE'
+                    'EncryptMethod': 'NONE',
+                    'HeartBtInt': self.heartbeat_timeout
                 }
             )
             self._state = STATE_LOGGED_ON
@@ -318,7 +318,18 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         await self.on_admin_message(message)
 
-        if message['MsgType'] == 'LOGON':
+        if self._state == STATE_TEST_HEARTBEAT:
+            # Ignore all messages other than the heartbeat response
+            if message['MsgType'] == 'HEARTBEAT':
+                if message['TestReqID'] == self._test_heartbeat_message:
+                    # SWitch back to logged on
+                    self._state = STATE_LOGGED_ON
+                else:
+                    self._state = STATE_LOGGING_OFF
+                    await self.send_message('LOGOUT')
+        elif self._state == STATE_SYNCHRONISING:
+            pass
+        elif message['MsgType'] == 'LOGON':
             await self._handle_logon_received(message)
         elif message['MsgType'] == 'HEARTBEAT':
             await self._handle_heartbeat_received(message)
@@ -347,7 +358,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
+    async def on_logon(self, message: Mapping[str, Any]) -> bool:
         """Return True if the login is valid
 
         Args:
