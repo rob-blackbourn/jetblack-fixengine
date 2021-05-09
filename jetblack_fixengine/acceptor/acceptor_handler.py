@@ -3,7 +3,6 @@
 from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, time, tzinfo, timezone
-from enum import Enum, auto
 import logging
 from typing import (
     Awaitable,
@@ -19,20 +18,18 @@ import uuid
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
+
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 
+from .acceptor_state import (
+    AdminState,
+    ConnectionState,
+    ConnectionResponse,
+    ConnectionStateMachine
+)
+
 LOGGER = logging.getLogger(__name__)
-
-
-class AdminState(Enum):
-    DISCONNECTED = auto()
-    LOGGING_ON = auto()
-    LOGGED_ON = auto()
-    LOGGING_OFF = auto()
-    LOGGED_OUT = auto()
-    TEST_HEARTBEAT = auto()
-    SYNCHRONISING = auto()
 
 
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
@@ -70,7 +67,16 @@ class AcceptorHandler(metaclass=ABCMeta):
             target_comp_id
         )
 
-        self._state = AdminState.DISCONNECTED
+        self._connection_state_machine = ConnectionStateMachine()
+        self._connection_handlers = {
+            ConnectionResponse.PROCESS_CONNECTED: self._handle_connected,
+            ConnectionResponse.PROCESS_FIX: self._handle_fix,
+            ConnectionResponse.PROCESS_TIMEOUT: self._handle_timeout,
+            ConnectionResponse.PROCESS_ERROR: self._handle_error,
+            ConnectionResponse.PROCESS_DISCONNECT: self._handle_disconnect
+        }
+
+        self._state = AdminState.LOGGING_ON
         self._test_heartbeat_message: Optional[str] = None
         self._last_send_time_utc: datetime = EPOCH_UTC
         self._last_receive_time_utc: datetime = EPOCH_UTC
@@ -78,6 +84,70 @@ class AcceptorHandler(metaclass=ABCMeta):
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
+        self._logout_time: Optional[datetime]
+
+    async def _handle_connected(self, _event: Event) -> None:
+        LOGGER.info('connected')
+        self._state = AdminState.LOGGING_ON
+        self._logout_time = await self._wait_till_logon_time()
+
+    async def _handle_timeout(self, _event: Event) -> None:
+        if self._state != AdminState.LOGGED_ON:
+            return
+
+        now_utc = datetime.now(timezone.utc)
+        seconds_since_last_receive = (
+            now_utc - self._last_receive_time_utc).total_seconds()
+        if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
+            self._state = AdminState.TEST_HEARTBEAT
+            self._test_heartbeat_message = str(uuid.uuid4())
+            await self.send_message(
+                'TEST_REQUEST',
+                {
+                    'TestReqID': self._test_heartbeat_message
+                }
+            )
+
+    async def _handle_fix(self, event: Event) -> None:
+
+        await self._session.save_message(event['message'])
+
+        fix_message = self.fix_message_factory.decode(event['message'])
+        LOGGER.info('Received %s', fix_message.message)
+
+        msgcat = cast(str, fix_message.meta_data.msgcat)
+        if msgcat == 'admin':
+            await self._handle_admin_message(fix_message.message)
+        else:
+            await self.on_application_message(fix_message.message)
+
+        msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
+        await self._set_incoming_seqnum(msg_seq_num)
+
+        self._last_receive_time_utc = datetime.now(timezone.utc)
+
+    async def _handle_error(self, event: Event) -> None:
+        LOGGER.warning('error: %s', event)
+
+    async def _handle_disconnect(self, _event: Event) -> None:
+        LOGGER.info('Disconnected')
+
+    async def _next_event(
+            self,
+            receive: Callable[[], Awaitable[Event]]
+    ) -> Event:
+        try:
+            timeout = await self._send_heartbeat_if_required()
+            return await asyncio.wait_for(receive(), timeout=timeout)
+        except asyncio.TimeoutError:
+            return {
+                'type': 'timeout'
+            }
+
+    async def _handle_event(self, event: Event) -> None:
+        response = self._connection_state_machine.transition(event['type'])
+        handler = self._connection_handlers[response]
+        await handler(event)
 
     async def __call__(
             self,
@@ -86,35 +156,11 @@ class AcceptorHandler(metaclass=ABCMeta):
     ) -> None:
         self._send, self._receive = send, receive
 
-        # Wait for connection.
-        event = await receive()
-
-        if event['type'] == 'connected':
-            LOGGER.info('connected')
-            self._state = AdminState.LOGGING_ON
-
-            logout_time = await self._wait_till_logon_time()
-
-            while self._state != AdminState.LOGGED_OUT:
-                try:
-                    await self._send_logout_if_login_expired(logout_time)
-                    seconds_till_next_heartbeat = await self._send_heartbeat_if_required()
-                    event = await asyncio.wait_for(receive(), timeout=seconds_till_next_heartbeat)
-
-                    if event['type'] == 'fix':
-                        await self._on_fix_event(event)
-
-                    elif event['type'] == 'error':
-                        break
-                    elif event['type'] == 'disconnect':
-                        break
-                    else:
-                        raise Exception(f'Unhandled event {event["type"]}')
-
-                except asyncio.TimeoutError:
-                    await self._on_timeout()
-        else:
-            raise RuntimeError('Failed to connect')
+        while True:
+            event = await self._next_event(receive)
+            await self._handle_event(event)
+            if self._connection_state_machine.state != ConnectionState.CONNECTED:
+                break
 
         LOGGER.info('disconnected')
 
@@ -159,41 +205,6 @@ class AcceptorHandler(metaclass=ABCMeta):
         seconds_till_next_heartbeat = self.heartbeat_timeout - seconds_since_last_send
 
         return seconds_till_next_heartbeat
-
-    async def _on_fix_event(self, event: Event) -> None:
-
-        await self._session.save_message(event['message'])
-
-        fix_message = self.fix_message_factory.decode(event['message'])
-        LOGGER.info('Received %s', fix_message.message)
-
-        msgcat = cast(str, fix_message.meta_data.msgcat)
-        if msgcat == 'admin':
-            await self._handle_admin_message(fix_message.message)
-        else:
-            await self.on_application_message(fix_message.message)
-
-        msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
-        await self._set_incoming_seqnum(msg_seq_num)
-
-        self._last_receive_time_utc = datetime.now(timezone.utc)
-
-    async def _on_timeout(self) -> None:
-        if self._state != AdminState.LOGGED_ON:
-            return
-
-        now_utc = datetime.now(timezone.utc)
-        seconds_since_last_receive = (
-            now_utc - self._last_receive_time_utc).total_seconds()
-        if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
-            self._state = AdminState.TEST_HEARTBEAT
-            self._test_heartbeat_message = str(uuid.uuid4())
-            await self.send_message(
-                'TEST_REQUEST',
-                {
-                    'TestReqID': self._test_heartbeat_message
-                }
-            )
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
