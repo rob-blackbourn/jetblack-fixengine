@@ -3,6 +3,7 @@
 from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, time, tzinfo, timezone
+from enum import Enum, auto
 import logging
 from typing import (
     Awaitable,
@@ -23,12 +24,16 @@ from ..utils.date_utils import wait_for_time_period
 
 LOGGER = logging.getLogger(__name__)
 
-STATE_LOGGING_ON = 'logon.start'
-STATE_LOGGED_ON = 'logon.ok'
-STATE_LOGGING_OFF = 'logout.start'
-STATE_LOGGED_OUT = 'logout.done'
-STATE_TEST_HEARTBEAT = 'test.heartbeat'
-STATE_SYNCHRONISING = 'session.sync'
+
+class AdminState(Enum):
+    DISCONNECTED = auto()
+    LOGGING_ON = auto()
+    LOGGED_ON = auto()
+    LOGGING_OFF = auto()
+    LOGGED_OUT = auto()
+    TEST_HEARTBEAT = auto()
+    SYNCHRONISING = auto()
+
 
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
@@ -65,7 +70,7 @@ class AcceptorHandler(metaclass=ABCMeta):
             target_comp_id
         )
 
-        self._state: Optional[str] = None
+        self._state = AdminState.DISCONNECTED
         self._test_heartbeat_message: Optional[str] = None
         self._last_send_time_utc: datetime = EPOCH_UTC
         self._last_receive_time_utc: datetime = EPOCH_UTC
@@ -86,11 +91,11 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         if event['type'] == 'connected':
             LOGGER.info('connected')
-            self._state = STATE_LOGGING_ON
+            self._state = AdminState.LOGGING_ON
 
             logout_time = await self._wait_till_logon_time()
 
-            while self._state != STATE_LOGGED_OUT:
+            while self._state != AdminState.LOGGED_OUT:
                 try:
                     await self._send_logout_if_login_expired(logout_time)
                     seconds_till_next_heartbeat = await self._send_heartbeat_if_required()
@@ -127,17 +132,17 @@ class AcceptorHandler(metaclass=ABCMeta):
         return logout_time
 
     async def _send_logout_if_login_expired(self, logout_time: Optional[datetime]) -> None:
-        if self._state != STATE_LOGGED_ON or not logout_time:
+        if self._state != AdminState.LOGGED_ON or not logout_time:
             return
 
         # Is it time to logout?
         if datetime.now(tz=self.tz) >= logout_time:
-            self._state = STATE_LOGGING_OFF
+            self._state = AdminState.LOGGING_OFF
             await self.send_message('LOGOUT')
             await self.on_logout({})
 
     async def _send_heartbeat_if_required(self) -> float:
-        if self._state == STATE_LOGGING_ON:
+        if self._state == AdminState.LOGGING_ON:
             return self.logon_timeout
 
         now_utc = datetime.now(timezone.utc)
@@ -146,7 +151,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         ).total_seconds()
         if (
                 seconds_since_last_send >= self.heartbeat_timeout and
-                self._state == STATE_LOGGED_ON
+                self._state == AdminState.LOGGED_ON
         ):
             await self.send_message('HEARTBEAT')
             seconds_since_last_send = 0
@@ -174,14 +179,14 @@ class AcceptorHandler(metaclass=ABCMeta):
         self._last_receive_time_utc = datetime.now(timezone.utc)
 
     async def _on_timeout(self) -> None:
-        if self._state != STATE_LOGGED_ON:
+        if self._state != AdminState.LOGGED_ON:
             return
 
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc).total_seconds()
         if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
-            self._state = STATE_TEST_HEARTBEAT
+            self._state = AdminState.TEST_HEARTBEAT
             self._test_heartbeat_message = str(uuid.uuid4())
             await self.send_message(
                 'TEST_REQUEST',
@@ -272,13 +277,13 @@ class AcceptorHandler(metaclass=ABCMeta):
                     'HeartBtInt': self.heartbeat_timeout
                 }
             )
-            self._state = STATE_LOGGED_ON
+            self._state = AdminState.LOGGED_ON
             return True
         else:
             # Reject the login.
-            self._state = STATE_LOGGING_OFF
+            self._state = AdminState.LOGGING_OFF
             await self.send_message('LOGOUT')
-            self._state = STATE_LOGGING_OFF
+            self._state = AdminState.LOGGING_OFF
             return False
 
     async def _handle_heartbeat_received(
@@ -310,7 +315,7 @@ class AcceptorHandler(metaclass=ABCMeta):
         await self._set_incoming_seqnum(message['NewSeqNo'])
 
     async def _handle_logout_received(self, message: Mapping[str, Any]) -> None:
-        self._state = STATE_LOGGED_OUT
+        self._state = AdminState.LOGGED_OUT
         await self.on_logout(message)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
@@ -318,16 +323,16 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         await self.on_admin_message(message)
 
-        if self._state == STATE_TEST_HEARTBEAT:
+        if self._state == AdminState.TEST_HEARTBEAT:
             # Ignore all messages other than the heartbeat response
             if message['MsgType'] == 'HEARTBEAT':
                 if message['TestReqID'] == self._test_heartbeat_message:
                     # SWitch back to logged on
-                    self._state = STATE_LOGGED_ON
+                    self._state = AdminState.LOGGED_ON
                 else:
-                    self._state = STATE_LOGGING_OFF
+                    self._state = AdminState.LOGGING_OFF
                     await self.send_message('LOGOUT')
-        elif self._state == STATE_SYNCHRONISING:
+        elif self._state == AdminState.SYNCHRONISING:
             pass
         elif message['MsgType'] == 'LOGON':
             await self._handle_logon_received(message)
