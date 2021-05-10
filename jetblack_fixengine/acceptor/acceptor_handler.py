@@ -19,15 +19,15 @@ import uuid
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from ..types import Store, Event
-from ..utils.date_utils import wait_for_time_period
-
-from .acceptor_state import (
-    AdminState,
+from ..connection_state import (
     ConnectionState,
     ConnectionResponse,
     ConnectionStateMachine
 )
+from ..types import Store, Event
+from ..utils.date_utils import wait_for_time_period
+
+from .acceptor_state import AdminState
 
 LOGGER = logging.getLogger(__name__)
 

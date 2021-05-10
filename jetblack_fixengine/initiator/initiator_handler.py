@@ -8,15 +8,19 @@ from typing import Awaitable, Callable, Mapping, Any, Optional, cast
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
+
+from ..connection_state import (
+    ConnectionState,
+    ConnectionResponse,
+    ConnectionStateMachine
+)
 from ..types import Store, Event
 
 from .initiator_state import (
     AdminState,
     AdminResponse,
     AdminStateMachine,
-    ConnectionState,
-    ConnectionResponse,
-    ConnectionStateMachine)
+)
 
 LOGGER = logging.getLogger(__name__)
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
