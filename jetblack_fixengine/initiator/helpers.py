@@ -12,7 +12,7 @@ from ..types import Handler, Store
 from ..utils.cancellation import register_cancellation_event
 
 from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
-from .initiator_handler import Initiator
+from .initiator import Initiator
 
 LOGGER = logging.getLogger(__name__)
 

@@ -9,17 +9,18 @@ from typing import Awaitable, Callable, Mapping, Any, Optional, cast
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from ..connection_state import (
+from .connection_state import (
     ConnectionState,
-    ConnectionResponse,
-    ConnectionStateMachine
+    ConnectionEventType,
+    ConnectionStateMachineHandler
 )
 from ..types import Store, Event
 
 from .initiator_state import (
     AdminState,
-    AdminResponse,
-    AdminStateMachine,
+    AdminEventType,
+    AdminEvent,
+    AdminStateMachineHandler,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -60,24 +61,55 @@ class Initiator(metaclass=ABCMeta):
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
 
-        self._connection_state_machine = ConnectionStateMachine()
-        self._connection_handlers = {
-            ConnectionResponse.PROCESS_CONNECTED: self._handle_connected,
-            ConnectionResponse.PROCESS_FIX: self._handle_fix,
-            ConnectionResponse.PROCESS_TIMEOUT: self._handle_timeout,
-            ConnectionResponse.PROCESS_ERROR: self._handle_error,
-            ConnectionResponse.PROCESS_DISCONNECT: self._handle_disconnect
-        }
-        self._admin_state_machine = AdminStateMachine()
-        self._admin_handlers = {
-            AdminResponse.PROCESS_LOGON: self._handle_logon_received,
-            AdminResponse.PROCESS_HEARTBEAT: self._handle_heartbeat_received,
-            AdminResponse.PROCESS_TEST_REQUEST: self._handle_test_request_received,
-            AdminResponse.PROCESS_RESEND_REQUEST: self._handle_resend_request_received,
-            AdminResponse.PROCESS_SEQUENCE_RESET: self._handle_sequence_reset_received,
-            AdminResponse.PROCESS_LOGOUT: self._handle_acceptor_logout_received
-
-        }
+        self._connection_state_machine = ConnectionStateMachineHandler(
+            {
+                (ConnectionState.DISCONNECTED, ConnectionEventType.CONNECTION_RECEIVED): (
+                    self._handle_connected
+                ),
+                (ConnectionState.CONNECTED, ConnectionEventType.FIX_RECEIVED): (
+                    self._handle_fix
+                ),
+                (ConnectionState.CONNECTED, ConnectionEventType.TIMEOUT_RECEIVED): (
+                    self._handle_timeout
+                ),
+                (ConnectionState.CONNECTED, ConnectionEventType.DISCONNECT_RECEIVED): (
+                    self._handle_disconnect
+                )
+            }
+        )
+        self._admin_state_machine = AdminStateMachineHandler(
+            {
+                (AdminState.DISCONNECTED, AdminEventType.CONNECTED): (
+                    self._send_logon
+                ),
+                (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): (
+                    self._logon_received
+                ),
+                (AdminState.CONNECTED, AdminEventType.HEARTBEAT_RECEIVED): (
+                    self._acknowledge_heartbeat
+                ),
+                (AdminState.CONNECTED, AdminEventType.TEST_REQUEST_RECEIVED): (
+                    self._send_test_request
+                ),
+                (AdminState.CONNECTED, AdminEventType.RESEND_REQUEST_RECEIVED): (
+                    self._send_sequence_reset
+                ),
+                (AdminState.CONNECTED, AdminEventType.SEQUENCE_RESET_RECEIVED): (
+                    self._reset_incoming_seqnum
+                ),
+                (AdminState.CONNECTED, AdminEventType.LOGOUT_RECEIVED): (
+                    self._acknowledge_logout
+                )
+            }
+        )
+        # self._admin_handlers = {
+        #     AdminResponse.PROCESS_LOGON: self._handle_logon_received,
+        #     AdminResponse.PROCESS_HEARTBEAT: self._handle_heartbeat_received,
+        #     AdminResponse.PROCESS_TEST_REQUEST: self._handle_test_request_received,
+        #     AdminResponse.PROCESS_RESEND_REQUEST: self._handle_resend_request_received,
+        #     AdminResponse.PROCESS_SEQUENCE_RESET: self._handle_sequence_reset_received,
+        #     AdminResponse.PROCESS_LOGOUT: self._handle_acceptor_logout_received
+        # }
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
@@ -101,22 +133,24 @@ class Initiator(metaclass=ABCMeta):
         await self._send(event)
         self._last_send_time_utc = send_time_utc
 
-    async def _handle_test_request_received(
+    async def _send_test_request(
             self,
-            message: Mapping[str, Any]
-    ) -> None:
+            event: Optional[AdminEvent]
+    ) -> Optional[AdminEvent]:
+        assert event is not None and event.message is not None
         # Respond to the server with the token it sent.
         await self.send_message(
             'TEST_REQUEST',
             {
-                'TestReqID': message['TestReqID']
+                'TestReqID': event.message['TestReqID']
             }
         )
+        return AdminEvent(AdminEventType.TEST_REQUEST_SENT)
 
-    async def _handle_resend_request_received(
+    async def _send_sequence_reset(
             self,
-            _message: Mapping[str, Any]
-    ) -> None:
+            _event: Optional[AdminEvent]
+    ) -> Optional[AdminEvent]:
         new_seq_no = await self._session.get_outgoing_seqnum() + 2
         await self.send_message(
             'SEQUENCE_RESET',
@@ -125,45 +159,56 @@ class Initiator(metaclass=ABCMeta):
                 'NewSeqNo': new_seq_no
             }
         )
+        return AdminEvent(AdminEventType.SEQUENCE_RESET_SENT)
 
-    async def _handle_logon_received(
+    async def _logon_received(
             self,
-            message: Mapping[str, Any]
-    ) -> None:
-        await self.on_logon(message)
+            event: Optional[AdminEvent]
+    ) -> Optional[AdminEvent]:
+        assert event is not None and event.message is not None
+        await self.on_logon(event.message)
+        return None
 
-    async def _handle_heartbeat_received(
+    async def _acknowledge_heartbeat(
             self,
-            message: Mapping[str, Any]
-    ) -> None:
-        await self.on_heartbeat(message)
+            event: Optional[AdminEvent]
+    ) -> Optional[AdminEvent]:
+        assert event is not None and event.message is not None
+        await self.on_heartbeat(event.message)
+        return AdminEvent(AdminEventType.HEARTBEAT_ACK)
 
-    async def _handle_sequence_reset_received(
+    async def _reset_incoming_seqnum(
             self,
-            message: Mapping[str, Any]
-    ) -> None:
-        await self._set_incoming_seqnum(message['NewSeqNo'])
+            event: Optional[AdminEvent]
+    ) -> Optional[AdminEvent]:
+        assert event is not None and event.message is not None
+        await self._set_incoming_seqnum(event.message['NewSeqNo'])
+        return AdminEvent(AdminEventType.SEQUENCE_RESET_SENT)
 
-    async def _handle_acceptor_logout_received(
+    async def _acknowledge_logout(
             self,
-            message: Mapping[str, Any]
-    ) -> None:
-        await self.on_logout(message)
+            event: Optional[AdminEvent]
+    ) -> Optional[AdminEvent]:
+        assert event is not None and event.message is not None
+        await self.on_logout(event.message)
+        return AdminEvent(AdminEventType.LOGOUT_ACK)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         await self.on_admin_message(message)
 
-        try:
-            response = self._admin_state_machine.transition(message['MsgType'])
-            handler = self._admin_handlers[response]
-            await handler(message)
-        except KeyError:
-            LOGGER.warning(
-                'unhandled admin message type "%s".',
-                message["MsgType"]
+        await self._admin_state_machine.handle_event(
+            AdminEvent(
+                AdminEventType(message['MsgType']),
+                message
             )
+        )
 
-    async def _handle_fix(self, event: Event) -> None:
+    async def _handle_fix(
+            self,
+            event: Optional[Event]
+    ) -> Optional[Event]:
+        assert event is not None
+
         await self._session.save_message(event['message'])
 
         fix_message = self.fix_message_factory.decode(event['message'])
@@ -180,11 +225,19 @@ class Initiator(metaclass=ABCMeta):
 
         self._last_receive_time_utc = datetime.now(timezone.utc)
 
+        return {
+            'type': 'fix.handled'
+        }
+
     async def _handle_error(self, event: Event) -> None:
         LOGGER.warning('error: %s', event)
 
-    async def _handle_disconnect(self, _event: Event) -> None:
+    async def _handle_disconnect(
+            self,
+            _event: Optional[Event]
+    ) -> Optional[Event]:
         LOGGER.info('Disconnected')
+        return None
 
     async def _send_heartbeat_if_required(self) -> float:
         if self._connection_state_machine.state != ConnectionState.CONNECTED:
@@ -196,16 +249,19 @@ class Initiator(metaclass=ABCMeta):
         ).total_seconds()
         if (
                 seconds_since_last_send >= self.heartbeat_timeout and
-                self._admin_state_machine.state == AdminState.LOGGED_ON
+                self._admin_state_machine.state == AdminState.CONNECTED
         ):
             await self.send_message('HEARTBEAT')
             seconds_since_last_send = 0
 
         return self.heartbeat_timeout - seconds_since_last_send
 
-    async def _handle_timeout(self, _event: Event) -> None:
-        if not self._admin_state_machine.state == AdminState.LOGGED_ON:
-            return
+    async def _handle_timeout(
+            self,
+            _event: Optional[Event]
+    ) -> Optional[Event]:
+        if not self._admin_state_machine.state == AdminState.CONNECTED:
+            raise RuntimeError('Make a state for this')
 
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
@@ -221,9 +277,25 @@ class Initiator(metaclass=ABCMeta):
                 }
             )
 
-    async def _handle_connected(self, _event: Event) -> None:
-        """Send a logon message"""
+        return {
+            'type': 'timeout.handled'
+        }
+
+    async def _handle_connected(
+            self,
+            event: Optional[Event]
+    ) -> Optional[Event]:
         LOGGER.info('connected')
+        await self._admin_state_machine.handle_event(
+            AdminEvent(AdminEventType.CONNECTED)
+        )
+        return None
+
+    async def _send_logon(
+            self,
+            _event: Optional[AdminEvent]
+    ) -> Optional[AdminEvent]:
+        """Send a logon message"""
         await self.send_message(
             'LOGON',
             {
@@ -231,6 +303,7 @@ class Initiator(metaclass=ABCMeta):
                 'HeartBtInt': self.heartbeat_timeout
             }
         )
+        return AdminEvent(AdminEventType.LOGON_SENT)
 
     async def _next_event(
             self,
@@ -244,11 +317,6 @@ class Initiator(metaclass=ABCMeta):
                 'type': 'timeout'
             }
 
-    async def _handle_event(self, event: Event) -> None:
-        response = self._connection_state_machine.transition(event['type'])
-        handler = self._connection_handlers[response]
-        await handler(event)
-
     async def __call__(
             self,
             send: Callable[[Event], Awaitable[None]],
@@ -258,7 +326,7 @@ class Initiator(metaclass=ABCMeta):
 
         while True:
             event = await self._next_event(receive)
-            await self._handle_event(event)
+            await self._connection_state_machine.handle_event(event)
             if self._connection_state_machine.state != ConnectionState.CONNECTED:
                 break
 
