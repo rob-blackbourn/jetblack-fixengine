@@ -283,7 +283,7 @@ class Initiator(metaclass=ABCMeta):
 
     async def _handle_connected(
             self,
-            event: Optional[Event]
+            _event: Optional[Event]
     ) -> Optional[Event]:
         LOGGER.info('connected')
         await self._admin_state_machine.handle_event(

@@ -4,8 +4,6 @@ from enum import Enum, auto
 import logging
 from typing import Any, Awaitable, Callable, Mapping, Optional, Tuple
 
-from ..types import Event
-
 LOGGER = logging.getLogger(__name__)
 
 
