@@ -12,7 +12,7 @@ from ..types import Handler, Store
 from ..utils.cancellation import register_cancellation_event
 
 from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
-from .initiator_handler import InitiatorHandler
+from .initiator_handler import Initiator
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ async def initiate(
 
 
 def create_initiator(
-        klass: Type[InitiatorHandler],
+        klass: Type[Initiator],
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
@@ -71,7 +71,7 @@ def create_initiator(
         cancellation_event: asyncio.Event,
         *,
         heartbeat_threshold: int = 1
-) -> InitiatorHandler:
+) -> Initiator:
     handler = klass(
         protocol,
         sender_comp_id,
@@ -86,7 +86,7 @@ def create_initiator(
 
 
 def start_initiator(
-        klass: Type[InitiatorHandler],
+        klass: Type[Initiator],
         host: str,
         port: int,
         protocol: ProtocolMetaData,

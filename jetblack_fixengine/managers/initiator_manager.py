@@ -8,7 +8,7 @@ from ssl import SSLContext
 from typing import Optional, Tuple, Callable, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
-from ..transports import InitiatorHandler, create_initiator
+from ..transports import Initiator, create_initiator
 from ..types import Store
 from ..transports import initiate
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
@@ -23,7 +23,7 @@ class InitiatorManager:
 
     def __init__(
             self,
-            handler_factory: Callable[[], InitiatorHandler],
+            handler_factory: Callable[[], Initiator],
             host: str,
             port: int,
             cancellation_event: asyncio.Event,
@@ -114,7 +114,7 @@ class InitiatorManager:
 
 
 def start_initiator_manager(
-        klass: Type[InitiatorHandler],
+        klass: Type[Initiator],
         host: str,
         port: int,
         protocol: ProtocolMetaData,
@@ -134,7 +134,7 @@ def start_initiator_manager(
 ) -> None:
     cancellation_event = asyncio.Event()
 
-    def initiator_factory() -> InitiatorHandler:
+    def initiator_factory() -> Initiator:
         return create_initiator(
             klass,
             protocol,

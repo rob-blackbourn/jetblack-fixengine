@@ -7,7 +7,7 @@ import os.path
 import pytz
 from typing import Optional, Mapping, Any
 
-from jetblack_fixengine.transports import InitiatorHandler
+from jetblack_fixengine.transports import Initiator
 from jetblack_fixengine.persistence import FileStore
 from jetblack_fixengine.managers import start_initiator_manager
 from jetblack_fixparser.loader import load_yaml_protocol
@@ -29,7 +29,7 @@ HEARTBEAT_TIMEOUT = 30
 TZ = pytz.timezone('Europe/London')
 
 
-class MyInitatorHandler(InitiatorHandler):
+class MyInitatorHandler(Initiator):
 
     async def on_logon(self) -> None:
         logger.info('on_logon')

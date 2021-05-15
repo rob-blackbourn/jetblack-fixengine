@@ -6,7 +6,7 @@ from typing import Mapping, Any
 
 from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine import FileStore
-from jetblack_fixengine import start_initiator, InitiatorHandler
+from jetblack_fixengine import start_initiator, Initiator
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -25,7 +25,7 @@ HEARTBEAT_TIMEOUT = 30
 PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 
-class MyInitiatorHandler(InitiatorHandler):
+class MyInitiatorHandler(Initiator):
     """An instance of the initiator"""
 
     async def on_logon(self, _message: Mapping[str, Any]) -> None:

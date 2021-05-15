@@ -28,7 +28,7 @@ EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 EventHandler = Callable[[Event], Awaitable[None]]
 
 
-class InitiatorHandler(metaclass=ABCMeta):
+class Initiator(metaclass=ABCMeta):
     """The base class for initiator handlers"""
 
     def __init__(

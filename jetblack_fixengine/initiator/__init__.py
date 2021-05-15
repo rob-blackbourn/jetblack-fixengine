@@ -6,12 +6,12 @@ from .helpers import (
     InitiatorFactory,
     create_initiator
 )
-from .initiator_handler import InitiatorHandler
+from .initiator import Initiator
 
 __all__ = [
     'initiate',
     'start_initiator',
-    'InitiatorHandler',
+    'Initiator',
     'InitiatorFactory',
     'create_initiator'
 ]
