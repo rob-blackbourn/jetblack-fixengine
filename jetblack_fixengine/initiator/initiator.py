@@ -9,7 +9,7 @@ from typing import Awaitable, Callable, Mapping, Any, Optional, cast
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from .connection_state import (
+from ..connection_state import (
     ConnectionState,
     ConnectionEventType,
     ConnectionStateMachineHandler

@@ -21,8 +21,8 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 
 from ..connection_state import (
     ConnectionState,
-    ConnectionResponse,
-    ConnectionStateMachine
+    ConnectionEventType,
+    ConnectionStateMachineHandler
 )
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
@@ -67,14 +67,22 @@ class AcceptorHandler(metaclass=ABCMeta):
             target_comp_id
         )
 
-        self._connection_state_machine = ConnectionStateMachine()
-        self._connection_handlers = {
-            ConnectionResponse.PROCESS_CONNECTED: self._handle_connected,
-            ConnectionResponse.PROCESS_FIX: self._handle_fix,
-            ConnectionResponse.PROCESS_TIMEOUT: self._handle_timeout,
-            ConnectionResponse.PROCESS_ERROR: self._handle_error,
-            ConnectionResponse.PROCESS_DISCONNECT: self._handle_disconnect
-        }
+        self._connection_state_machine = ConnectionStateMachineHandler(
+            {
+                (ConnectionState.DISCONNECTED, ConnectionEventType.CONNECTION_RECEIVED): (
+                    self._handle_connected
+                ),
+                (ConnectionState.CONNECTED, ConnectionEventType.FIX_RECEIVED): (
+                    self._handle_fix
+                ),
+                (ConnectionState.CONNECTED, ConnectionEventType.TIMEOUT_RECEIVED): (
+                    self._handle_timeout
+                ),
+                (ConnectionState.CONNECTED, ConnectionEventType.DISCONNECT_RECEIVED): (
+                    self._handle_disconnect
+                )
+            }
+        )
 
         self._state = AdminState.LOGGING_ON
         self._test_heartbeat_message: Optional[str] = None
@@ -86,14 +94,21 @@ class AcceptorHandler(metaclass=ABCMeta):
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
         self._logout_time: Optional[datetime]
 
-    async def _handle_connected(self, _event: Event) -> None:
+    async def _handle_connected(
+            self,
+            _event: Optional[Event]
+    ) -> Optional[Event]:
         LOGGER.info('connected')
         self._state = AdminState.LOGGING_ON
         self._logout_time = await self._wait_till_logon_time()
+        return None
 
-    async def _handle_timeout(self, _event: Event) -> None:
+    async def _handle_timeout(
+            self,
+            _event: Optional[Event]
+    ) -> Optional[Event]:
         if self._state != AdminState.LOGGED_ON:
-            return
+            raise RuntimeError('Make a state for this')
 
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
@@ -108,7 +123,15 @@ class AcceptorHandler(metaclass=ABCMeta):
                 }
             )
 
-    async def _handle_fix(self, event: Event) -> None:
+        return {
+            'type': 'timeout.handled'
+        }
+
+    async def _handle_fix(
+            self,
+            event: Optional[Event]
+    ) -> Optional[Event]:
+        assert event is not None
 
         await self._session.save_message(event['message'])
 
@@ -126,11 +149,19 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         self._last_receive_time_utc = datetime.now(timezone.utc)
 
+        return {
+            'type': 'fix.handled'
+        }
+
     async def _handle_error(self, event: Event) -> None:
         LOGGER.warning('error: %s', event)
 
-    async def _handle_disconnect(self, _event: Event) -> None:
+    async def _handle_disconnect(
+            self,
+            _event: Optional[Event]
+    ) -> Optional[Event]:
         LOGGER.info('Disconnected')
+        return None
 
     async def _next_event(
             self,
@@ -144,11 +175,6 @@ class AcceptorHandler(metaclass=ABCMeta):
                 'type': 'timeout'
             }
 
-    async def _handle_event(self, event: Event) -> None:
-        response = self._connection_state_machine.transition(event['type'])
-        handler = self._connection_handlers[response]
-        await handler(event)
-
     async def __call__(
             self,
             send: Callable[[Event], Awaitable[None]],
@@ -158,7 +184,7 @@ class AcceptorHandler(metaclass=ABCMeta):
 
         while True:
             event = await self._next_event(receive)
-            await self._handle_event(event)
+            await self._connection_state_machine.handle_event(event)
             if self._connection_state_machine.state != ConnectionState.CONNECTED:
                 break
 

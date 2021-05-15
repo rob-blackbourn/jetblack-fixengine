@@ -1,7 +1,12 @@
 """Connection State"""
 
-from enum import Enum
-from typing import Mapping, Tuple
+from enum import Enum, auto
+import logging
+from typing import Awaitable, Callable, Mapping, Optional, Tuple
+
+from .types import Event
+
+LOGGER = logging.getLogger(__name__)
 
 
 class InvalidStateTransitionError(Exception):
@@ -9,58 +14,91 @@ class InvalidStateTransitionError(Exception):
 
 
 class ConnectionState(Enum):
-    DISCONNECTED = 'disconnected'
-    CONNECTED = 'connected'
-    ERROR = 'error'
+    DISCONNECTED = auto()
+    CONNECTED = auto()
+    FIX = auto()
+    TIMEOUT = auto()
 
 
-class ConnectionResponse(Enum):
-    PROCESS_CONNECTED = 'connected.process'
-    PROCESS_FIX = 'fix.process'
-    PROCESS_TIMEOUT = 'timeout.process'
-    PROCESS_ERROR = 'error.process'
-    PROCESS_DISCONNECT = 'disconnect.process'
+class ConnectionEventType(Enum):
+    CONNECTION_RECEIVED = 'connected'
+    FIX_RECEIVED = 'fix'
+    FIX_HANDLED = 'fix.handled'
+    TIMEOUT_RECEIVED = 'timeout'
+    TIMEOUT_HANDLED = 'timeout.handled'
+    DISCONNECT_RECEIVED = 'disconnected'
 
 
-ConnectionTransitionKey = Tuple[ConnectionState, str]
-ConnectionTransitionValue = Tuple[ConnectionResponse, ConnectionState]
-ConnectionTransitionMapping = Mapping[ConnectionTransitionKey,
-                                      ConnectionTransitionValue]
+ConnectionTransitionMapping = Mapping[
+    Tuple[ConnectionState, ConnectionEventType],
+    ConnectionState
+]
 
-CONNECTION_TRANSITIONS: ConnectionTransitionMapping = {
-    (ConnectionState.DISCONNECTED, 'connected'): (
-        ConnectionResponse.PROCESS_CONNECTED,
-        ConnectionState.CONNECTED
-    ),
-    (ConnectionState.CONNECTED, 'fix'): (
-        ConnectionResponse.PROCESS_FIX,
-        ConnectionState.CONNECTED
-    ),
-    (ConnectionState.CONNECTED, 'timeout'): (
-        ConnectionResponse.PROCESS_TIMEOUT,
-        ConnectionState.CONNECTED
-    ),
-    (ConnectionState.CONNECTED, 'error'): (
-        ConnectionResponse.PROCESS_ERROR,
-        ConnectionState.DISCONNECTED
-    ),
-    (ConnectionState.CONNECTED, 'disconnect'): (
-        ConnectionResponse.PROCESS_DISCONNECT,
-        ConnectionState.DISCONNECTED
-    )
-}
+ConnectionEventHandler = Callable[
+    [Optional[Event]],
+    Awaitable[Optional[Event]]
+]
+ConnectionEventHandlerMapping = Mapping[
+    Tuple[ConnectionState, ConnectionEventType],
+    ConnectionEventHandler
+]
 
 
 class ConnectionStateMachine:
 
+    TRANSITIONS: ConnectionTransitionMapping = {
+        (ConnectionState.DISCONNECTED, ConnectionEventType.CONNECTION_RECEIVED): (
+            ConnectionState.CONNECTED
+        ),
+        (ConnectionState.CONNECTED, ConnectionEventType.FIX_RECEIVED): (
+            ConnectionState.FIX
+        ),
+        (ConnectionState.FIX, ConnectionEventType.FIX_HANDLED): (
+            ConnectionState.CONNECTED
+        ),
+        (ConnectionState.CONNECTED, ConnectionEventType.TIMEOUT_RECEIVED): (
+            ConnectionState.TIMEOUT
+        ),
+        (ConnectionState.TIMEOUT, ConnectionEventType.TIMEOUT_HANDLED): (
+            ConnectionState.CONNECTED
+        ),
+        (ConnectionState.CONNECTED, ConnectionEventType.DISCONNECT_RECEIVED): (
+            ConnectionState.DISCONNECTED
+        )
+    }
+
     def __init__(self) -> None:
         self.state = ConnectionState.DISCONNECTED
 
-    def transition(self, event: str) -> ConnectionResponse:
+    def transition(self, event_type: ConnectionEventType) -> ConnectionState:
+        LOGGER.debug('Transition from %s with %s', self.state, event_type)
         try:
-            response, self.state = CONNECTION_TRANSITIONS[(self.state, event)]
-            return response
+            self.state = self.TRANSITIONS[(self.state, event_type)]
+            return self.state
         except KeyError as error:
             raise InvalidStateTransitionError(
-                f'unhandled event {self.state.name}"{event}".',
+                f'unhandled event {self.state.name} -> {event_type}.',
             ) from error
+
+
+class ConnectionStateMachineHandler(ConnectionStateMachine):
+
+    def __init__(
+            self,
+            handlers: ConnectionEventHandlerMapping
+    ) -> None:
+        super().__init__()
+        self._handlers = handlers
+
+    async def handle_event(
+            self,
+            event: Optional[Event]
+    ) -> ConnectionState:
+        while event is not None:
+            event_type = ConnectionEventType(event['type'])
+            handler = self._handlers.get((self.state, event_type))
+            self.transition(event_type)
+            if handler is None:
+                break
+            event = await handler(event)
+        return self.state
