@@ -14,7 +14,7 @@ from ..transports import fix_stream_processor, FixReadBuffer, fix_read_async
 from ..types import Handler, Store
 from ..utils.cancellation import register_cancellation_event
 
-from .acceptor_handler import AcceptorHandler
+from .acceptor import Acceptor
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ AcceptorFactory = Callable[
 
 
 def create_acceptor(
-        klass: Type[AcceptorHandler],
+        klass: Type[Acceptor],
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
@@ -38,7 +38,7 @@ def create_acceptor(
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
         tz: Optional[tzinfo] = None
-) -> AcceptorHandler:
+) -> Acceptor:
     handler = klass(
         protocol,
         sender_comp_id,
@@ -54,7 +54,7 @@ def create_acceptor(
 
 
 def start_acceptor(
-        klass: Type[AcceptorHandler],
+        klass: Type[Acceptor],
         host: str,
         port: int,
         protocol: ProtocolMetaData,

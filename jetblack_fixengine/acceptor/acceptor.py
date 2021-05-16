@@ -35,7 +35,7 @@ LOGGER = logging.getLogger(__name__)
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 
-class AcceptorHandler(metaclass=ABCMeta):
+class Acceptor(metaclass=ABCMeta):
     """The base class for acceptor handlers"""
 
     def __init__(

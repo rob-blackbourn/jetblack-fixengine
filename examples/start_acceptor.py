@@ -6,7 +6,7 @@ from typing import Mapping, Any
 
 from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine import FileStore
-from jetblack_fixengine.acceptor.helpers import start_acceptor, AcceptorHandler
+from jetblack_fixengine.acceptor.helpers import start_acceptor, Acceptor
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -25,7 +25,7 @@ HEARTBEAT_TIMEOUT = 30
 PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 
-class MyAcceptorHandler(AcceptorHandler):
+class MyAcceptor(Acceptor):
     """An instance of the acceptor"""
 
     async def on_logon(self, _message: Mapping[str, Any]) -> bool:
@@ -40,7 +40,7 @@ class MyAcceptorHandler(AcceptorHandler):
 
 
 start_acceptor(
-    MyAcceptorHandler,
+    MyAcceptor,
     HOST,
     PORT,
     PROTOCOL,
