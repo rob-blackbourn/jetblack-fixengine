@@ -16,7 +16,7 @@ from ..connection_state import (
 )
 from ..types import Store, Event
 
-from .initiator_state import (
+from .state import (
     AdminState,
     AdminEventType,
     AdminEvent,
@@ -85,19 +85,19 @@ class Initiator(metaclass=ABCMeta):
                 (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): (
                     self._logon_received
                 ),
-                (AdminState.CONNECTED, AdminEventType.HEARTBEAT_RECEIVED): (
+                (AdminState.AUTHENTICATED, AdminEventType.HEARTBEAT_RECEIVED): (
                     self._acknowledge_heartbeat
                 ),
-                (AdminState.CONNECTED, AdminEventType.TEST_REQUEST_RECEIVED): (
+                (AdminState.AUTHENTICATED, AdminEventType.TEST_REQUEST_RECEIVED): (
                     self._send_test_request
                 ),
-                (AdminState.CONNECTED, AdminEventType.RESEND_REQUEST_RECEIVED): (
+                (AdminState.AUTHENTICATED, AdminEventType.RESEND_REQUEST_RECEIVED): (
                     self._send_sequence_reset
                 ),
-                (AdminState.CONNECTED, AdminEventType.SEQUENCE_RESET_RECEIVED): (
+                (AdminState.AUTHENTICATED, AdminEventType.SEQUENCE_RESET_RECEIVED): (
                     self._reset_incoming_seqnum
                 ),
-                (AdminState.CONNECTED, AdminEventType.LOGOUT_RECEIVED): (
+                (AdminState.AUTHENTICATED, AdminEventType.LOGOUT_RECEIVED): (
                     self._acknowledge_logout
                 )
             }
@@ -249,7 +249,7 @@ class Initiator(metaclass=ABCMeta):
         ).total_seconds()
         if (
                 seconds_since_last_send >= self.heartbeat_timeout and
-                self._admin_state_machine.state == AdminState.CONNECTED
+                self._admin_state_machine.state == AdminState.AUTHENTICATED
         ):
             await self.send_message('HEARTBEAT')
             seconds_since_last_send = 0
@@ -260,7 +260,7 @@ class Initiator(metaclass=ABCMeta):
             self,
             _event: Optional[Event]
     ) -> Optional[Event]:
-        if not self._admin_state_machine.state == AdminState.CONNECTED:
+        if not self._admin_state_machine.state == AdminState.AUTHENTICATED:
             raise RuntimeError('Make a state for this')
 
         now_utc = datetime.now(timezone.utc)

@@ -27,7 +27,7 @@ from ..connection_state import (
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
 
-from .acceptor_state import AdminState
+from .state import AdminState
 
 LOGGER = logging.getLogger(__name__)
 

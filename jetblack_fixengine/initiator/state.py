@@ -54,27 +54,27 @@ class AdminStateMachine:
     TRANSITIONS: Mapping[Tuple[AdminState, AdminEventType], AdminState] = {
         (AdminState.DISCONNECTED, AdminEventType.CONNECTED): AdminState.LOGON_REQUESTED,
         (AdminState.LOGON_REQUESTED, AdminEventType.LOGON_SENT): AdminState.LOGON_EXPECTED,
-        (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): AdminState.CONNECTED,
+        (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): AdminState.AUTHENTICATED,
         (AdminState.LOGON_EXPECTED, AdminEventType.REJECT_RECEIVED): AdminState.DISCONNECTED,
 
         # Acceptor heartbeet
-        (AdminState.CONNECTED, AdminEventType.HEARTBEAT_RECEIVED): AdminState.ACKNOWLEDGE_HEARTBEAT,
-        (AdminState.ACKNOWLEDGE_HEARTBEAT, AdminEventType.HEARTBEAT_ACK): AdminState.CONNECTED,
+        (AdminState.AUTHENTICATED, AdminEventType.HEARTBEAT_RECEIVED): AdminState.ACKNOWLEDGE_HEARTBEAT,
+        (AdminState.ACKNOWLEDGE_HEARTBEAT, AdminEventType.HEARTBEAT_ACK): AdminState.AUTHENTICATED,
 
         # Test Request
-        (AdminState.CONNECTED, AdminEventType.TEST_REQUEST_RECEIVED): AdminState.TEST_REQUEST_REQUESTED,
-        (AdminState.TEST_REQUEST_REQUESTED, AdminEventType.TEST_REQUEST_SENT): AdminState.CONNECTED,
+        (AdminState.AUTHENTICATED, AdminEventType.TEST_REQUEST_RECEIVED): AdminState.TEST_REQUEST_REQUESTED,
+        (AdminState.TEST_REQUEST_REQUESTED, AdminEventType.TEST_REQUEST_SENT): AdminState.AUTHENTICATED,
 
         # Resend Request
-        (AdminState.CONNECTED, AdminEventType.RESEND_REQUEST_RECEIVED): AdminState.SEQUENCE_RESET_REQUESTED,
-        (AdminState.SEQUENCE_RESET_REQUESTED, AdminEventType.SEQUENCE_RESET_SENT): AdminState.CONNECTED,
+        (AdminState.AUTHENTICATED, AdminEventType.RESEND_REQUEST_RECEIVED): AdminState.SEQUENCE_RESET_REQUESTED,
+        (AdminState.SEQUENCE_RESET_REQUESTED, AdminEventType.SEQUENCE_RESET_SENT): AdminState.AUTHENTICATED,
 
         # Sequence Reset
-        (AdminState.CONNECTED, AdminEventType.SEQUENCE_RESET_RECEIVED): AdminState.SET_INCOMING_SEQNUM,
-        (AdminState.SET_INCOMING_SEQNUM, AdminEventType.INCOMING_SEQNUM_SET): AdminState.CONNECTED,
+        (AdminState.AUTHENTICATED, AdminEventType.SEQUENCE_RESET_RECEIVED): AdminState.SET_INCOMING_SEQNUM,
+        (AdminState.SET_INCOMING_SEQNUM, AdminEventType.INCOMING_SEQNUM_SET): AdminState.AUTHENTICATED,
 
         # Logout
-        (AdminState.CONNECTED, AdminEventType.LOGOUT_RECEIVED): AdminState.ACKNOWLEDGE_LOGOUT,
+        (AdminState.AUTHENTICATED, AdminEventType.LOGOUT_RECEIVED): AdminState.ACKNOWLEDGE_LOGOUT,
         (AdminState.ACKNOWLEDGE_LOGOUT, AdminEventType.LOGOUT_ACK): AdminState.DISCONNECTED
     }
 
