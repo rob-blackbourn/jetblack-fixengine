@@ -102,14 +102,6 @@ class Initiator(metaclass=ABCMeta):
                 )
             }
         )
-        # self._admin_handlers = {
-        #     AdminResponse.PROCESS_LOGON: self._handle_logon_received,
-        #     AdminResponse.PROCESS_HEARTBEAT: self._handle_heartbeat_received,
-        #     AdminResponse.PROCESS_TEST_REQUEST: self._handle_test_request_received,
-        #     AdminResponse.PROCESS_RESEND_REQUEST: self._handle_resend_request_received,
-        #     AdminResponse.PROCESS_SEQUENCE_RESET: self._handle_sequence_reset_received,
-        #     AdminResponse.PROCESS_LOGOUT: self._handle_acceptor_logout_received
-        # }
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()

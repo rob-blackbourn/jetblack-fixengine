@@ -16,7 +16,7 @@ class AdminState(Enum):
     DISCONNECTED = auto()
     LOGON_REQUESTED = auto()
     LOGON_EXPECTED = auto()
-    CONNECTED = auto()
+    AUTHENTICATED = auto()
     ACKNOWLEDGE_HEARTBEAT = auto()
     TEST_REQUEST_REQUESTED = auto()
     SEQUENCE_RESET_REQUESTED = auto()
