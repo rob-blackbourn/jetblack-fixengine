@@ -25,7 +25,7 @@ HEARTBEAT_TIMEOUT = 30
 PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 
-class MyInitiatorHandler(Initiator):
+class MyInitiator(Initiator):
     """An instance of the initiator"""
 
     async def on_logon(self, _message: Mapping[str, Any]) -> None:
@@ -39,7 +39,7 @@ class MyInitiatorHandler(Initiator):
 
 
 start_initiator(
-    MyInitiatorHandler,
+    MyInitiator,
     HOST,
     PORT,
     PROTOCOL,
