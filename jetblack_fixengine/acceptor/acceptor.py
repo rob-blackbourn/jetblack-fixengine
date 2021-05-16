@@ -22,7 +22,7 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..connection_state import (
     ConnectionState,
     ConnectionEventType,
-    ConnectionStateMachineHandler
+    ConnectionStateMachineAsync
 )
 from ..types import Store, Event
 from ..utils.date_utils import wait_for_time_period
@@ -67,7 +67,7 @@ class Acceptor(metaclass=ABCMeta):
             target_comp_id
         )
 
-        self._connection_state_machine = ConnectionStateMachineHandler(
+        self._connection_state_machine = ConnectionStateMachineAsync(
             {
                 (ConnectionState.DISCONNECTED, ConnectionEventType.CONNECTION_RECEIVED): (
                     self._handle_connected

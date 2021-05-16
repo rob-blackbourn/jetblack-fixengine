@@ -121,7 +121,7 @@ AdminEventHandlerMapping = Mapping[
 ]
 
 
-class AdminStateMachineHandler(AdminStateMachine):
+class AdminStateMachineAsync(AdminStateMachine):
 
     def __init__(
             self,

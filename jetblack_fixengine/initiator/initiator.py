@@ -12,7 +12,7 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..connection_state import (
     ConnectionState,
     ConnectionEventType,
-    ConnectionStateMachineHandler
+    ConnectionStateMachineAsync
 )
 from ..types import Store, Event
 
@@ -20,7 +20,7 @@ from .state import (
     AdminState,
     AdminEventType,
     AdminEvent,
-    AdminStateMachineHandler,
+    AdminStateMachineAsync,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class Initiator(metaclass=ABCMeta):
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
 
-        self._connection_state_machine = ConnectionStateMachineHandler(
+        self._connection_state_machine = ConnectionStateMachineAsync(
             {
                 (ConnectionState.DISCONNECTED, ConnectionEventType.CONNECTION_RECEIVED): (
                     self._handle_connected
@@ -77,7 +77,7 @@ class Initiator(metaclass=ABCMeta):
                 )
             }
         )
-        self._admin_state_machine = AdminStateMachineHandler(
+        self._admin_state_machine = AdminStateMachineAsync(
             {
                 (AdminState.DISCONNECTED, AdminEventType.CONNECTED): (
                     self._send_logon

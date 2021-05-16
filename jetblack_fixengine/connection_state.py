@@ -81,7 +81,7 @@ class ConnectionStateMachine:
             ) from error
 
 
-class ConnectionStateMachineHandler(ConnectionStateMachine):
+class ConnectionStateMachineAsync(ConnectionStateMachine):
 
     def __init__(
             self,
