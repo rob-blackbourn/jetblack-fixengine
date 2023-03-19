@@ -264,7 +264,10 @@ class InitiatorHandler(metaclass=ABCMeta):
         seconds_since_last_send = (
             now_utc - self._last_send_time_utc
         ).total_seconds()
-        if seconds_since_last_send >= self.heartbeat_timeout and self._state == STATE_LOGGED_ON:
+        if (
+                seconds_since_last_send >= self.heartbeat_timeout and
+                self._state == STATE_LOGGED_ON
+        ):
             await self.heartbeat()
             seconds_since_last_send = 0
 
