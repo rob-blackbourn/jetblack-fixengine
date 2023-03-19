@@ -216,7 +216,6 @@ class InitiatorHandler(metaclass=ABCMeta):
         Returns:
             Optional[bool]: If true the message will override the base handler.
         """
-        ...
 
     @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> bool:
@@ -232,7 +231,6 @@ class InitiatorHandler(metaclass=ABCMeta):
         Returns:
             bool: If true the base handler will not handle the message.
         """
-        ...
 
     async def _handle_event(self, event: Event) -> bool:
         if event['type'] == 'fix':
@@ -284,15 +282,11 @@ class InitiatorHandler(metaclass=ABCMeta):
 
     @abstractmethod
     async def on_logon(self) -> None:
-        """Called when a logon message is received.
-        """
-        ...
+        """Called when a logon message is received."""
 
     @abstractmethod
     async def on_logout(self) -> None:
-        """Called when a logout message is received.
-        """
-        ...
+        """Called when a logout message is received."""
 
     async def _wait_till_logon_time(self) -> Optional[datetime]:
         if self.logon_time_range:
@@ -355,4 +349,5 @@ class InitiatorHandler(metaclass=ABCMeta):
         self._close_event.set()
 
     async def wait_closed(self) -> None:
+        """Wait until the initiator has closed"""
         await self._close_event.wait()

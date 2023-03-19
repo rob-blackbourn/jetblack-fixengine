@@ -71,7 +71,7 @@ class InitiatorManager:
     async def start(self, shutdown_timeout: float = 10.0) -> None:
         while not self.cancellation_event.is_set():
             try:
-                # Wait for the seeion to start.
+                # Wait for the session to start.
                 end_datetime = await self.sleep_until_session_starts()
             except asyncio.CancelledError:
                 continue

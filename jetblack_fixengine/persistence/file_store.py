@@ -1,9 +1,8 @@
 """File storage"""
 
 import os.path
-from typing import Optional
+from typing import MutableMapping, Optional, Tuple
 from urllib.parse import quote_from_bytes
-from typing import MutableMapping, Tuple
 
 import aiofiles
 
@@ -45,8 +44,8 @@ class FileSession(Session):
         self.message_style = message_style
 
     async def _save(self) -> None:
-        async with aiofiles.open(self.seqnum_filename, 'wt') as f:
-            await f.write(f'{self._outgoing_seqnum}:{self._incoming_seqnum}\n')
+        async with aiofiles.open(self.seqnum_filename, 'wt') as fp:
+            await fp.write(f'{self._outgoing_seqnum}:{self._incoming_seqnum}\n')
 
     @property
     def sender_comp_id(self) -> str:

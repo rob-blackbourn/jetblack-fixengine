@@ -63,4 +63,3 @@ class FixReadEndOfFile(FixReadEvent):
 
 class FixReadError(Exception):
     """A FIX read error"""
-    ...

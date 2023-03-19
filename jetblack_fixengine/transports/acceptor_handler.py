@@ -312,7 +312,7 @@ class AcceptorHandler(metaclass=ABCMeta):
     async def _on_admin_message(self, message: Mapping[str, Any]) -> bool:
         LOGGER.info('on_admin_message: %s', message)
 
-        # Only handle if unhandled by the overrideing method.
+        # Only handle if unhandled by the overriding method.
         override_status = await self.on_admin_message(message)
         if override_status is not None:
             return override_status
@@ -350,7 +350,6 @@ class AcceptorHandler(metaclass=ABCMeta):
         Returns:
             Optional[bool]: If true override the base processing.
         """
-        ...
 
     async def _on_login(self, message: Mapping[str, Any]) -> bool:
         if await self.on_logon(message):
@@ -367,12 +366,10 @@ class AcceptorHandler(metaclass=ABCMeta):
     @abstractmethod
     async def on_logon(self, message: Mapping[str, Any]) -> bool:
         """Return True if the login is valid"""
-        ...
 
     @abstractmethod
     async def on_logout(self) -> None:
         """Perform any logout tasks"""
-        ...
 
     @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> bool:
@@ -384,4 +381,3 @@ class AcceptorHandler(metaclass=ABCMeta):
         Returns:
             bool: If true, override any base processing.
         """
-        ...
