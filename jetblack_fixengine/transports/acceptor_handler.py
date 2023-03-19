@@ -91,7 +91,7 @@ class AcceptorHandler(metaclass=ABCMeta):
                     elif event['type'] == 'disconnect':
                         break
                     else:
-                        raise Exception(f'Unhandled event {event["type"]}')
+                        raise ValueError(f'Unhandled event {event["type"]}')
 
                 except asyncio.TimeoutError:
                     await self._on_timeout()
