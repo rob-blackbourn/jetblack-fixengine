@@ -5,7 +5,7 @@ import calendar
 from datetime import datetime, time, tzinfo
 import logging
 from ssl import SSLContext
-from typing import Optional, Tuple, Callable, Type
+from typing import Callable, Optional, Tuple, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..transports import InitiatorHandler, create_initiator
@@ -103,7 +103,7 @@ class InitiatorManager:
                 try:
                     await asyncio.wait(
                         [
-                            handler,
+                            handler.wait_closed(),
                             self.cancellation_event.wait()
                         ],
                         timeout=10,

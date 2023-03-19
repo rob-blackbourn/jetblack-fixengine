@@ -57,6 +57,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
+        self._close_event = asyncio.Event()
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
@@ -350,3 +351,8 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         LOGGER.info('disconnected')
         self._state = STATE_DISCONNECTED
+
+        self._close_event.set()
+
+    async def wait_closed(self) -> None:
+        await self._close_event.wait()
