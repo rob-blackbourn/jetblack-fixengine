@@ -98,7 +98,7 @@ class InitiatorManager:
                 )
             except asyncio.TimeoutError:
                 # After logout we should disconnect.
-                await handler.logout()
+                await handler.send_logout()
 
                 try:
                     await asyncio.wait(
