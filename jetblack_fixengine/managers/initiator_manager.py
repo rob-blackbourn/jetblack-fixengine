@@ -31,7 +31,7 @@ class InitiatorManager:
             ssl: Optional[SSLContext] = None,
             session_dow_range: Optional[Tuple[int, int]] = None,
             session_time_range: Optional[Tuple[time, time]] = None,
-            tz: tzinfo = None
+            tz: Optional[tzinfo] = None
     ) -> None:
         self.handler_factory = handler_factory
         self.host = host
@@ -129,7 +129,7 @@ def start_initiator_manager(
         shutdown_timeout: float = 10.0,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: tzinfo = None
+        tz: Optional[tzinfo] = None
 ) -> None:
     cancellation_event = asyncio.Event()
 

@@ -62,7 +62,7 @@ async def fix_stream_processor(
     reader_iter = reader.__aiter__()
 
     # Create initial tasks.
-    handler_task = asyncio.create_task(handler(send, receive))
+    handler_task: Task = asyncio.create_task(handler(send, receive))
     read_task: Task[bytes] = asyncio.create_task(reader_iter.__anext__())
     write_task: Task[Event] = asyncio.create_task(write_queue.get())
     cancellation_task = asyncio.create_task(cancellation_event.wait())

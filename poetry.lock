@@ -348,6 +348,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "types-aiofiles"
+version = "23.1.0.0"
+description = "Typing stubs for aiofiles"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.5.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -390,7 +398,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "ab572db2e546e10f91cdfbb50ca9c4ee85d09e1834393bd29fd63097c883d635"
+content-hash = "07df484d068a6cb357b0e173ff4068023f2147860a8533b139c8698f1ff85b4a"
 
 [metadata.files]
 aiofiles = []
@@ -423,6 +431,7 @@ pytz-deprecation-shim = []
 "ruamel.yaml.clib" = []
 tomli = []
 tomlkit = []
+types-aiofiles = []
 typing-extensions = []
 tzdata = []
 tzlocal = []
