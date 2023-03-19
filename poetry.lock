@@ -356,6 +356,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-pytz"
+version = "2022.7.1.2"
+description = "Typing stubs for pytz"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.5.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -398,7 +406,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "07df484d068a6cb357b0e173ff4068023f2147860a8533b139c8698f1ff85b4a"
+content-hash = "ee30112a919c6b9dfb597a822636334ea9695ddb39d410d9406fd9242d7f5f02"
 
 [metadata.files]
 aiofiles = []
@@ -432,6 +440,7 @@ pytz-deprecation-shim = []
 tomli = []
 tomlkit = []
 types-aiofiles = []
+types-pytz = []
 typing-extensions = []
 tzdata = []
 tzlocal = []
