@@ -29,7 +29,7 @@ HEARTBEAT_TIMEOUT = 30
 TZ = pytz.timezone('Europe/London')
 
 
-class MyInitatorHandler(InitiatorHandler):
+class MyInitiatorHandler(InitiatorHandler):
 
     async def on_logon(self) -> None:
         logger.info('on_logon')
@@ -38,16 +38,16 @@ class MyInitatorHandler(InitiatorHandler):
         logger.info('on_logout')
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
-        logger.info(f'on_admin_message {message}')
+        logger.info('on_admin_message %s', message)
         return None
 
     async def on_application_message(self, message: Mapping[str, Any]) -> bool:
-        logger.info(f'on_application_message {message}')
+        logger.info('on_application_message %s', message)
         return True
 
 
 start_initiator_manager(
-    MyInitatorHandler,
+    MyInitiatorHandler,
     HOST,
     PORT,
     PROTOCOL,

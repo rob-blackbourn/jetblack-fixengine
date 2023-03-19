@@ -57,6 +57,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Callable[[Event], Awaitable[None]]] = None
         self._receive: Optional[Callable[[], Awaitable[Event]]] = None
+        self._close_event = asyncio.Event()
 
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
@@ -96,7 +97,7 @@ class InitiatorHandler(metaclass=ABCMeta):
         }
         await self._send_event(event, send_time_utc)
 
-    async def logon(self) -> None:
+    async def send_logon(self) -> None:
         """Send a logon message"""
         self._state = STATE_LOGGING_ON
         await self.send_message(
@@ -107,13 +108,13 @@ class InitiatorHandler(metaclass=ABCMeta):
             }
         )
 
-    async def logout(self) -> None:
+    async def send_logout(self) -> None:
         """Send a logout message.
         """
         self._state = STATE_LOGGING_OFF
         await self.send_message('LOGOUT')
 
-    async def heartbeat(self, test_req_id: Optional[str] = None) -> None:
+    async def send_heartbeat(self, test_req_id: Optional[str] = None) -> None:
         """Send a heartbeat message.
 
         Args:
@@ -215,7 +216,6 @@ class InitiatorHandler(metaclass=ABCMeta):
         Returns:
             Optional[bool]: If true the message will override the base handler.
         """
-        ...
 
     @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> bool:
@@ -231,7 +231,6 @@ class InitiatorHandler(metaclass=ABCMeta):
         Returns:
             bool: If true the base handler will not handle the message.
         """
-        ...
 
     async def _handle_event(self, event: Event) -> bool:
         if event['type'] == 'fix':
@@ -260,13 +259,16 @@ class InitiatorHandler(metaclass=ABCMeta):
         else:
             return False
 
-    async def _handle_heartbeat(self) -> float:
+    async def _send_heartbeat_if_due(self) -> float:
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_send = (
             now_utc - self._last_send_time_utc
         ).total_seconds()
-        if seconds_since_last_send >= self.heartbeat_timeout and self._state == STATE_LOGGED_ON:
-            await self.heartbeat()
+        if (
+                seconds_since_last_send >= self.heartbeat_timeout and
+                self._state == STATE_LOGGED_ON
+        ):
+            await self.send_heartbeat()
             seconds_since_last_send = 0
 
         return self.heartbeat_timeout - seconds_since_last_send
@@ -277,21 +279,19 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
-            now_utc - self._last_receive_time_utc).total_seconds()
-        if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
+            now_utc - self._last_receive_time_utc
+        ).total_seconds()
+        seconds_to_timeout = seconds_since_last_receive - self.heartbeat_timeout
+        if seconds_to_timeout > self.heartbeat_threshold:
             await self.test_request('TEST')
 
     @abstractmethod
     async def on_logon(self) -> None:
-        """Called when a logon message is received.
-        """
-        ...
+        """Called when a logon message is received."""
 
     @abstractmethod
     async def on_logout(self) -> None:
-        """Called when a logout message is received.
-        """
-        ...
+        """Called when a logout message is received."""
 
     async def _wait_till_logon_time(self) -> Optional[datetime]:
         if self.logon_time_range:
@@ -321,7 +321,7 @@ class InitiatorHandler(metaclass=ABCMeta):
             self._state = STATE_CONNECTED
 
             end_datetime = await self._wait_till_logon_time()
-            await self.logon()
+            await self.send_logon()
 
             ok = True
             while ok:
@@ -331,10 +331,10 @@ class InitiatorHandler(metaclass=ABCMeta):
                             end_datetime and
                             datetime.now(tz=self.tz) >= end_datetime
                     ):
-                        await self.logout()
+                        await self.send_logout()
                         await self.on_logout()
 
-                    timeout = await self._handle_heartbeat()
+                    timeout = await self._send_heartbeat_if_due()
                     event = await asyncio.wait_for(receive(), timeout=timeout)
 
                     if event['type'] == 'fix':
@@ -350,3 +350,9 @@ class InitiatorHandler(metaclass=ABCMeta):
 
         LOGGER.info('disconnected')
         self._state = STATE_DISCONNECTED
+
+        self._close_event.set()
+
+    async def wait_closed(self) -> None:
+        """Wait until the initiator has closed"""
+        await self._close_event.wait()

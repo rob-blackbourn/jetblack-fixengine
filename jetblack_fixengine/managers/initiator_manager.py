@@ -5,7 +5,7 @@ import calendar
 from datetime import datetime, time, tzinfo
 import logging
 from ssl import SSLContext
-from typing import Optional, Tuple, Callable, Type
+from typing import Callable, Optional, Tuple, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..transports import InitiatorHandler, create_initiator
@@ -31,7 +31,7 @@ class InitiatorManager:
             ssl: Optional[SSLContext] = None,
             session_dow_range: Optional[Tuple[int, int]] = None,
             session_time_range: Optional[Tuple[time, time]] = None,
-            tz: tzinfo = None
+            tz: Optional[tzinfo] = None
     ) -> None:
         self.handler_factory = handler_factory
         self.host = host
@@ -71,7 +71,7 @@ class InitiatorManager:
     async def start(self, shutdown_timeout: float = 10.0) -> None:
         while not self.cancellation_event.is_set():
             try:
-                # Wait for the seeion to start.
+                # Wait for the session to start.
                 end_datetime = await self.sleep_until_session_starts()
             except asyncio.CancelledError:
                 continue
@@ -98,12 +98,12 @@ class InitiatorManager:
                 )
             except asyncio.TimeoutError:
                 # After logout we should disconnect.
-                await handler.logout()
+                await handler.send_logout()
 
                 try:
                     await asyncio.wait(
                         [
-                            handler,
+                            handler.wait_closed(),
                             self.cancellation_event.wait()
                         ],
                         timeout=10,
@@ -129,7 +129,7 @@ def start_initiator_manager(
         shutdown_timeout: float = 10.0,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: tzinfo = None
+        tz: Optional[tzinfo] = None
 ) -> None:
     cancellation_event = asyncio.Event()
 

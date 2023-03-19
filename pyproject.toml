@@ -11,21 +11,21 @@ repository = "https://github.com/rob-blackbourn/jetblack-fixengine"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-aiofiles = "^0.4.0"
-aiosqlite = "^0.9.0"
-pytz = "^2018.9"
-tzlocal = "^1.5"
-wheel = "^0.34.2"
-"ruamel.yaml" = "^0.16.10"
-jetblack-fixparser = "^2.0"
+aiofiles = "^23.1"
+aiosqlite = "^0.18.0"
+pytz = "^2022.7"
+tzlocal = "^4.3"
+jetblack-fixparser = "^2.3"
 
 [tool.poetry.dev-dependencies]
-pytest = "^4.2"
-pytest-asyncio = "^0.10.0"
-pytest-runner = "^4.2"
-pylint = "^2.5.3"
-autopep8 = "^1.5.3"
-mypy = "^0.790"
+autopep8 = "^2.0"
+mypy = "^1.1"
+pytest = "^7.2"
+pytest-asyncio = "^0.20"
+pytest-runner = "^6.0"
+pylint = "^2.17"
+types-aiofiles = "^23.1.0"
+types-pytz = "^2022.7.1"
 
 [build-system]
 requires = ["poetry>=0.12"]

@@ -1,9 +1,8 @@
 """File storage"""
 
 import os.path
-from typing import Optional
+from typing import MutableMapping, Optional, Tuple
 from urllib.parse import quote_from_bytes
-from typing import MutableMapping, Tuple
 
 import aiofiles
 
@@ -24,14 +23,14 @@ class FileSession(Session):
         self.seqnum_filename = os.path.join(
             directory, f'{sender_comp_id}-{target_comp_id}-initiator-seqnum.txt')
         if not os.path.exists(self.seqnum_filename):
-            with open(self.seqnum_filename, 'wt') as f:
-                f.write("0:0\n")
+            with open(self.seqnum_filename, 'wt', encoding='utf8') as file_ptr:
+                file_ptr.write("0:0\n")
         elif not os.path.isfile(self.seqnum_filename):
             raise RuntimeError(
                 f'session file "{self.seqnum_filename}" is not a file.')
 
-        with open(self.seqnum_filename) as f:
-            line = f.readline() or '0:0'
+        with open(self.seqnum_filename, encoding="utf8") as file_ptr:
+            line = file_ptr.readline() or '0:0'
             outgoing_seqnum, incoming_seqnum = line.rstrip('\n').split(':')
 
         self._sender_comp_id = sender_comp_id
@@ -45,8 +44,8 @@ class FileSession(Session):
         self.message_style = message_style
 
     async def _save(self) -> None:
-        async with aiofiles.open(self.seqnum_filename, 'wt') as f:
-            await f.write(f'{self._outgoing_seqnum}:{self._incoming_seqnum}\n')
+        async with aiofiles.open(self.seqnum_filename, 'wt') as fp:
+            await fp.write(f'{self._outgoing_seqnum}:{self._incoming_seqnum}\n')
 
     @property
     def sender_comp_id(self) -> str:
@@ -78,12 +77,12 @@ class FileSession(Session):
         await self._save()
 
     async def save_message(self, buf: bytes) -> None:
-        async with aiofiles.open(self.message_filename, 'at') as f:
+        async with aiofiles.open(self.message_filename, 'at') as file_ptr:
             if self.message_style == 'urlencode':
-                await f.write(quote_from_bytes(buf) + '\n')
+                await file_ptr.write(quote_from_bytes(buf) + '\n')
             else:
-                await f.write(buf)
-            f.flush()
+                await file_ptr.write(buf.decode("utf8"))
+            await file_ptr.flush()
 
 
 class FileStore(Store):
