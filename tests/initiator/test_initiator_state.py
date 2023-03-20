@@ -1,6 +1,6 @@
 """Tests for initiator state"""
 
-from jetblack_fixengine.initiator.initiator_state import (
+from jetblack_fixengine.initiator.state import (
     AdminState,
     AdminResponse,
     AdminStateMachine,

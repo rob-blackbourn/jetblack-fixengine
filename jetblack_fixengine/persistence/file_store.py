@@ -85,7 +85,7 @@ class FileSession(Session):
                 await file_ptr.write(quote_from_bytes(buf) + '\n')
             else:
                 await file_ptr.write(buf.hex())
-            file_ptr.flush()
+            await file_ptr.flush()
 
 
 class FileStore(Store):

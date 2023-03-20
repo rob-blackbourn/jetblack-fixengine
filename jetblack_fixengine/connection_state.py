@@ -26,7 +26,7 @@ class ConnectionEventType(Enum):
     FIX_HANDLED = 'fix.handled'
     TIMEOUT_RECEIVED = 'timeout'
     TIMEOUT_HANDLED = 'timeout.handled'
-    DISCONNECT_RECEIVED = 'disconnected'
+    DISCONNECT_RECEIVED = 'disconnect'
 
 
 ConnectionTransitionMapping = Mapping[

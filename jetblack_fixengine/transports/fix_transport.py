@@ -62,8 +62,12 @@ async def fix_stream_processor(
     reader_iter = reader.__aiter__()
 
     # Create initial tasks.
-    handler_task = asyncio.create_task(handler(send, receive))
-    read_task: Task[bytes] = asyncio.create_task(reader_iter.__anext__())
+    handler_task = asyncio.create_task(
+        handler(send, receive)  # type: ignore
+    )
+    read_task: Task[bytes] = asyncio.create_task(
+        reader_iter.__anext__()  # type: ignore
+    )
     write_task: Task[Event] = asyncio.create_task(write_queue.get())
     cancellation_task = asyncio.create_task(cancellation_event.wait())
     pending: Set[Future] = {
@@ -133,7 +137,9 @@ async def fix_stream_processor(
                         'message': message
                     })
                     # Create the new read task.
-                    read_task = asyncio.create_task(reader_iter.__anext__())
+                    read_task = asyncio.create_task(
+                        reader_iter.__anext__()  # type: ignore
+                    )
                     pending.add(read_task)
                 except StopAsyncIteration:
                     state = FixState.EOF

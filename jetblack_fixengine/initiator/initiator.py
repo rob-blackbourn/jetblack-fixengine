@@ -103,6 +103,8 @@ class Initiator(metaclass=ABCMeta):
             }
         )
 
+        self._stop_event = asyncio.Event()
+
     async def _next_outgoing_seqnum(self) -> int:
         seqnum = await self._session.get_outgoing_seqnum()
         seqnum += 1
@@ -323,6 +325,11 @@ class Initiator(metaclass=ABCMeta):
                 break
 
         LOGGER.info('disconnected')
+
+        self._stop_event.set()
+
+    async def wait_stopped(self) -> None:
+        await self._stop_event.wait()
 
     async def send_message(
             self,

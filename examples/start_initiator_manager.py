@@ -7,7 +7,7 @@ import os.path
 import pytz
 from typing import Optional, Mapping, Any
 
-from jetblack_fixengine.transports import Initiator
+from jetblack_fixengine.initiator import Initiator
 from jetblack_fixengine.persistence import FileStore
 from jetblack_fixengine.managers import start_initiator_manager
 from jetblack_fixparser.loader import load_yaml_protocol
@@ -31,19 +31,17 @@ TZ = pytz.timezone('Europe/London')
 
 class MyInitatorHandler(Initiator):
 
-    async def on_logon(self) -> None:
-        logger.info('on_logon')
+    async def on_logon(self, message: Mapping[str, Any]) -> None:
+        logger.info('on_logon %s', message)
 
-    async def on_logout(self) -> None:
-        logger.info('on_logout')
+    async def on_logout(self, message: Mapping[str, Any]) -> None:
+        logger.info('on_logout %s', message)
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
-        logger.info(f'on_admin_message {message}')
-        return None
+    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
+        logger.info('on_admin_message %s', message)
 
-    async def on_application_message(self, message: Mapping[str, Any]) -> bool:
-        logger.info(f'on_application_message {message}')
-        return True
+    async def on_application_message(self, message: Mapping[str, Any]) -> None:
+        logger.info('on_application_message %s', message)
 
 
 start_initiator_manager(

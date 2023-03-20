@@ -8,9 +8,9 @@ from ssl import SSLContext
 from typing import Optional, Tuple, Callable, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
-from ..transports import Initiator, create_initiator
+from ..initiator import Initiator, create_initiator
 from ..types import Store
-from ..transports import initiate
+from ..initiator import initiate
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_event
 
@@ -31,7 +31,7 @@ class InitiatorManager:
             ssl: Optional[SSLContext] = None,
             session_dow_range: Optional[Tuple[int, int]] = None,
             session_time_range: Optional[Tuple[time, time]] = None,
-            tz: tzinfo = None
+            tz: Optional[tzinfo] = None
     ) -> None:
         self.handler_factory = handler_factory
         self.host = host
@@ -103,7 +103,7 @@ class InitiatorManager:
                 try:
                     await asyncio.wait(
                         [
-                            handler,
+                            handler.wait_stopped(),
                             self.cancellation_event.wait()
                         ],
                         timeout=10,
@@ -130,7 +130,7 @@ def start_initiator_manager(
         shutdown_timeout: float = 10.0,
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: tzinfo = None
+        tz: Optional[tzinfo] = None
 ) -> None:
     cancellation_event = asyncio.Event()
 

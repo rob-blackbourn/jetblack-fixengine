@@ -5,7 +5,7 @@ Implements an IO agnostic state machine to handle parsing FIX protocol messages.
 
 from collections import deque
 from enum import IntEnum
-from typing import Deque, Optional, Tuple, Union
+from typing import Callable, Deque, Mapping, Optional, Tuple, Union
 
 from jetblack_fixparser.fix_message import SOH, calc_checksum
 
@@ -42,6 +42,10 @@ class ReadState(IntEnum):
 
 StateResponse = Tuple[Optional[FixReadEvent], bool]
 
+TransitionKey = Tuple[ReadState, InputState]
+TransitionValue = Tuple[Callable[[], StateResponse], ReadState]
+TransitionMap = Mapping[TransitionKey, TransitionValue]
+
 
 class FixReadBuffer:
     """A state machine to parse FIX messages"""
@@ -66,7 +70,7 @@ class FixReadBuffer:
         # The initial state is idle.
         self._state = ReadState.IDLE
         # These are the state transitions.
-        self._transitions = {
+        self._transitions: TransitionMap = {
 
             (ReadState.IDLE, InputState.EMPTY): (
                 self._request_data,
