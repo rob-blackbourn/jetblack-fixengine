@@ -2,7 +2,7 @@
 
 from enum import Enum, auto
 import logging
-from typing import Awaitable, Callable, Mapping, Optional, Tuple
+from typing import Awaitable, Callable, Mapping, Optional
 
 from .types import Message
 
