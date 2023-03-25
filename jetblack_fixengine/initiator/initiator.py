@@ -18,8 +18,8 @@ from ..types import Store, Event
 
 from .state import (
     AdminState,
-    AdminEventType,
     AdminEvent,
+    AdminMessage,
     AdminStateMachineAsync,
 )
 
@@ -63,43 +63,31 @@ class Initiator(metaclass=ABCMeta):
 
         self._connection_state_machine = ConnectionStateMachineAsync(
             {
-                (ConnectionState.DISCONNECTED, ConnectionEventType.CONNECTION_RECEIVED): (
-                    self._handle_connected
-                ),
-                (ConnectionState.CONNECTED, ConnectionEventType.FIX_RECEIVED): (
-                    self._handle_fix
-                ),
-                (ConnectionState.CONNECTED, ConnectionEventType.TIMEOUT_RECEIVED): (
-                    self._handle_timeout
-                ),
-                (ConnectionState.CONNECTED, ConnectionEventType.DISCONNECT_RECEIVED): (
-                    self._handle_disconnect
-                )
+                ConnectionState.DISCONNECTED: {
+                    ConnectionEventType.CONNECTION_RECEIVED: self._handle_connected
+                },
+                ConnectionState.CONNECTED: {
+                    ConnectionEventType.FIX_RECEIVED: self._handle_fix,
+                    ConnectionEventType.TIMEOUT_RECEIVED: self._handle_timeout,
+                    ConnectionEventType.DISCONNECT_RECEIVED: self._handle_disconnect
+                }
             }
         )
         self._admin_state_machine = AdminStateMachineAsync(
             {
-                (AdminState.DISCONNECTED, AdminEventType.CONNECTED): (
-                    self._send_logon
-                ),
-                (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): (
-                    self._logon_received
-                ),
-                (AdminState.AUTHENTICATED, AdminEventType.HEARTBEAT_RECEIVED): (
-                    self._acknowledge_heartbeat
-                ),
-                (AdminState.AUTHENTICATED, AdminEventType.TEST_REQUEST_RECEIVED): (
-                    self._send_test_request
-                ),
-                (AdminState.AUTHENTICATED, AdminEventType.RESEND_REQUEST_RECEIVED): (
-                    self._send_sequence_reset
-                ),
-                (AdminState.AUTHENTICATED, AdminEventType.SEQUENCE_RESET_RECEIVED): (
-                    self._reset_incoming_seqnum
-                ),
-                (AdminState.AUTHENTICATED, AdminEventType.LOGOUT_RECEIVED): (
-                    self._acknowledge_logout
-                )
+                AdminState.DISCONNECTED: {
+                    AdminEvent.CONNECTED: self._send_logon
+                },
+                AdminState.LOGON_EXPECTED: {
+                    AdminEvent.LOGON_RECEIVED: self._logon_received
+                },
+                AdminState.AUTHENTICATED: {
+                    AdminEvent.HEARTBEAT_RECEIVED: self._acknowledge_heartbeat,
+                    AdminEvent.TEST_REQUEST_RECEIVED: self._send_test_request,
+                    AdminEvent.RESEND_REQUEST_RECEIVED: self._send_sequence_reset,
+                    AdminEvent.SEQUENCE_RESET_RECEIVED: self._reset_incoming_seqnum,
+                    AdminEvent.LOGOUT_RECEIVED: self._acknowledge_logout
+                },
             }
         )
 
@@ -129,8 +117,8 @@ class Initiator(metaclass=ABCMeta):
 
     async def _send_test_request(
             self,
-            event: Optional[AdminEvent]
-    ) -> Optional[AdminEvent]:
+            event: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
         assert event is not None and event.message is not None
         # Respond to the server with the token it sent.
         await self.send_message(
@@ -139,12 +127,12 @@ class Initiator(metaclass=ABCMeta):
                 'TestReqID': event.message['TestReqID']
             }
         )
-        return AdminEvent(AdminEventType.TEST_REQUEST_SENT)
+        return AdminMessage(AdminEvent.TEST_REQUEST_SENT)
 
     async def _send_sequence_reset(
             self,
-            _event: Optional[AdminEvent]
-    ) -> Optional[AdminEvent]:
+            _event: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
         new_seq_no = await self._session.get_outgoing_seqnum() + 2
         await self.send_message(
             'SEQUENCE_RESET',
@@ -153,46 +141,46 @@ class Initiator(metaclass=ABCMeta):
                 'NewSeqNo': new_seq_no
             }
         )
-        return AdminEvent(AdminEventType.SEQUENCE_RESET_SENT)
+        return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
 
     async def _logon_received(
             self,
-            event: Optional[AdminEvent]
-    ) -> Optional[AdminEvent]:
+            event: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
         assert event is not None and event.message is not None
         await self.on_logon(event.message)
         return None
 
     async def _acknowledge_heartbeat(
             self,
-            event: Optional[AdminEvent]
-    ) -> Optional[AdminEvent]:
+            event: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
         assert event is not None and event.message is not None
         await self.on_heartbeat(event.message)
-        return AdminEvent(AdminEventType.HEARTBEAT_ACK)
+        return AdminMessage(AdminEvent.HEARTBEAT_ACK)
 
     async def _reset_incoming_seqnum(
             self,
-            event: Optional[AdminEvent]
-    ) -> Optional[AdminEvent]:
+            event: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
         assert event is not None and event.message is not None
         await self._set_incoming_seqnum(event.message['NewSeqNo'])
-        return AdminEvent(AdminEventType.SEQUENCE_RESET_SENT)
+        return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
 
     async def _acknowledge_logout(
             self,
-            event: Optional[AdminEvent]
-    ) -> Optional[AdminEvent]:
+            event: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
         assert event is not None and event.message is not None
         await self.on_logout(event.message)
-        return AdminEvent(AdminEventType.LOGOUT_ACK)
+        return AdminMessage(AdminEvent.LOGOUT_ACK)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         await self.on_admin_message(message)
 
         await self._admin_state_machine.handle_event(
-            AdminEvent(
-                AdminEventType(message['MsgType']),
+            AdminMessage(
+                AdminEvent.from_msg_type(message['MsgType']),
                 message
             )
         )
@@ -281,14 +269,14 @@ class Initiator(metaclass=ABCMeta):
     ) -> Optional[Event]:
         LOGGER.info('connected')
         await self._admin_state_machine.handle_event(
-            AdminEvent(AdminEventType.CONNECTED)
+            AdminMessage(AdminEvent.CONNECTED)
         )
         return None
 
     async def _send_logon(
             self,
-            _event: Optional[AdminEvent]
-    ) -> Optional[AdminEvent]:
+            _event: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
         """Send a logon message"""
         await self.send_message(
             'LOGON',
@@ -297,7 +285,7 @@ class Initiator(metaclass=ABCMeta):
                 'HeartBtInt': self.heartbeat_timeout
             }
         )
-        return AdminEvent(AdminEventType.LOGON_SENT)
+        return AdminMessage(AdminEvent.LOGON_SENT)
 
     async def _next_event(
             self,

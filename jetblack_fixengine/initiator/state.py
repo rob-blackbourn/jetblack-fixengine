@@ -1,8 +1,10 @@
 """Initiator state management"""
 
+from __future__ import annotations
+
 from enum import Enum, auto
 import logging
-from typing import Any, Awaitable, Callable, Mapping, Optional, Tuple
+from typing import Any, Awaitable, Callable, Mapping, Optional
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ class AdminState(Enum):
     ACKNOWLEDGE_LOGOUT = auto()
 
 
-class AdminEventType(Enum):
+class AdminEvent(Enum):
     CONNECTED = 'connected'
     LOGON_RECEIVED = 'LOGON'
     LOGON_SENT = 'LOGON.sent'
@@ -41,83 +43,106 @@ class AdminEventType(Enum):
     LOGOUT_RECEIVED = 'LOGOUT'
     LOGOUT_ACK = 'LOGOUT.ack'
 
-
-AdminTransitionMapping = Mapping[
-    Tuple[AdminState, AdminEventType],
-    AdminState
-]
+    @classmethod
+    def from_msg_type(cls, msg_type: str) -> AdminEvent:
+        if msg_type == 'LOGON':
+            return cls.LOGON_RECEIVED
+        elif msg_type == 'REJECT':
+            return cls.REJECT_RECEIVED
+        elif msg_type == 'HEARTBEAT':
+            return cls.HEARTBEAT_RECEIVED
+        elif msg_type == 'TEST_REQUEST':
+            return cls.TEST_REQUEST_RECEIVED
+        elif msg_type == 'RESEND_REQUEST':
+            return cls.RESEND_REQUEST_RECEIVED
+        elif msg_type == 'SEQUENCE_RESET':
+            return cls.SEQUENCE_RESET_RECEIVED
+        elif msg_type == 'XML_MESSAGE':
+            return cls.XML_MESSAGE_RECEIVED
+        elif msg_type == 'LOGOUT':
+            return cls.LOGON_RECEIVED
+        else:
+            raise ValueError(f'invalid msg_type "{msg_type}"')
 
 
 class AdminStateMachine:
     """State machine for the initiator admin messages"""
 
-    TRANSITIONS: Mapping[Tuple[AdminState, AdminEventType], AdminState] = {
-        (AdminState.DISCONNECTED, AdminEventType.CONNECTED): AdminState.LOGON_REQUESTED,
-        (AdminState.LOGON_REQUESTED, AdminEventType.LOGON_SENT): AdminState.LOGON_EXPECTED,
-        (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): AdminState.AUTHENTICATED,
-        (AdminState.LOGON_EXPECTED, AdminEventType.REJECT_RECEIVED): AdminState.DISCONNECTED,
-
-        # Acceptor heartbeat
-        (AdminState.AUTHENTICATED, AdminEventType.HEARTBEAT_RECEIVED): AdminState.ACKNOWLEDGE_HEARTBEAT,
-        (AdminState.ACKNOWLEDGE_HEARTBEAT, AdminEventType.HEARTBEAT_ACK): AdminState.AUTHENTICATED,
-
-        # Test Request
-        (AdminState.AUTHENTICATED, AdminEventType.TEST_REQUEST_RECEIVED): AdminState.TEST_REQUEST_REQUESTED,
-        (AdminState.TEST_REQUEST_REQUESTED, AdminEventType.TEST_REQUEST_SENT): AdminState.AUTHENTICATED,
-
-        # Resend Request
-        (AdminState.AUTHENTICATED, AdminEventType.RESEND_REQUEST_RECEIVED): AdminState.SEQUENCE_RESET_REQUESTED,
-        (AdminState.SEQUENCE_RESET_REQUESTED, AdminEventType.SEQUENCE_RESET_SENT): AdminState.AUTHENTICATED,
-
-        # Sequence Reset
-        (AdminState.AUTHENTICATED, AdminEventType.SEQUENCE_RESET_RECEIVED): AdminState.SET_INCOMING_SEQNUM,
-        (AdminState.SET_INCOMING_SEQNUM, AdminEventType.INCOMING_SEQNUM_SET): AdminState.AUTHENTICATED,
-
-        # Logout
-        (AdminState.AUTHENTICATED, AdminEventType.LOGOUT_RECEIVED): AdminState.ACKNOWLEDGE_LOGOUT,
-        (AdminState.ACKNOWLEDGE_LOGOUT, AdminEventType.LOGOUT_ACK): AdminState.DISCONNECTED
+    TRANSITIONS: Mapping[AdminState, Mapping[AdminEvent, AdminState]] = {
+        AdminState.DISCONNECTED: {
+            AdminEvent.CONNECTED: AdminState.LOGON_REQUESTED
+        },
+        AdminState.LOGON_REQUESTED: {
+            AdminEvent.LOGON_SENT: AdminState.LOGON_EXPECTED
+        },
+        AdminState.LOGON_EXPECTED: {
+            AdminEvent.LOGON_RECEIVED: AdminState.AUTHENTICATED,
+            AdminEvent.REJECT_RECEIVED: AdminState.DISCONNECTED
+        },
+        AdminState.AUTHENTICATED: {
+            AdminEvent.HEARTBEAT_RECEIVED: AdminState.ACKNOWLEDGE_HEARTBEAT,
+            AdminEvent.TEST_REQUEST_RECEIVED: AdminState.TEST_REQUEST_REQUESTED,
+            AdminEvent.RESEND_REQUEST_RECEIVED: AdminState.SEQUENCE_RESET_REQUESTED,
+            AdminEvent.SEQUENCE_RESET_RECEIVED: AdminState.SET_INCOMING_SEQNUM,
+            AdminEvent.LOGOUT_RECEIVED: AdminState.ACKNOWLEDGE_LOGOUT
+        },
+        AdminState.ACKNOWLEDGE_HEARTBEAT: {
+            AdminEvent.HEARTBEAT_ACK: AdminState.AUTHENTICATED
+        },
+        AdminState.TEST_REQUEST_REQUESTED: {
+            AdminEvent.TEST_REQUEST_SENT: AdminState.AUTHENTICATED
+        },
+        AdminState.SEQUENCE_RESET_REQUESTED: {
+            AdminEvent.SEQUENCE_RESET_SENT: AdminState.AUTHENTICATED
+        },
+        AdminState.SET_INCOMING_SEQNUM: {
+            AdminEvent.INCOMING_SEQNUM_SET: AdminState.AUTHENTICATED
+        },
+        AdminState.ACKNOWLEDGE_LOGOUT: {
+            AdminEvent.LOGOUT_ACK: AdminState.DISCONNECTED
+        }
     }
 
     def __init__(self):
         self.state = AdminState.DISCONNECTED
 
-    def transition(self, event_type: AdminEventType) -> AdminState:
-        LOGGER.debug('Transition from %s with %s', self.state, event_type)
+    def transition(self, event: AdminEvent) -> AdminState:
+        LOGGER.debug('Transition from %s with %s', self.state, event)
         try:
-            self.state = self.TRANSITIONS[(self.state, event_type)]
+            self.state = self.TRANSITIONS[self.state][event]
             return self.state
         except KeyError as error:
             raise InvalidStateTransitionError(
-                f'unhandled event {self.state.name} -> {event_type}.',
+                f'unhandled event {self.state.name} -> {event}.',
             ) from error
 
     def __str__(self) -> str:
-        return f"InitiatorStateMachine: state={self.state}"
+        return f"AdminStateMachine: state={self.state}"
 
     __repr__ = __str__
 
 
-class AdminEvent:
+class AdminMessage:
 
     def __init__(
             self,
-            event_type: AdminEventType,
+            event: AdminEvent,
             message: Optional[Mapping[str, Any]] = None
     ) -> None:
-        self.event_type = event_type
+        self.event = event
         self.message = message
 
     def __str__(self) -> str:
-        return f'{self.event_type}: {self.message}'
+        return f'{self.event}: {self.message}'
 
 
 AdminEventHandler = Callable[
-    [Optional[AdminEvent]],
-    Awaitable[Optional[AdminEvent]]
+    [Optional[AdminMessage]],
+    Awaitable[Optional[AdminMessage]]
 ]
 AdminEventHandlerMapping = Mapping[
-    Tuple[AdminState, AdminEventType],
-    AdminEventHandler
+    AdminState,
+    Mapping[AdminEvent, AdminEventHandler]
 ]
 
 
@@ -132,12 +157,12 @@ class AdminStateMachineAsync(AdminStateMachine):
 
     async def handle_event(
             self,
-            event: Optional[AdminEvent]
+            message: Optional[AdminMessage]
     ) -> AdminState:
-        while event is not None:
-            handler = self._handlers.get((self.state, event.event_type))
-            self.transition(event.event_type)
+        while message is not None:
+            handler = self._handlers.get(self.state, {}).get(message.event)
+            self.transition(message.event)
             if handler is None:
                 break
-            event = await handler(event)
+            message = await handler(message)
         return self.state

@@ -2,7 +2,7 @@
 
 from jetblack_fixengine.initiator.state import (
     AdminState,
-    AdminEventType,
+    AdminEvent,
     AdminStateMachine,
 )
 
@@ -19,43 +19,43 @@ def test_initiator_admin_state():
 
     assert state_machine.state == AdminState.DISCONNECTED
 
-    response = state_machine.transition(AdminEventType.CONNECTED)
+    response = state_machine.transition(AdminEvent.CONNECTED)
     assert response == AdminState.LOGON_REQUESTED
 
-    response = state_machine.transition(AdminEventType.LOGON_SENT)
+    response = state_machine.transition(AdminEvent.LOGON_SENT)
     assert response == AdminState.LOGON_EXPECTED
 
-    response = state_machine.transition(AdminEventType.LOGON_RECEIVED)
+    response = state_machine.transition(AdminEvent.LOGON_RECEIVED)
     assert response == AdminState.AUTHENTICATED
 
-    response = state_machine.transition(AdminEventType.HEARTBEAT_RECEIVED)
+    response = state_machine.transition(AdminEvent.HEARTBEAT_RECEIVED)
     assert response == AdminState.ACKNOWLEDGE_HEARTBEAT
 
-    response = state_machine.transition(AdminEventType.HEARTBEAT_ACK)
+    response = state_machine.transition(AdminEvent.HEARTBEAT_ACK)
     assert response == AdminState.AUTHENTICATED
 
-    response = state_machine.transition(AdminEventType.TEST_REQUEST_RECEIVED)
+    response = state_machine.transition(AdminEvent.TEST_REQUEST_RECEIVED)
     assert response == AdminState.TEST_REQUEST_REQUESTED
 
-    response = state_machine.transition(AdminEventType.TEST_REQUEST_SENT)
+    response = state_machine.transition(AdminEvent.TEST_REQUEST_SENT)
     assert response == AdminState.AUTHENTICATED
 
-    response = state_machine.transition(AdminEventType.RESEND_REQUEST_RECEIVED)
+    response = state_machine.transition(AdminEvent.RESEND_REQUEST_RECEIVED)
     assert response == AdminState.SEQUENCE_RESET_REQUESTED
 
-    response = state_machine.transition(AdminEventType.SEQUENCE_RESET_SENT)
+    response = state_machine.transition(AdminEvent.SEQUENCE_RESET_SENT)
     assert response == AdminState.AUTHENTICATED
 
-    response = state_machine.transition(AdminEventType.SEQUENCE_RESET_RECEIVED)
+    response = state_machine.transition(AdminEvent.SEQUENCE_RESET_RECEIVED)
     assert response == AdminState.SET_INCOMING_SEQNUM
 
-    response = state_machine.transition(AdminEventType.INCOMING_SEQNUM_SET)
+    response = state_machine.transition(AdminEvent.INCOMING_SEQNUM_SET)
     assert response == AdminState.AUTHENTICATED
 
-    response = state_machine.transition(AdminEventType.LOGOUT_RECEIVED)
+    response = state_machine.transition(AdminEvent.LOGOUT_RECEIVED)
     assert response == AdminState.ACKNOWLEDGE_LOGOUT
 
-    response = state_machine.transition(AdminEventType.LOGOUT_ACK)
+    response = state_machine.transition(AdminEvent.LOGOUT_ACK)
     assert response == AdminState.DISCONNECTED
 
 

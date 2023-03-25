@@ -69,18 +69,14 @@ class Acceptor(metaclass=ABCMeta):
 
         self._connection_state_machine = ConnectionStateMachineAsync(
             {
-                (ConnectionState.DISCONNECTED, ConnectionEventType.CONNECTION_RECEIVED): (
-                    self._handle_connected
-                ),
-                (ConnectionState.CONNECTED, ConnectionEventType.FIX_RECEIVED): (
-                    self._handle_fix
-                ),
-                (ConnectionState.CONNECTED, ConnectionEventType.TIMEOUT_RECEIVED): (
-                    self._handle_timeout
-                ),
-                (ConnectionState.CONNECTED, ConnectionEventType.DISCONNECT_RECEIVED): (
-                    self._handle_disconnect
-                )
+                ConnectionState.DISCONNECTED: {
+                    ConnectionEventType.CONNECTION_RECEIVED: self._handle_connected
+                },
+                ConnectionState.CONNECTED: {
+                    ConnectionEventType.FIX_RECEIVED: self._handle_fix,
+                    ConnectionEventType.TIMEOUT_RECEIVED: self._handle_timeout,
+                    ConnectionEventType.DISCONNECT_RECEIVED: self._handle_disconnect
+                }
             }
         )
 
