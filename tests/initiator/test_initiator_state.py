@@ -8,7 +8,7 @@ from jetblack_fixengine.initiator.state import (
 
 from jetblack_fixengine.connection_state import (
     ConnectionState,
-    ConnectionEventType,
+    ConnectionEvent,
     ConnectionStateMachine
 )
 
@@ -65,21 +65,21 @@ def test_initiator_connection_state():
     assert state_machine.state == ConnectionState.DISCONNECTED
 
     response = state_machine.transition(
-        ConnectionEventType.CONNECTION_RECEIVED)
+        ConnectionEvent.CONNECTION_RECEIVED)
     assert response == ConnectionState.CONNECTED
 
-    response = state_machine.transition(ConnectionEventType.FIX_RECEIVED)
+    response = state_machine.transition(ConnectionEvent.FIX_RECEIVED)
     assert response == ConnectionState.FIX
 
-    response = state_machine.transition(ConnectionEventType.FIX_HANDLED)
+    response = state_machine.transition(ConnectionEvent.FIX_HANDLED)
     assert response == ConnectionState.CONNECTED
 
-    response = state_machine.transition(ConnectionEventType.TIMEOUT_RECEIVED)
+    response = state_machine.transition(ConnectionEvent.TIMEOUT_RECEIVED)
     assert response == ConnectionState.TIMEOUT
 
-    response = state_machine.transition(ConnectionEventType.TIMEOUT_HANDLED)
+    response = state_machine.transition(ConnectionEvent.TIMEOUT_HANDLED)
     assert response == ConnectionState.CONNECTED
 
     response = state_machine.transition(
-        ConnectionEventType.DISCONNECT_RECEIVED)
+        ConnectionEvent.DISCONNECT_RECEIVED)
     assert response == ConnectionState.DISCONNECTED

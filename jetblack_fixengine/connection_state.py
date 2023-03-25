@@ -4,7 +4,7 @@ from enum import Enum, auto
 import logging
 from typing import Awaitable, Callable, Mapping, Optional, Tuple
 
-from .types import Event
+from .types import Message
 
 LOGGER = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class ConnectionState(Enum):
     TIMEOUT = auto()
 
 
-class ConnectionEventType(Enum):
+class ConnectionEvent(Enum):
     CONNECTION_RECEIVED = 'connected'
     FIX_RECEIVED = 'fix'
     FIX_HANDLED = 'fix.handled'
@@ -31,16 +31,16 @@ class ConnectionEventType(Enum):
 
 ConnectionTransitionMapping = Mapping[
     ConnectionState,
-    Mapping[ConnectionEventType, ConnectionState]
+    Mapping[ConnectionEvent, ConnectionState]
 ]
 
 ConnectionEventHandler = Callable[
-    [Optional[Event]],
-    Awaitable[Optional[Event]]
+    [Optional[Message]],
+    Awaitable[Optional[Message]]
 ]
 ConnectionEventHandlerMapping = Mapping[
     ConnectionState,
-    Mapping[ConnectionEventType, ConnectionEventHandler]
+    Mapping[ConnectionEvent, ConnectionEventHandler]
 ]
 
 
@@ -48,25 +48,25 @@ class ConnectionStateMachine:
 
     TRANSITIONS: ConnectionTransitionMapping = {
         ConnectionState.DISCONNECTED:  {
-            ConnectionEventType.CONNECTION_RECEIVED: ConnectionState.CONNECTED
+            ConnectionEvent.CONNECTION_RECEIVED: ConnectionState.CONNECTED
         },
         ConnectionState.CONNECTED: {
-            ConnectionEventType.FIX_RECEIVED: ConnectionState.FIX,
-            ConnectionEventType.TIMEOUT_RECEIVED: ConnectionState.TIMEOUT,
-            ConnectionEventType.DISCONNECT_RECEIVED: ConnectionState.DISCONNECTED
+            ConnectionEvent.FIX_RECEIVED: ConnectionState.FIX,
+            ConnectionEvent.TIMEOUT_RECEIVED: ConnectionState.TIMEOUT,
+            ConnectionEvent.DISCONNECT_RECEIVED: ConnectionState.DISCONNECTED
         },
         ConnectionState.FIX: {
-            ConnectionEventType.FIX_HANDLED: ConnectionState.CONNECTED
+            ConnectionEvent.FIX_HANDLED: ConnectionState.CONNECTED
         },
         ConnectionState.TIMEOUT: {
-            ConnectionEventType.TIMEOUT_HANDLED: ConnectionState.CONNECTED
+            ConnectionEvent.TIMEOUT_HANDLED: ConnectionState.CONNECTED
         },
     }
 
     def __init__(self) -> None:
         self.state = ConnectionState.DISCONNECTED
 
-    def transition(self, event_type: ConnectionEventType) -> ConnectionState:
+    def transition(self, event_type: ConnectionEvent) -> ConnectionState:
         LOGGER.debug('Transition from %s with %s', self.state, event_type)
         try:
             self.state = self.TRANSITIONS[self.state][event_type]
@@ -86,15 +86,15 @@ class ConnectionStateMachineAsync(ConnectionStateMachine):
         super().__init__()
         self._handlers = handlers
 
-    async def handle_event(
+    async def process(
             self,
-            event: Optional[Event]
+            message: Optional[Message]
     ) -> ConnectionState:
-        while event is not None:
-            event_type = ConnectionEventType(event['type'])
-            handler = self._handlers.get(self.state, {}).get(event_type)
-            self.transition(event_type)
+        while message is not None:
+            event = ConnectionEvent(message['type'])
+            handler = self._handlers.get(self.state, {}).get(event)
+            self.transition(event)
             if handler is None:
                 break
-            event = await handler(event)
+            message = await handler(message)
         return self.state

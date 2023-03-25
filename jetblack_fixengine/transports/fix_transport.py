@@ -8,7 +8,7 @@ from typing import AsyncIterator, Set, cast
 
 from jetblack_fixparser.fix_message import SOH
 
-from ..types import Handler, Event
+from ..types import Handler, Message
 from ..utils.cancellation import cancel_await
 
 LOGGER = logging.getLogger(__name__)
@@ -45,13 +45,13 @@ async def fix_stream_processor(
     if cancellation_event.is_set():
         return
 
-    read_queue: "Queue[Event]" = Queue()
-    write_queue: "Queue[Event]" = Queue()
+    read_queue: "Queue[Message]" = Queue()
+    write_queue: "Queue[Message]" = Queue()
 
-    async def receive() -> Event:
+    async def receive() -> Message:
         return await read_queue.get()
 
-    async def send(evt: Event) -> None:
+    async def send(evt: Message) -> None:
         await write_queue.put(evt)
 
     await read_queue.put({
@@ -68,7 +68,7 @@ async def fix_stream_processor(
     read_task: Task[bytes] = asyncio.create_task(
         reader_iter.__anext__()  # type: ignore
     )
-    write_task: Task[Event] = asyncio.create_task(write_queue.get())
+    write_task: Task[Message] = asyncio.create_task(write_queue.get())
     cancellation_task = asyncio.create_task(cancellation_event.wait())
     pending: Set[Future] = {
         read_task,

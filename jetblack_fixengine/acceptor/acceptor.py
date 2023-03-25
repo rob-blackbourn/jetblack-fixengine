@@ -21,10 +21,10 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 
 from ..connection_state import (
     ConnectionState,
-    ConnectionEventType,
+    ConnectionEvent,
     ConnectionStateMachineAsync
 )
-from ..types import Store, Event
+from ..types import Store, Message
 from ..utils.date_utils import wait_for_time_period
 
 from .state import AdminState
@@ -70,12 +70,12 @@ class Acceptor(metaclass=ABCMeta):
         self._connection_state_machine = ConnectionStateMachineAsync(
             {
                 ConnectionState.DISCONNECTED: {
-                    ConnectionEventType.CONNECTION_RECEIVED: self._handle_connected
+                    ConnectionEvent.CONNECTION_RECEIVED: self._handle_connected
                 },
                 ConnectionState.CONNECTED: {
-                    ConnectionEventType.FIX_RECEIVED: self._handle_fix,
-                    ConnectionEventType.TIMEOUT_RECEIVED: self._handle_timeout,
-                    ConnectionEventType.DISCONNECT_RECEIVED: self._handle_disconnect
+                    ConnectionEvent.FIX_RECEIVED: self._handle_fix,
+                    ConnectionEvent.TIMEOUT_RECEIVED: self._handle_timeout,
+                    ConnectionEvent.DISCONNECT_RECEIVED: self._handle_disconnect
                 }
             }
         )
@@ -86,14 +86,14 @@ class Acceptor(metaclass=ABCMeta):
         self._last_receive_time_utc: datetime = EPOCH_UTC
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
-        self._send: Optional[Callable[[Event], Awaitable[None]]] = None
-        self._receive: Optional[Callable[[], Awaitable[Event]]] = None
+        self._send: Optional[Callable[[Message], Awaitable[None]]] = None
+        self._receive: Optional[Callable[[], Awaitable[Message]]] = None
         self._logout_time: Optional[datetime]
 
     async def _handle_connected(
             self,
-            _event: Optional[Event]
-    ) -> Optional[Event]:
+            _event: Optional[Message]
+    ) -> Optional[Message]:
         LOGGER.info('connected')
         self._state = AdminState.LOGGING_ON
         self._logout_time = await self._wait_till_logon_time()
@@ -101,8 +101,8 @@ class Acceptor(metaclass=ABCMeta):
 
     async def _handle_timeout(
             self,
-            _event: Optional[Event]
-    ) -> Optional[Event]:
+            _event: Optional[Message]
+    ) -> Optional[Message]:
         if self._state != AdminState.LOGGED_ON:
             raise RuntimeError('Make a state for this')
 
@@ -125,8 +125,8 @@ class Acceptor(metaclass=ABCMeta):
 
     async def _handle_fix(
             self,
-            event: Optional[Event]
-    ) -> Optional[Event]:
+            event: Optional[Message]
+    ) -> Optional[Message]:
         assert event is not None
 
         await self._session.save_message(event['message'])
@@ -149,20 +149,20 @@ class Acceptor(metaclass=ABCMeta):
             'type': 'fix.handled'
         }
 
-    async def _handle_error(self, event: Event) -> None:
+    async def _handle_error(self, event: Message) -> None:
         LOGGER.warning('error: %s', event)
 
     async def _handle_disconnect(
             self,
-            _event: Optional[Event]
-    ) -> Optional[Event]:
+            _event: Optional[Message]
+    ) -> Optional[Message]:
         LOGGER.info('Disconnected')
         return None
 
-    async def _next_event(
+    async def _next_message(
             self,
-            receive: Callable[[], Awaitable[Event]]
-    ) -> Event:
+            receive: Callable[[], Awaitable[Message]]
+    ) -> Message:
         try:
             timeout = await self._send_heartbeat_if_required()
             return await asyncio.wait_for(receive(), timeout=timeout)
@@ -173,14 +173,14 @@ class Acceptor(metaclass=ABCMeta):
 
     async def __call__(
             self,
-            send: Callable[[Event], Awaitable[None]],
-            receive: Callable[[], Awaitable[Event]]
+            send: Callable[[Message], Awaitable[None]],
+            receive: Callable[[], Awaitable[Message]]
     ) -> None:
         self._send, self._receive = send, receive
 
         while True:
-            event = await self._next_event(receive)
-            await self._connection_state_machine.handle_event(event)
+            message = await self._next_message(receive)
+            await self._connection_state_machine.process(message)
             if self._connection_state_machine.state != ConnectionState.CONNECTED:
                 break
 
@@ -240,7 +240,7 @@ class Acceptor(metaclass=ABCMeta):
     async def _set_incoming_seqnum(self, seqnum: int) -> None:
         await self._session.set_incoming_seqnum(seqnum)
 
-    async def _send_event(self, event: Event, send_time_utc: datetime) -> None:
+    async def _send_event(self, event: Message, send_time_utc: datetime) -> None:
         if self._send is None:
             raise ValueError("Not connected")
         await self._send(event)
