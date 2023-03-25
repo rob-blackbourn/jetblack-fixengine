@@ -57,7 +57,7 @@ class AdminStateMachine:
         (AdminState.LOGON_EXPECTED, AdminEventType.LOGON_RECEIVED): AdminState.AUTHENTICATED,
         (AdminState.LOGON_EXPECTED, AdminEventType.REJECT_RECEIVED): AdminState.DISCONNECTED,
 
-        # Acceptor heartbeet
+        # Acceptor heartbeat
         (AdminState.AUTHENTICATED, AdminEventType.HEARTBEAT_RECEIVED): AdminState.ACKNOWLEDGE_HEARTBEAT,
         (AdminState.ACKNOWLEDGE_HEARTBEAT, AdminEventType.HEARTBEAT_ACK): AdminState.AUTHENTICATED,
 
