@@ -62,7 +62,7 @@ async def fix_stream_processor(
     reader_iter = reader.__aiter__()
 
     # Create initial tasks.
-    handler_task = asyncio.create_task(
+    handler_task: Task = asyncio.create_task(
         handler(send, receive)  # type: ignore
     )
     read_task: Task[bytes] = asyncio.create_task(
@@ -137,6 +137,8 @@ async def fix_stream_processor(
                         'message': message
                     })
                     # Create the new read task.
+                    message = b''
+                    # Read the field.
                     read_task = asyncio.create_task(
                         reader_iter.__anext__()  # type: ignore
                     )

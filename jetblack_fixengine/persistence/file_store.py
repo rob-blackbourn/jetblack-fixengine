@@ -24,14 +24,14 @@ class FileSession(Session):
         self.seqnum_filename = os.path.join(
             directory, f'{sender_comp_id}-{target_comp_id}-initiator-seqnum.txt')
         if not os.path.exists(self.seqnum_filename):
-            with open(self.seqnum_filename, 'wt') as f:
-                f.write("0:0\n")
+            with open(self.seqnum_filename, 'wt', encoding='utf8') as file_ptr:
+                file_ptr.write("0:0\n")
         elif not os.path.isfile(self.seqnum_filename):
             raise RuntimeError(
                 f'session file "{self.seqnum_filename}" is not a file.')
 
-        with open(self.seqnum_filename) as f:
-            line = f.readline() or '0:0'
+        with open(self.seqnum_filename, encoding="utf8") as file_ptr:
+            line = file_ptr.readline() or '0:0'
             outgoing_seqnum, incoming_seqnum = line.rstrip('\n').split(':')
 
         self._sender_comp_id = sender_comp_id
@@ -78,6 +78,7 @@ class FileSession(Session):
         await self._save()
 
     async def save_message(self, buf: bytes) -> None:
+
         async with aiofiles.open(self.message_filename, 'at') as file_ptr:  # type: ignore
             if self.message_style == 'text':
                 await file_ptr.write(buf.replace(SOH, b'|').decode() + '\n')

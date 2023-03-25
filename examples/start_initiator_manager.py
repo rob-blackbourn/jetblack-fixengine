@@ -45,7 +45,7 @@ class MyInitatorHandler(Initiator):
 
 
 start_initiator_manager(
-    MyInitatorHandler,
+    MyInitiatorHandler,
     HOST,
     PORT,
     PROTOCOL,
