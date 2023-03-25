@@ -80,6 +80,8 @@ def start_acceptor(
     cancellation_event = asyncio.Event()
 
     async def accept(reader: StreamReader, writer: StreamWriter) -> None:
+        LOGGER.info("Accepting initiator")
+
         read_buffer = FixReadBuffer(
             sep,
             convert_sep_to_soh_for_checksum,
@@ -106,9 +108,17 @@ def start_acceptor(
             cancellation_event
         )
 
+    LOGGER.info(
+        "Starting acceptor on %s:%s%s",
+        host,
+        port,
+        " using SSL" if ssl is not None else ""
+    )
+
+    factory = asyncio.start_server(accept, host, port, ssl=ssl)
+
     loop = asyncio.get_event_loop()
     register_cancellation_event(cancellation_event, loop)
-    factory = asyncio.start_server(accept, host, port, ssl=ssl)
     server = loop.run_until_complete(factory)
 
     try:

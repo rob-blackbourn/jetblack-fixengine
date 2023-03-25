@@ -12,6 +12,7 @@ class InvalidStateTransitionError(Exception):
 
 
 class TransportState(Enum):
+    """Transport states"""
     DISCONNECTED = auto()
     CONNECTED = auto()
     FIX = auto()
@@ -19,12 +20,13 @@ class TransportState(Enum):
 
 
 class TransportEvent(Enum):
-    CONNECTION_RECEIVED = 'connected'
-    FIX_RECEIVED = 'fix'
-    FIX_HANDLED = 'fix.handled'
-    TIMEOUT_RECEIVED = 'timeout'
-    TIMEOUT_HANDLED = 'timeout.handled'
-    DISCONNECT_RECEIVED = 'disconnect'
+    """Transport events"""
+    CONNECTION_RECEIVED = auto()
+    FIX_RECEIVED = auto()
+    FIX_HANDLED = auto()
+    TIMEOUT_RECEIVED = auto()
+    TIMEOUT_HANDLED = auto()
+    DISCONNECT_RECEIVED = auto()
 
 
 TransportTransitionMapping = Mapping[
@@ -34,6 +36,7 @@ TransportTransitionMapping = Mapping[
 
 
 class TransportStateMachine:
+    """The transport state machine"""
 
     TRANSITIONS: TransportTransitionMapping = {
         TransportState.DISCONNECTED:  {
@@ -55,18 +58,30 @@ class TransportStateMachine:
     def __init__(self) -> None:
         self.state = TransportState.DISCONNECTED
 
-    def transition(self, event_type: TransportEvent) -> TransportState:
-        LOGGER.debug('Transition from %s with %s', self.state, event_type)
+    def transition(self, event: TransportEvent) -> TransportState:
+        """Transition from the current state to a new state given an event.
+
+        Args:
+            event (TransportEvent): The event.
+
+        Raises:
+            InvalidStateTransitionError: If the transition was invalid.
+
+        Returns:
+            TransportState: The new state.
+        """
+        LOGGER.debug('Transition from %s with %s', self.state.name, event.name)
         try:
-            self.state = self.TRANSITIONS[self.state][event_type]
+            self.state = self.TRANSITIONS[self.state][event]
             return self.state
         except KeyError as error:
             raise InvalidStateTransitionError(
-                f'unhandled event {self.state.name} -> {event_type}.',
+                f'unhandled event {self.state.name} -> {event.name}.',
             ) from error
 
 
 class TransportMessage:
+    """A transport message"""
 
     def __init__(
             self,
@@ -91,6 +106,7 @@ TransportEventHandlerMapping = Mapping[
 
 
 class TransportStateMachineAsync(TransportStateMachine):
+    """A transport state machine with async bindings"""
 
     def __init__(
             self,
@@ -103,6 +119,14 @@ class TransportStateMachineAsync(TransportStateMachine):
             self,
             message: Optional[TransportMessage]
     ) -> TransportState:
+        """Process a transport message
+
+        Args:
+            message (Optional[TransportMessage]): The message
+
+        Returns:
+            TransportState: The new state.
+        """
         while message is not None:
             handler = self._handlers.get(self.state, {}).get(message.event)
             self.transition(message.event)
@@ -115,4 +139,3 @@ class TransportStateMachineAsync(TransportStateMachine):
 Send = Callable[[TransportMessage], Awaitable[None]]
 Receive = Callable[[], Awaitable[TransportMessage]]
 TransportHandler = Callable[[Send, Receive], Awaitable[None]]
-Middleware = Callable[[Send, Receive, TransportHandler], Awaitable[None]]
