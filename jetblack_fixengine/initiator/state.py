@@ -27,21 +27,21 @@ class AdminState(Enum):
 
 
 class AdminEvent(Enum):
-    CONNECTED = 'connected'
-    LOGON_RECEIVED = 'LOGON'
-    LOGON_SENT = 'LOGON.sent'
-    REJECT_RECEIVED = 'REJECT'
-    HEARTBEAT_RECEIVED = 'HEARTBEAT'
-    HEARTBEAT_ACK = 'HEARTBEAT.ack'
-    TEST_REQUEST_RECEIVED = 'TEST_REQUEST'
-    TEST_REQUEST_SENT = 'TEST_REQUEST.sent'
-    RESEND_REQUEST_RECEIVED = 'RESEND_REQUEST'
-    SEQUENCE_RESET_RECEIVED = 'SEQUENCE_RESET'
-    SEQUENCE_RESET_SENT = 'SEQUENCE_RESET.sent'
-    INCOMING_SEQNUM_SET = 'SEQUENCE_RESET.ack'
-    XML_MESSAGE_RECEIVED = 'XML_MESSAGE'
-    LOGOUT_RECEIVED = 'LOGOUT'
-    LOGOUT_ACK = 'LOGOUT.ack'
+    CONNECTED = auto()
+    LOGON_RECEIVED = auto()
+    LOGON_SENT = auto()
+    REJECT_RECEIVED = auto()
+    HEARTBEAT_RECEIVED = auto()
+    HEARTBEAT_ACK = auto()
+    TEST_REQUEST_RECEIVED = auto()
+    TEST_REQUEST_SENT = auto()
+    RESEND_REQUEST_RECEIVED = auto()
+    SEQUENCE_RESET_RECEIVED = auto()
+    SEQUENCE_RESET_SENT = auto()
+    INCOMING_SEQNUM_SET = auto()
+    XML_MESSAGE_RECEIVED = auto()
+    LOGOUT_RECEIVED = auto()
+    LOGOUT_ACK = auto()
 
     @classmethod
     def from_msg_type(cls, msg_type: str) -> AdminEvent:
