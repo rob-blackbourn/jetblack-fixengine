@@ -1,13 +1,7 @@
 """Types"""
 
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Awaitable, Mapping, Any, Tuple
-
-Message = Mapping[str, Any]
-Send = Callable[[Message], Awaitable[None]]
-Receive = Callable[[], Awaitable[Message]]
-Handler = Callable[[Send, Receive], Awaitable[None]]
-Middleware = Callable[[Send, Receive, Handler], Awaitable[None]]
+from typing import Tuple
 
 
 class Session(metaclass=ABCMeta):

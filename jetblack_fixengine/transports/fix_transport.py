@@ -8,8 +8,8 @@ from typing import AsyncIterator, Set, cast
 
 from jetblack_fixparser.fix_message import SOH
 
-from ..types import Handler, Message
 from ..utils.cancellation import cancel_await
+from .state import TransportHandler, TransportMessage, TransportEvent
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class FixState(IntEnum):
 
 
 async def fix_stream_processor(
-        handler: Handler,
+        handler: TransportHandler,
         shutdown_timeout: float,
         reader: AsyncIterator[bytes],
         writer: StreamWriter,
@@ -45,18 +45,16 @@ async def fix_stream_processor(
     if cancellation_event.is_set():
         return
 
-    read_queue: "Queue[Message]" = Queue()
-    write_queue: "Queue[Message]" = Queue()
+    read_queue: "Queue[TransportMessage]" = Queue()
+    write_queue: "Queue[TransportMessage]" = Queue()
 
-    async def receive() -> Message:
+    async def receive() -> TransportMessage:
         return await read_queue.get()
 
-    async def send(evt: Message) -> None:
+    async def send(evt: TransportMessage) -> None:
         await write_queue.put(evt)
 
-    await read_queue.put({
-        'type': 'connected'
-    })
+    await read_queue.put(TransportMessage(TransportEvent.CONNECTION_RECEIVED))
 
     state = FixState.OK
     reader_iter = reader.__aiter__()
@@ -68,7 +66,7 @@ async def fix_stream_processor(
     read_task: Task[bytes] = asyncio.create_task(
         reader_iter.__anext__()  # type: ignore
     )
-    write_task: Task[Message] = asyncio.create_task(write_queue.get())
+    write_task: Task[TransportMessage] = asyncio.create_task(write_queue.get())
     cancellation_task = asyncio.create_task(cancellation_event.wait())
     pending: Set[Future] = {
         read_task,
@@ -100,44 +98,47 @@ async def fix_stream_processor(
 
             elif task == write_task:
 
-                # Fetch the event sent by the handler.
-                event = write_task.result()
+                # Fetch the message sent by the handler.
+                message = write_task.result()
 
-                if event['type'] == 'fix':
+                if message.event == TransportEvent.FIX_RECEIVED:
                     # Send data to the handler and renew the write task.
-                    message: bytes = event['message']
+                    assert message.buffer is not None
+                    data = message.buffer
                     LOGGER.debug(
                         'Sending "%s"',
-                        message.replace(SOH, b'|').decode()
+                        message.buffer.replace(SOH, b'|').decode()
                     )
-                    writer.write(message)
+                    writer.write(message.buffer)
                     await writer.drain()
                     write_task = asyncio.create_task(write_queue.get())
                     pending.add(write_task)
-                elif event['type'] == 'close':
+                elif message.event == TransportEvent.DISCONNECT_RECEIVED:
                     # Close the connection and exit the task service loop.
                     writer.close()
                     state = FixState.HANDLER_CLOSED
                     continue
                 else:
-                    LOGGER.debug('Invalid event "%s"', event["type"])
-                    raise RuntimeError(f'Invalid event "{event["type"]}"')
+                    LOGGER.debug('Invalid event "%s"', message.event.name)
+                    raise RuntimeError(f'Invalid event "{message.event.name}"')
 
             elif task == read_task:
 
                 try:
-                    message = cast(bytes, task.result())
+                    data = cast(bytes, task.result())
                     LOGGER.debug(
                         'Received "%s"',
-                        message.replace(SOH, b'|').decode()
+                        data.replace(SOH, b'|').decode()
                     )
                     # Notify the client and reset the state.
-                    await read_queue.put({
-                        'type': 'fix',
-                        'message': message
-                    })
+                    await read_queue.put(
+                        TransportMessage(
+                            TransportEvent.FIX_RECEIVED,
+                            data
+                        )
+                    )
                     # Create the new read task.
-                    message = b''
+                    data = b''
                     # Read the field.
                     read_task = asyncio.create_task(
                         reader_iter.__anext__()  # type: ignore
@@ -160,9 +161,9 @@ async def fix_stream_processor(
         writer.close()
     else:
         # Notify the client of the disconnection.
-        await read_queue.put({
-            'type': 'disconnect'
-        })
+        await read_queue.put(
+            TransportMessage(TransportEvent.DISCONNECT_RECEIVED)
+        )
 
         await cancel_await(write_task)
 

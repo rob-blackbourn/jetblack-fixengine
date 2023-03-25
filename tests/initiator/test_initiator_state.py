@@ -6,10 +6,10 @@ from jetblack_fixengine.initiator.state import (
     AdminStateMachine,
 )
 
-from jetblack_fixengine.connection_state import (
-    ConnectionState,
-    ConnectionEvent,
-    ConnectionStateMachine
+from jetblack_fixengine.transports.state import (
+    TransportState,
+    TransportEvent,
+    TransportStateMachine
 )
 
 
@@ -60,26 +60,26 @@ def test_initiator_admin_state():
 
 
 def test_initiator_connection_state():
-    state_machine = ConnectionStateMachine()
+    state_machine = TransportStateMachine()
 
-    assert state_machine.state == ConnectionState.DISCONNECTED
-
-    response = state_machine.transition(
-        ConnectionEvent.CONNECTION_RECEIVED)
-    assert response == ConnectionState.CONNECTED
-
-    response = state_machine.transition(ConnectionEvent.FIX_RECEIVED)
-    assert response == ConnectionState.FIX
-
-    response = state_machine.transition(ConnectionEvent.FIX_HANDLED)
-    assert response == ConnectionState.CONNECTED
-
-    response = state_machine.transition(ConnectionEvent.TIMEOUT_RECEIVED)
-    assert response == ConnectionState.TIMEOUT
-
-    response = state_machine.transition(ConnectionEvent.TIMEOUT_HANDLED)
-    assert response == ConnectionState.CONNECTED
+    assert state_machine.state == TransportState.DISCONNECTED
 
     response = state_machine.transition(
-        ConnectionEvent.DISCONNECT_RECEIVED)
-    assert response == ConnectionState.DISCONNECTED
+        TransportEvent.CONNECTION_RECEIVED)
+    assert response == TransportState.CONNECTED
+
+    response = state_machine.transition(TransportEvent.FIX_RECEIVED)
+    assert response == TransportState.FIX
+
+    response = state_machine.transition(TransportEvent.FIX_HANDLED)
+    assert response == TransportState.CONNECTED
+
+    response = state_machine.transition(TransportEvent.TIMEOUT_RECEIVED)
+    assert response == TransportState.TIMEOUT
+
+    response = state_machine.transition(TransportEvent.TIMEOUT_HANDLED)
+    assert response == TransportState.CONNECTED
+
+    response = state_machine.transition(
+        TransportEvent.DISCONNECT_RECEIVED)
+    assert response == TransportState.DISCONNECTED

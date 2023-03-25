@@ -10,19 +10,24 @@ from ssl import SSLContext
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
-from ..transports import fix_stream_processor, FixReadBuffer, fix_read_async
-from ..types import Handler, Store
+from ..transports import (
+    fix_stream_processor,
+    FixReadBuffer,
+    fix_read_async,
+    TransportHandler
+)
+from ..types import Store
 from ..utils.cancellation import register_cancellation_event
 
 from .acceptor import Acceptor
 
 LOGGER = logging.getLogger(__name__)
 
-ClientFactory = Callable[[], Handler]
+ClientFactory = Callable[[], TransportHandler]
 
 AcceptorFactory = Callable[
     [ProtocolMetaData, str, str, Store, int, asyncio.Event],
-    Handler
+    TransportHandler
 ]
 
 
