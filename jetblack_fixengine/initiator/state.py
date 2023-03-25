@@ -32,7 +32,7 @@ class AdminEvent(Enum):
     LOGON_SENT = auto()
     REJECT_RECEIVED = auto()
     HEARTBEAT_RECEIVED = auto()
-    HEARTBEAT_ACK = auto()
+    HEARTBEAT_ACKNOWLEDGED = auto()
     TEST_REQUEST_RECEIVED = auto()
     TEST_REQUEST_SENT = auto()
     RESEND_REQUEST_RECEIVED = auto()
@@ -41,7 +41,7 @@ class AdminEvent(Enum):
     INCOMING_SEQNUM_SET = auto()
     XML_MESSAGE_RECEIVED = auto()
     LOGOUT_RECEIVED = auto()
-    LOGOUT_ACK = auto()
+    LOGOUT_ACKNOWLEDGED = auto()
 
     @classmethod
     def from_msg_type(cls, msg_type: str) -> AdminEvent:
@@ -87,7 +87,7 @@ class AdminStateMachine:
             AdminEvent.LOGOUT_RECEIVED: AdminState.ACKNOWLEDGE_LOGOUT
         },
         AdminState.ACKNOWLEDGE_HEARTBEAT: {
-            AdminEvent.HEARTBEAT_ACK: AdminState.AUTHENTICATED
+            AdminEvent.HEARTBEAT_ACKNOWLEDGED: AdminState.AUTHENTICATED
         },
         AdminState.TEST_REQUEST_REQUESTED: {
             AdminEvent.TEST_REQUEST_SENT: AdminState.AUTHENTICATED
@@ -99,7 +99,7 @@ class AdminStateMachine:
             AdminEvent.INCOMING_SEQNUM_SET: AdminState.AUTHENTICATED
         },
         AdminState.ACKNOWLEDGE_LOGOUT: {
-            AdminEvent.LOGOUT_ACK: AdminState.DISCONNECTED
+            AdminEvent.LOGOUT_ACKNOWLEDGED: AdminState.DISCONNECTED
         }
     }
 

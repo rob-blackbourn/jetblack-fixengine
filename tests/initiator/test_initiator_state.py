@@ -31,7 +31,7 @@ def test_initiator_admin_state():
     response = state_machine.transition(AdminEvent.HEARTBEAT_RECEIVED)
     assert response == AdminState.ACKNOWLEDGE_HEARTBEAT
 
-    response = state_machine.transition(AdminEvent.HEARTBEAT_ACK)
+    response = state_machine.transition(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
     assert response == AdminState.AUTHENTICATED
 
     response = state_machine.transition(AdminEvent.TEST_REQUEST_RECEIVED)
@@ -55,7 +55,7 @@ def test_initiator_admin_state():
     response = state_machine.transition(AdminEvent.LOGOUT_RECEIVED)
     assert response == AdminState.ACKNOWLEDGE_LOGOUT
 
-    response = state_machine.transition(AdminEvent.LOGOUT_ACK)
+    response = state_machine.transition(AdminEvent.LOGOUT_ACKNOWLEDGED)
     assert response == AdminState.DISCONNECTED
 
 

@@ -157,7 +157,7 @@ class Initiator(metaclass=ABCMeta):
     ) -> Optional[AdminMessage]:
         assert event is not None and event.message is not None
         await self.on_heartbeat(event.message)
-        return AdminMessage(AdminEvent.HEARTBEAT_ACK)
+        return AdminMessage(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
 
     async def _reset_incoming_seqnum(
             self,
@@ -173,7 +173,7 @@ class Initiator(metaclass=ABCMeta):
     ) -> Optional[AdminMessage]:
         assert event is not None and event.message is not None
         await self.on_logout(event.message)
-        return AdminMessage(AdminEvent.LOGOUT_ACK)
+        return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         await self.on_admin_message(message)
