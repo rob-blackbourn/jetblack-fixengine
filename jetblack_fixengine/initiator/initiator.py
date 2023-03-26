@@ -30,7 +30,51 @@ LOGGER = logging.getLogger(__name__)
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 
-class Initiator(metaclass=ABCMeta):
+class AbstractInitiator(metaclass=ABCMeta):
+    """The interface for an initiator"""
+
+    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
+        """Called when an admin message is received.
+
+        Args:
+            message (Mapping[str, Any]): The admin message that was sent by the
+                acceptor.
+        """
+
+    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
+        """Called when a heartbeat is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
+        """
+
+    @abstractmethod
+    async def on_application_message(self, message: Mapping[str, Any]) -> None:
+        """Called when an application message is received.
+
+        Args:
+            message (Mapping[str, Any]): The application message sent by the
+                acceptor.
+        """
+
+    @abstractmethod
+    async def on_logon(self, message: Mapping[str, Any]) -> None:
+        """Called when a logon message is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
+        """
+
+    @abstractmethod
+    async def on_logout(self, message: Mapping[str, Any]) -> None:
+        """Called when a logout message is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
+        """
+
+
+class Initiator(AbstractInitiator, metaclass=ABCMeta):
     """The base class for initiator handlers"""
 
     def __init__(
@@ -353,43 +397,3 @@ class Initiator(metaclass=ABCMeta):
         """
         # self._admin_state = AdminState.LOGGING_OFF
         await self.send_message('LOGOUT')
-
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
-        """Called when an admin message is received.
-
-        Args:
-            message (Mapping[str, Any]): The admin message that was sent by the
-                acceptor.
-        """
-
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
-        """Called when a heartbeat is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
-    @abstractmethod
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
-        """Called when an application message is received.
-
-        Args:
-            message (Mapping[str, Any]): The application message sent by the
-                acceptor.
-        """
-
-    @abstractmethod
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
-        """Called when a logon message is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
-    @abstractmethod
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
-        """Called when a logout message is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """

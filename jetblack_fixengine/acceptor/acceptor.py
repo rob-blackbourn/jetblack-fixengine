@@ -41,7 +41,49 @@ LOGGER = logging.getLogger(__name__)
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 
-class Acceptor(metaclass=ABCMeta):
+class AbstractAcceptor(metaclass=ABCMeta):
+    """The interface for an acceptor"""
+
+    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
+        """Handle an admin message.
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+        """
+
+    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
+        """Handle a heartbeat.
+
+        Args:
+            message (Mapping[str, Any]): The heartbeat message
+        """
+
+    @abstractmethod
+    async def on_logon(self, message: Mapping[str, Any]) -> bool:
+        """Return True if the login is valid
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+        """
+
+    @abstractmethod
+    async def on_logout(self, message: Mapping[str, Any]) -> None:
+        """Perform any logout tasks
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+        """
+
+    @abstractmethod
+    async def on_application_message(self, message: Mapping[str, Any]) -> None:
+        """Handle an application message.
+
+        Args:
+            message (Mapping[str, Any]): The message to handle.
+        """
+
+
+class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
     """The base class for acceptor handlers"""
 
     def __init__(
@@ -459,37 +501,3 @@ class Acceptor(metaclass=ABCMeta):
                 'EndSeqNo': end_seqnum
             }
         )
-
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
-        """Handle an admin message.
-
-        Args:
-            message (Mapping[str, Any]): The message to handle.
-        """
-
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
-        pass
-
-    @abstractmethod
-    async def on_logon(self, message: Mapping[str, Any]) -> bool:
-        """Return True if the login is valid
-
-        Args:
-            message (Mapping[str, Any]): The message to handle.
-        """
-
-    @abstractmethod
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
-        """Perform any logout tasks
-
-        Args:
-            message (Mapping[str, Any]): The message to handle.
-        """
-
-    @abstractmethod
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
-        """Handle an application message.
-
-        Args:
-            message (Mapping[str, Any]): The message to handle.
-        """
