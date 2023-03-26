@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 import asyncio
 from datetime import datetime, timezone
 import logging
-from typing import Awaitable, Callable, Mapping, Any, Optional, cast
+from typing import Mapping, Any, Optional, cast
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
@@ -28,8 +28,6 @@ from .state import (
 
 LOGGER = logging.getLogger(__name__)
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
-
-EventHandler = Callable[[TransportMessage], Awaitable[None]]
 
 
 class Initiator(metaclass=ABCMeta):
@@ -126,13 +124,13 @@ class Initiator(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert 'TestReqID' in admin_message.body, "expected TestReqID"
+        assert 'TestReqID' in admin_message.fix, "expected TestReqID"
 
         # Respond to the server with the token it sent.
         await self.send_message(
             'TEST_REQUEST',
             {
-                'TestReqID': admin_message.body['TestReqID']
+                'TestReqID': admin_message.fix['TestReqID']
             }
         )
         return AdminMessage(AdminEvent.TEST_REQUEST_SENT)
@@ -155,36 +153,36 @@ class Initiator(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.on_logon(admin_message.body)
+        await self.on_logon(admin_message.fix)
         return None
 
     async def _acknowledge_heartbeat(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.on_heartbeat(admin_message.body)
+        await self.on_heartbeat(admin_message.fix)
         return AdminMessage(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
 
     async def _reset_incoming_seqnum(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert 'NewSeqNo' in admin_message.body, "expected NewSeqNo"
-        await self._set_incoming_seqnum(admin_message.body['NewSeqNo'])
+        assert 'NewSeqNo' in admin_message.fix, "expected NewSeqNo"
+        await self._set_incoming_seqnum(admin_message.fix['NewSeqNo'])
         return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
 
     async def _acknowledge_logout(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message.body is not None
-        await self.on_logout(admin_message.body)
+        assert admin_message.fix is not None
+        await self.on_logout(admin_message.fix)
         return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
         await self.on_admin_message(message)
 
-        await self._admin_state_machine.handle_event(
+        await self._admin_state_machine.process(
             AdminMessage(
                 AdminEvent.from_msg_type(message['MsgType']),
                 message
@@ -195,8 +193,6 @@ class Initiator(metaclass=ABCMeta):
             self,
             transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        assert transport_message.buffer is not None
-
         await self._session.save_message(transport_message.buffer)
 
         fix_message = self.fix_message_factory.decode(transport_message.buffer)
@@ -249,7 +245,7 @@ class Initiator(metaclass=ABCMeta):
             self,
             _transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        if not self._admin_state_machine.state == AdminState.AUTHENTICATED:
+        if self._admin_state_machine.state != AdminState.AUTHENTICATED:
             raise RuntimeError('Make a state for this')
 
         now_utc = datetime.now(timezone.utc)
@@ -273,7 +269,7 @@ class Initiator(metaclass=ABCMeta):
             _transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
         LOGGER.info('connected')
-        await self._admin_state_machine.handle_event(
+        await self._admin_state_machine.process(
             AdminMessage(AdminEvent.CONNECTED)
         )
         return None

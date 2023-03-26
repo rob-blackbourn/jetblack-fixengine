@@ -149,7 +149,7 @@ class Acceptor(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        if await self.on_logon(admin_message.body):
+        if await self.on_logon(admin_message.fix):
             return AdminMessage(AdminEvent.LOGON_ACCEPTED)
         else:
             return AdminMessage(AdminEvent.LOGON_REJECTED)
@@ -172,22 +172,22 @@ class Acceptor(metaclass=ABCMeta):
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         await self.send_message('LOGOUT')
-        await self.on_logout(admin_message.body)
+        await self.on_logout(admin_message.fix)
         return None
 
     async def _receive_heartbeat(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.on_heartbeat(admin_message.body)
+        await self.on_heartbeat(admin_message.fix)
         return None
 
     async def _receive_test_request(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert 'TestReqID' in admin_message.body
-        test_req_id = admin_message.body['TestReqID']
+        assert 'TestReqID' in admin_message.fix
+        test_req_id = admin_message.fix['TestReqID']
         await self.send_message(
             'TEST_REQUEST',
             {
@@ -216,15 +216,15 @@ class Acceptor(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert 'NewSeqNo' in admin_message.body
-        await self._set_incoming_seqnum(admin_message.body['NewSeqNo'])
+        assert 'NewSeqNo' in admin_message.fix
+        await self._set_incoming_seqnum(admin_message.fix['NewSeqNo'])
         return AdminMessage(AdminEvent.INCOMING_SEQNUM_SET)
 
     async def _receive_logout(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.on_logout(admin_message.body)
+        await self.on_logout(admin_message.fix)
         return None
 
     async def _send_test_heartbeat(
@@ -245,8 +245,8 @@ class Acceptor(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert 'TestReqID' in admin_message.body
-        if admin_message.body['TestReqID'] == self._test_heartbeat_message:
+        assert 'TestReqID' in admin_message.fix
+        if admin_message.fix['TestReqID'] == self._test_heartbeat_message:
             return AdminMessage(AdminEvent.TEST_HEARTBEAT_VALID)
         else:
             return AdminMessage(AdminEvent.TEST_HEARTBEAT_INVALID)
@@ -297,8 +297,6 @@ class Acceptor(metaclass=ABCMeta):
             self,
             transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        assert transport_message.buffer is not None
-
         await self._session.save_message(transport_message.buffer)
 
         fix_message = self.fix_message_factory.decode(transport_message.buffer)

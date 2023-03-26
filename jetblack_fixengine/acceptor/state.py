@@ -14,6 +14,7 @@ class InvalidStateTransitionError(Exception):
 
 
 class AdminState(Enum):
+    """Admin states"""
     DISCONNECTED = auto()
     LOGON_EXPECTED = auto()
     AUTHENTICATING = auto()
@@ -31,6 +32,7 @@ class AdminState(Enum):
 
 
 class AdminEvent(Enum):
+    """Admin events"""
     CONNECTED = auto()
     LOGON_RECEIVED = auto()
     LOGON_ACCEPTED = auto()
@@ -51,6 +53,17 @@ class AdminEvent(Enum):
 
     @classmethod
     def from_msg_type(cls, msg_type: str) -> AdminEvent:
+        """Convert from a FIX message type.
+
+        Args:
+            msg_type (str): The FIX message type.
+
+        Raises:
+            ValueError: If there was no mapping.
+
+        Returns:
+            AdminEvent: The event.
+        """
         if msg_type == 'LOGON':
             return cls.LOGON_RECEIVED
         elif msg_type == 'LOGOUT':
@@ -114,6 +127,17 @@ class AdminStateMachine:
         self.state = AdminState.DISCONNECTED
 
     def transition(self, event: AdminEvent) -> AdminState:
+        """Transition to a new state.
+
+        Args:
+            event (AdminEvent): The event.
+
+        Raises:
+            InvalidStateTransitionError: If there is not valid transition.
+
+        Returns:
+            AdminState: The new state.
+        """
         LOGGER.debug('Transition from %s with %s', self.state, event)
         try:
             self.state = self.TRANSITIONS[self.state][event]
@@ -130,17 +154,18 @@ class AdminStateMachine:
 
 
 class AdminMessage:
+    """An admin message"""
 
     def __init__(
             self,
             event: AdminEvent,
-            body: Optional[Mapping[str, Any]] = None
+            fix: Optional[Mapping[str, Any]] = None
     ) -> None:
         self.event = event
-        self.body = body if body is not None else cast(Mapping[str, Any], {})
+        self.fix = fix if fix is not None else cast(Mapping[str, Any], {})
 
     def __str__(self) -> str:
-        return f'{self.event}: {self.body}'
+        return f'{self.event}: {self.fix}'
 
 
 AdminEventHandler = Callable[
@@ -154,6 +179,7 @@ AdminEventHandlerMapping = Mapping[
 
 
 class AdminStateMachineAsync(AdminStateMachine):
+    """An admin state machine with async handlers"""
 
     def __init__(
             self,
@@ -166,6 +192,14 @@ class AdminStateMachineAsync(AdminStateMachine):
             self,
             message: Optional[AdminMessage]
     ) -> AdminState:
+        """Process an admin message.
+
+        Args:
+            message (Optional[AdminMessage]): The message.
+
+        Returns:
+            AdminState: The new state.
+        """
         while message is not None:
             handler = self._handlers.get(self.state, {}).get(message.event)
             self.transition(message.event)

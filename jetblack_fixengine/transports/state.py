@@ -89,7 +89,7 @@ class TransportMessage:
             buffer: Optional[bytes] = None
     ) -> None:
         self.event = event
-        self.buffer = buffer
+        self.buffer = buffer if buffer is not None else b''
 
     def __str__(self) -> str:
         return f'{self.event}: {self.buffer!r}'
