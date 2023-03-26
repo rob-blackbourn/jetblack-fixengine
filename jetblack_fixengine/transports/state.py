@@ -96,7 +96,7 @@ class TransportMessage:
 
 
 TransportEventHandler = Callable[
-    [Optional[TransportMessage]],
+    [TransportMessage],
     Awaitable[Optional[TransportMessage]]
 ]
 TransportEventHandlerMapping = Mapping[

@@ -249,7 +249,7 @@ class Acceptor(metaclass=ABCMeta):
 
     async def _handle_transport_connected(
             self,
-            _transport_message: Optional[TransportMessage]
+            _transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
         LOGGER.info('connected')
         await self._admin_state_machine.process(
@@ -259,7 +259,7 @@ class Acceptor(metaclass=ABCMeta):
 
     async def _handle_timeout(
             self,
-            _transport_message: Optional[TransportMessage]
+            _transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
         if self._admin_state_machine.state != AdminState.AUTHENTICATED:
             raise RuntimeError('Make a state for this')
@@ -289,9 +289,8 @@ class Acceptor(metaclass=ABCMeta):
 
     async def _handle_fix(
             self,
-            transport_message: Optional[TransportMessage]
+            transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        assert transport_message is not None
         assert transport_message.buffer is not None
 
         await self._session.save_message(transport_message.buffer)

@@ -194,9 +194,8 @@ class Initiator(metaclass=ABCMeta):
 
     async def _handle_fix(
             self,
-            transport_message: Optional[TransportMessage]
+            transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        assert transport_message is not None
         assert transport_message.buffer is not None
 
         await self._session.save_message(transport_message.buffer)
@@ -225,7 +224,7 @@ class Initiator(metaclass=ABCMeta):
 
     async def _handle_disconnect(
             self,
-            _transport_message: Optional[TransportMessage]
+            _transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
         LOGGER.info('Disconnected')
         return None
@@ -249,7 +248,7 @@ class Initiator(metaclass=ABCMeta):
 
     async def _handle_timeout(
             self,
-            _transport_message: Optional[TransportMessage]
+            _transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
         if not self._admin_state_machine.state == AdminState.AUTHENTICATED:
             raise RuntimeError('Make a state for this')
@@ -272,7 +271,7 @@ class Initiator(metaclass=ABCMeta):
 
     async def _handle_connected(
             self,
-            _transport_message: Optional[TransportMessage]
+            _transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
         LOGGER.info('connected')
         await self._admin_state_machine.handle_event(
