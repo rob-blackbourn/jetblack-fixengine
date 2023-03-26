@@ -126,12 +126,13 @@ class Initiator(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message.message is not None
+        assert 'TestReqID' in admin_message.body, "expected TestReqID"
+
         # Respond to the server with the token it sent.
         await self.send_message(
             'TEST_REQUEST',
             {
-                'TestReqID': admin_message.message['TestReqID']
+                'TestReqID': admin_message.body['TestReqID']
             }
         )
         return AdminMessage(AdminEvent.TEST_REQUEST_SENT)
@@ -154,32 +155,30 @@ class Initiator(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message.message is not None
-        await self.on_logon(admin_message.message)
+        await self.on_logon(admin_message.body)
         return None
 
     async def _acknowledge_heartbeat(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message.message is not None
-        await self.on_heartbeat(admin_message.message)
+        await self.on_heartbeat(admin_message.body)
         return AdminMessage(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
 
     async def _reset_incoming_seqnum(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message.message is not None
-        await self._set_incoming_seqnum(admin_message.message['NewSeqNo'])
+        assert 'NewSeqNo' in admin_message.body, "expected NewSeqNo"
+        await self._set_incoming_seqnum(admin_message.body['NewSeqNo'])
         return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
 
     async def _acknowledge_logout(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message.message is not None
-        await self.on_logout(admin_message.message)
+        assert admin_message.body is not None
+        await self.on_logout(admin_message.body)
         return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:

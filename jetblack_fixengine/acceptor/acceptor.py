@@ -131,7 +131,7 @@ class Acceptor(metaclass=ABCMeta):
         if self.logon_time_range:
             start_time, end_time = self.logon_time_range
             LOGGER.info(
-                "Waiting for loging window between %s and %s",
+                "Waiting for logging window between %s and %s",
                 start_time,
                 end_time
             )
@@ -149,7 +149,7 @@ class Acceptor(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        if await self.on_logon(admin_message.message):
+        if await self.on_logon(admin_message.body):
             return AdminMessage(AdminEvent.LOGON_ACCEPTED)
         else:
             return AdminMessage(AdminEvent.LOGON_REJECTED)
@@ -172,21 +172,22 @@ class Acceptor(metaclass=ABCMeta):
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         await self.send_message('LOGOUT')
-        await self.on_logout(admin_message.message)
+        await self.on_logout(admin_message.body)
         return None
 
     async def _receive_heartbeat(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.on_heartbeat(admin_message.message)
+        await self.on_heartbeat(admin_message.body)
         return None
 
     async def _receive_test_request(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        test_req_id = admin_message.message['TestReqID']
+        assert 'TestReqID' in admin_message.body
+        test_req_id = admin_message.body['TestReqID']
         await self.send_message(
             'TEST_REQUEST',
             {
@@ -215,14 +216,15 @@ class Acceptor(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self._set_incoming_seqnum(admin_message.message['NewSeqNo'])
+        assert 'NewSeqNo' in admin_message.body
+        await self._set_incoming_seqnum(admin_message.body['NewSeqNo'])
         return AdminMessage(AdminEvent.INCOMING_SEQNUM_SET)
 
     async def _receive_logout(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.on_logout(admin_message.message)
+        await self.on_logout(admin_message.body)
         return None
 
     async def _send_test_heartbeat(
@@ -230,6 +232,7 @@ class Acceptor(metaclass=ABCMeta):
             _admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         self._test_heartbeat_message = str(uuid.uuid4())
+
         await self.send_message(
             'TEST_REQUEST',
             {
@@ -242,7 +245,8 @@ class Acceptor(metaclass=ABCMeta):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        if admin_message.message['TestReqID'] == self._test_heartbeat_message:
+        assert 'TestReqID' in admin_message.body
+        if admin_message.body['TestReqID'] == self._test_heartbeat_message:
             return AdminMessage(AdminEvent.TEST_HEARTBEAT_VALID)
         else:
             return AdminMessage(AdminEvent.TEST_HEARTBEAT_INVALID)
@@ -276,7 +280,9 @@ class Acceptor(metaclass=ABCMeta):
         return TransportMessage(TransportEvent.TIMEOUT_HANDLED)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
-        LOGGER.info('on_admin_message: %s', message)
+        assert 'MsgType' in message
+
+        LOGGER.info('admin message: %s', message)
 
         await self.on_admin_message(message)
 

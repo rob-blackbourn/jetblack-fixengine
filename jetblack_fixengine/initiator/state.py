@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 import logging
-from typing import Any, Awaitable, Callable, Mapping, Optional
+from typing import Any, Awaitable, Callable, Mapping, Optional, cast
 
 LOGGER = logging.getLogger(__name__)
 
@@ -127,13 +127,13 @@ class AdminMessage:
     def __init__(
             self,
             event: AdminEvent,
-            message: Optional[Mapping[str, Any]] = None
+            body: Optional[Mapping[str, Any]] = None
     ) -> None:
         self.event = event
-        self.message = message
+        self.body = body if body is not None else cast(Mapping[str, Any], {})
 
     def __str__(self) -> str:
-        return f'{self.event}: {self.message}'
+        return f'{self.event}: {self.body}'
 
 
 AdminEventHandler = Callable[
