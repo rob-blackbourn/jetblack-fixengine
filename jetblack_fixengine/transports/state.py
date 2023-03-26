@@ -70,7 +70,7 @@ class TransportStateMachine:
         Returns:
             TransportState: The new state.
         """
-        LOGGER.debug('Transition from %s with %s', self.state.name, event.name)
+        LOGGER.debug('Transition from %s with %s', self.state, event)
         try:
             self.state = self.TRANSITIONS[self.state][event]
             return self.state

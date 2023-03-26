@@ -28,7 +28,12 @@ from ..transports.state import (
 from ..types import Store
 from ..utils.date_utils import wait_for_time_period
 
-from .state import AdminState
+from .state import (
+    AdminState,
+    AdminEvent,
+    AdminMessage,
+    AdminStateMachineAsync,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,7 +76,7 @@ class Acceptor(metaclass=ABCMeta):
         self._transport_state_machine = TransportStateMachineAsync(
             {
                 TransportState.DISCONNECTED: {
-                    TransportEvent.CONNECTION_RECEIVED: self._handle_connected
+                    TransportEvent.CONNECTION_RECEIVED: self._handle_transport_connected
                 },
                 TransportState.CONNECTED: {
                     TransportEvent.FIX_RECEIVED: self._handle_fix,
@@ -81,7 +86,35 @@ class Acceptor(metaclass=ABCMeta):
             }
         )
 
-        self._admin_state = AdminState.LOGGING_ON
+        self._admin_state_machine = AdminStateMachineAsync(
+            {
+                AdminState.DISCONNECTED: {
+                    AdminEvent.CONNECTED: self._handle_connected
+                },
+                AdminState.LOGON_EXPECTED: {
+                    AdminEvent.LOGON_RECEIVED: self._validate_logon
+                },
+                AdminState.AUTHENTICATING: {
+                    AdminEvent.LOGON_ACCEPTED: self._send_logon,
+                    AdminEvent.LOGON_REJECTED: self._send_logout
+                },
+                AdminState.AUTHENTICATED: {
+                    AdminEvent.HEARTBEAT_RECEIVED: self._receive_heartbeat,
+                    AdminEvent.TEST_REQUEST_RECEIVED: self._receive_test_request,
+                    AdminEvent.RESEND_REQUEST_RECEIVED: self._send_sequence_reset,
+                    AdminEvent.SEQUENCE_RESET_RECEIVED: self._handle_sequence_reset,
+                    AdminEvent.LOGOUT_RECEIVED: self._receive_logout,
+                    AdminEvent.TEST_HEARTBEAT_REQUIRED: self._send_test_heartbeat,
+                },
+                AdminState.SEND_TEST_HEARTBEAT: {
+                    AdminEvent.TEST_REQUEST_SENT: self._validate_test_heartbeat
+                },
+                AdminState.REJECT_LOGON: {
+                    AdminEvent.SEND_LOGOUT: self._send_logout
+                }
+            }
+        )
+
         self._test_heartbeat_message: Optional[str] = None
         self._last_send_time_utc: datetime = EPOCH_UTC
         self._last_receive_time_utc: datetime = EPOCH_UTC
@@ -89,38 +122,170 @@ class Acceptor(metaclass=ABCMeta):
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Send] = None
         self._receive: Optional[Receive] = None
-        self._logout_time: Optional[datetime]
+        self._logout_time: Optional[datetime] = None
 
     async def _handle_connected(
+            self,
+            _admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        if self.logon_time_range:
+            start_time, end_time = self.logon_time_range
+            LOGGER.info(
+                "Waiting for loging window between %s and %s",
+                start_time,
+                end_time
+            )
+            self._logout_time = await wait_for_time_period(
+                datetime.now(tz=self.tz),
+                start_time,
+                end_time,
+                self.cancellation_event
+            )
+
+        self._last_send_time_utc = datetime.now(timezone.utc)
+        return None
+
+    async def _validate_logon(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        if await self.on_logon(admin_message.message):
+            return AdminMessage(AdminEvent.LOGON_ACCEPTED)
+        else:
+            return AdminMessage(AdminEvent.LOGON_REJECTED)
+
+    async def _send_logon(
+            self,
+            _admin_message: Optional[AdminMessage]
+    ) -> Optional[AdminMessage]:
+        await self.send_message(
+            'LOGON',
+            {
+                'EncryptMethod': 'NONE',
+                'HeartBtInt': self.heartbeat_timeout
+            }
+        )
+        return None
+
+    async def _send_logout(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        await self.send_message('LOGOUT')
+        await self.on_logout(admin_message.message)
+        return None
+
+    async def _receive_heartbeat(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        await self.on_heartbeat(admin_message.message)
+        return None
+
+    async def _receive_test_request(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        test_req_id = admin_message.message['TestReqID']
+        await self.send_message(
+            'TEST_REQUEST',
+            {
+                'TestReqID': test_req_id
+            }
+        )
+
+        return AdminMessage(AdminEvent.TEST_REQUEST_SENT)
+
+    async def _send_sequence_reset(
+            self,
+            _admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        new_seq_no = await self._session.get_outgoing_seqnum() + 2
+        await self.send_message(
+            'SEQUENCE_RESET',
+            {
+                'GapFillFlag': False,
+                'NewSeqNo': new_seq_no
+            }
+        )
+
+        return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
+
+    async def _handle_sequence_reset(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        await self._set_incoming_seqnum(admin_message.message['NewSeqNo'])
+        return AdminMessage(AdminEvent.INCOMING_SEQNUM_SET)
+
+    async def _receive_logout(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        await self.on_logout(admin_message.message)
+        return None
+
+    async def _send_test_heartbeat(
+            self,
+            _admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        self._test_heartbeat_message = str(uuid.uuid4())
+        await self.send_message(
+            'TEST_REQUEST',
+            {
+                'TestReqID': self._test_heartbeat_message
+            }
+        )
+        return AdminMessage(AdminEvent.TEST_HEARTBEAT_SENT)
+
+    async def _validate_test_heartbeat(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        if admin_message.message['TestReqID'] == self._test_heartbeat_message:
+            return AdminMessage(AdminEvent.TEST_HEARTBEAT_VALID)
+        else:
+            return AdminMessage(AdminEvent.TEST_HEARTBEAT_INVALID)
+
+    async def _handle_transport_connected(
             self,
             _transport_message: Optional[TransportMessage]
     ) -> Optional[TransportMessage]:
         LOGGER.info('connected')
-        self._admin_state = AdminState.LOGGING_ON
-        self._logout_time = await self._wait_till_logon_time()
+        await self._admin_state_machine.process(
+            AdminMessage(AdminEvent.CONNECTED)
+        )
         return None
 
     async def _handle_timeout(
             self,
             _transport_message: Optional[TransportMessage]
     ) -> Optional[TransportMessage]:
-        if self._admin_state != AdminState.LOGGED_ON:
+        if self._admin_state_machine.state != AdminState.AUTHENTICATED:
             raise RuntimeError('Make a state for this')
 
         now_utc = datetime.now(timezone.utc)
         seconds_since_last_receive = (
-            now_utc - self._last_receive_time_utc).total_seconds()
+            now_utc - self._last_receive_time_utc
+        ).total_seconds()
         if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
-            self._admin_state = AdminState.TEST_HEARTBEAT
-            self._test_heartbeat_message = str(uuid.uuid4())
-            await self.send_message(
-                'TEST_REQUEST',
-                {
-                    'TestReqID': self._test_heartbeat_message
-                }
+            await self._admin_state_machine.process(
+                AdminMessage(AdminEvent.TEST_HEARTBEAT_REQUIRED)
             )
 
         return TransportMessage(TransportEvent.TIMEOUT_HANDLED)
+
+    async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
+        LOGGER.info('on_admin_message: %s', message)
+
+        await self.on_admin_message(message)
+
+        await self._admin_state_machine.process(
+            AdminMessage(
+                AdminEvent.from_msg_type(message['MsgType']),
+                message
+            )
+        )
 
     async def _handle_fix(
             self,
@@ -178,6 +343,7 @@ class Acceptor(metaclass=ABCMeta):
         self._send, self._receive = send, receive
 
         while True:
+            await self._send_logout_if_login_expired(self._logout_time)
             transport_message = await self._next_transport_message(receive)
             await self._transport_state_machine.process(transport_message)
             if self._transport_state_machine.state != TransportState.CONNECTED:
@@ -185,34 +351,21 @@ class Acceptor(metaclass=ABCMeta):
 
         LOGGER.info('disconnected')
 
-    async def _wait_till_logon_time(self) -> Optional[datetime]:
-        if not self.logon_time_range:
-            return None
-
-        start_time, end_time = self.logon_time_range
-        logout_time = await wait_for_time_period(
-            datetime.now(tz=self.tz),
-            start_time,
-            end_time,
-            cancellation_event=self.cancellation_event
-        )
-        return logout_time
-
     async def _send_logout_if_login_expired(
             self,
             logout_time: Optional[datetime]
     ) -> None:
-        if self._admin_state != AdminState.LOGGED_ON or not logout_time:
+        if self._admin_state_machine.state != AdminState.AUTHENTICATED or not logout_time:
             return
 
         # Is it time to logout?
         if datetime.now(tz=self.tz) >= logout_time:
-            self._admin_state = AdminState.LOGGING_OFF
-            await self.send_message('LOGOUT')
-            await self.on_logout({})
+            await self._admin_state_machine.process(
+                AdminMessage(AdminEvent.SEND_LOGOUT)
+            )
 
     async def _send_heartbeat_if_required(self) -> float:
-        if self._admin_state == AdminState.LOGGING_ON:
+        if self._transport_state_machine.state != TransportState.CONNECTED:
             return self.logon_timeout
 
         now_utc = datetime.now(timezone.utc)
@@ -221,7 +374,7 @@ class Acceptor(metaclass=ABCMeta):
         ).total_seconds()
         if (
                 seconds_since_last_send >= self.heartbeat_timeout and
-                self._admin_state == AdminState.LOGGED_ON
+                self._admin_state_machine.state == AdminState.AUTHENTICATED
         ):
             await self.send_message('HEARTBEAT')
             seconds_since_last_send = 0
@@ -303,91 +456,6 @@ class Acceptor(metaclass=ABCMeta):
                 'EndSeqNo': end_seqnum
             }
         )
-
-    async def _handle_logon_received(self, message: Mapping[str, Any]) -> bool:
-        if await self.on_logon(message):
-            # Acknowledge the login
-            await self.send_message(
-                'LOGON',
-                {
-                    'EncryptMethod': 'NONE',
-                    'HeartBtInt': self.heartbeat_timeout
-                }
-            )
-            self._admin_state = AdminState.LOGGED_ON
-            return True
-        else:
-            # Reject the login.
-            self._admin_state = AdminState.LOGGING_OFF
-            await self.send_message('LOGOUT')
-            self._admin_state = AdminState.LOGGING_OFF
-            return False
-
-    async def _handle_heartbeat_received(
-            self,
-            message: Mapping[str, Any]
-    ) -> None:
-        await self.on_heartbeat(message)
-
-    async def _handle_test_request(self, message: Mapping[str, Any]) -> None:
-        test_req_id = message['TestReqID']
-        await self.send_message(
-            'TEST_REQUEST',
-            {
-                'TestReqID': test_req_id
-            }
-        )
-
-    async def _handle_resend_request(self, _message: Mapping[str, Any]) -> None:
-        new_seq_no = await self._session.get_outgoing_seqnum() + 2
-        await self.send_message(
-            'SEQUENCE_RESET',
-            {
-                'GapFillFlag': False,
-                'NewSeqNo': new_seq_no
-            }
-        )
-
-    async def _handle_sequence_reset(self, message: Mapping[str, Any]) -> None:
-        await self._set_incoming_seqnum(message['NewSeqNo'])
-
-    async def _handle_logout_received(self, message: Mapping[str, Any]) -> None:
-        self._admin_state = AdminState.LOGGED_OUT
-        await self.on_logout(message)
-
-    async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
-        LOGGER.info('on_admin_message: %s', message)
-
-        await self.on_admin_message(message)
-
-        if self._admin_state == AdminState.TEST_HEARTBEAT:
-            # Ignore all messages other than the heartbeat response
-            if message['MsgType'] == 'HEARTBEAT':
-                if message['TestReqID'] == self._test_heartbeat_message:
-                    # SWitch back to logged on
-                    self._admin_state = AdminState.LOGGED_ON
-                else:
-                    self._admin_state = AdminState.LOGGING_OFF
-                    await self.send_message('LOGOUT')
-        elif self._admin_state == AdminState.SYNCHRONISING:
-            pass
-        elif message['MsgType'] == 'LOGON':
-            await self._handle_logon_received(message)
-        elif message['MsgType'] == 'HEARTBEAT':
-            await self._handle_heartbeat_received(message)
-        elif message['MsgType'] == 'TEST_REQUEST':
-            await self._handle_test_request(message)
-        elif message['MsgType'] == 'RESEND_REQUEST':
-            await self._handle_resend_request(message)
-        elif message['MsgType'] == 'SEQUENCE_RESET':
-            await self._handle_sequence_reset(message)
-        elif message['MsgType'] == 'LOGOUT':
-            await self._handle_logout_received(message)
-        else:
-            LOGGER.warning(
-                'unhandled admin message type "%s".',
-                message["MsgType"]
-            )
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         """Handle an admin message.
