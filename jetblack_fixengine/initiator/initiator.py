@@ -124,9 +124,9 @@ class Initiator(metaclass=ABCMeta):
 
     async def _send_test_request(
             self,
-            admin_message: Optional[AdminMessage]
+            admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message is not None and admin_message.message is not None
+        assert admin_message.message is not None
         # Respond to the server with the token it sent.
         await self.send_message(
             'TEST_REQUEST',
@@ -138,7 +138,7 @@ class Initiator(metaclass=ABCMeta):
 
     async def _send_sequence_reset(
             self,
-            _admin_message: Optional[AdminMessage]
+            _admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         new_seq_no = await self._session.get_outgoing_seqnum() + 2
         await self.send_message(
@@ -152,33 +152,33 @@ class Initiator(metaclass=ABCMeta):
 
     async def _logon_received(
             self,
-            admin_message: Optional[AdminMessage]
+            admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message is not None and admin_message.message is not None
+        assert admin_message.message is not None
         await self.on_logon(admin_message.message)
         return None
 
     async def _acknowledge_heartbeat(
             self,
-            admin_message: Optional[AdminMessage]
+            admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message is not None and admin_message.message is not None
+        assert admin_message.message is not None
         await self.on_heartbeat(admin_message.message)
         return AdminMessage(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
 
     async def _reset_incoming_seqnum(
             self,
-            admin_message: Optional[AdminMessage]
+            admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message is not None and admin_message.message is not None
+        assert admin_message.message is not None
         await self._set_incoming_seqnum(admin_message.message['NewSeqNo'])
         return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
 
     async def _acknowledge_logout(
             self,
-            admin_message: Optional[AdminMessage]
+            admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        assert admin_message is not None and admin_message.message is not None
+        assert admin_message.message is not None
         await self.on_logout(admin_message.message)
         return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
 
@@ -281,7 +281,7 @@ class Initiator(metaclass=ABCMeta):
 
     async def _send_logon(
             self,
-            _admin_message: Optional[AdminMessage]
+            _admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         """Send a logon message"""
         await self.send_message(

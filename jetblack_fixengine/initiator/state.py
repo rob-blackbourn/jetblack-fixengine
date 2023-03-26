@@ -137,7 +137,7 @@ class AdminMessage:
 
 
 AdminEventHandler = Callable[
-    [Optional[AdminMessage]],
+    [AdminMessage],
     Awaitable[Optional[AdminMessage]]
 ]
 AdminEventHandlerMapping = Mapping[
