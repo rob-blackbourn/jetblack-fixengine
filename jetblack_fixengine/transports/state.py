@@ -4,11 +4,9 @@ from enum import Enum, auto
 import logging
 from typing import Callable, Awaitable, Mapping, Optional
 
+from ..types import InvalidStateTransitionError
+
 LOGGER = logging.getLogger(__name__)
-
-
-class InvalidStateTransitionError(Exception):
-    """An invalid state transition"""
 
 
 class TransportState(Enum):

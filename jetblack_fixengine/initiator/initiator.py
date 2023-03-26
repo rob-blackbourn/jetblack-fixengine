@@ -1,6 +1,6 @@
 """The Initiator handler class"""
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 import asyncio
 from datetime import datetime, timezone
 import logging
@@ -25,53 +25,10 @@ from .state import (
     AdminMessage,
     AdminStateMachineAsync,
 )
+from .types import AbstractInitiator
 
 LOGGER = logging.getLogger(__name__)
 EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
-
-
-class AbstractInitiator(metaclass=ABCMeta):
-    """The interface for an initiator"""
-
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
-        """Called when an admin message is received.
-
-        Args:
-            message (Mapping[str, Any]): The admin message that was sent by the
-                acceptor.
-        """
-
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
-        """Called when a heartbeat is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
-    @abstractmethod
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
-        """Called when an application message is received.
-
-        Args:
-            message (Mapping[str, Any]): The application message sent by the
-                acceptor.
-        """
-
-    @abstractmethod
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
-        """Called when a logon message is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
-    @abstractmethod
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
-        """Called when a logout message is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
 
 
 class Initiator(AbstractInitiator, metaclass=ABCMeta):
