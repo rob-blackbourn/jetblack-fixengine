@@ -19,7 +19,7 @@ from ..transports.state import (
 from ..transports import TransportMessage
 from ..types import Store
 
-from .state import (
+from .admin_state import (
     AdminState,
     AdminEvent,
     AdminMessage,

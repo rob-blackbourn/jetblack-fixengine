@@ -28,7 +28,7 @@ from ..transports.state import (
 from ..types import Store
 from ..utils.date_utils import wait_for_time_period
 
-from .state import (
+from .admin_state import (
     AdminState,
     AdminEvent,
     AdminMessage,
