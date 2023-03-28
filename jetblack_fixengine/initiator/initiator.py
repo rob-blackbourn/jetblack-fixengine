@@ -62,6 +62,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Send] = None
         self._receive: Optional[Receive] = None
+        self._timeout = float(heartbeat_timeout)
 
         self._transport_state_machine = TransportStateMachineAsync(
             {
@@ -225,23 +226,6 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
         LOGGER.info('Disconnected')
         return None
 
-    async def _send_heartbeat_if_required(self) -> float:
-        if self._transport_state_machine.state != TransportState.CONNECTED:
-            return self.logon_timeout
-
-        now_utc = datetime.now(timezone.utc)
-        seconds_since_last_send = (
-            now_utc - self._last_send_time_utc
-        ).total_seconds()
-        if (
-                seconds_since_last_send >= self.heartbeat_timeout and
-                self._admin_state_machine.state == AdminState.AUTHENTICATED
-        ):
-            await self.send_message('HEARTBEAT')
-            seconds_since_last_send = 0
-
-        return self.heartbeat_timeout - seconds_since_last_send
-
     async def _handle_timeout(
             self,
             _transport_message: TransportMessage
@@ -289,13 +273,35 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
         )
         return AdminMessage(AdminEvent.LOGON_SENT)
 
+    async def _send_heartbeat_if_required(self) -> None:
+        if self._transport_state_machine.state != TransportState.CONNECTED:
+            self._timeout = self.logon_timeout
+            return
+
+        now_utc = datetime.now(timezone.utc)
+        seconds_since_last_send = (
+            now_utc - self._last_send_time_utc
+        ).total_seconds()
+        if (
+                seconds_since_last_send >= self.heartbeat_timeout and
+                self._admin_state_machine.state == AdminState.AUTHENTICATED
+        ):
+            await self.send_message('HEARTBEAT')
+            seconds_since_last_send = 0
+
+        self._timeout = self.heartbeat_timeout - seconds_since_last_send
+
     async def _next_message(
             self,
             receive: Receive
     ) -> TransportMessage:
         try:
-            timeout = await self._send_heartbeat_if_required()
-            return await asyncio.wait_for(receive(), timeout=timeout)
+            await self._send_heartbeat_if_required()
+            message = await asyncio.wait_for(
+                receive(),
+                timeout=self._timeout
+            )
+            return message
         except asyncio.TimeoutError:
             return TransportMessage(TransportEvent.TIMEOUT_RECEIVED)
 
