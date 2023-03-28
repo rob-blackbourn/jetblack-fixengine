@@ -3,6 +3,8 @@
 from asyncio import StreamReader
 from typing import AsyncIterator, cast
 
+from ..types import InvalidStateTransitionError
+
 from .fix_events import FixReadEventType, FixReadDataReady
 from .fix_read_buffer import FixReadBuffer
 
@@ -20,7 +22,7 @@ async def fix_read_async(
         blksiz (int): The read block size.
 
     Raises:
-        Exception: If the reader is in an invalid state.
+        InvalidStateTransitionError: If the reader is in an invalid state.
 
     Yields:
         Iterator[AsyncIterator[bytes]]: A bytes buffer containing a raw FIX
@@ -38,4 +40,4 @@ async def fix_read_async(
             data_ready = cast(FixReadDataReady, fix_event)
             yield data_ready.data
         else:
-            raise Exception('Invalid state')
+            raise InvalidStateTransitionError('Invalid state')
