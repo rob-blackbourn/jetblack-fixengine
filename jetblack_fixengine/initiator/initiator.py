@@ -9,6 +9,12 @@ from typing import Mapping, Any, Optional, cast
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
+from ..admin_state import (
+    AdminState,
+    AdminEvent,
+    AdminMessage,
+    AdminStateMachineAsync,
+)
 from ..transports import (
     TransportState,
     TransportEvent,
@@ -19,12 +25,7 @@ from ..transports import (
 from ..transports import TransportMessage
 from ..types import Store
 
-from .admin_state import (
-    AdminState,
-    AdminEvent,
-    AdminMessage,
-    AdminStateMachineAsync,
-)
+from .state import INITIATOR_ADMIN_TRANSITIONS
 from .types import AbstractInitiator
 
 LOGGER = logging.getLogger(__name__)
@@ -77,6 +78,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
             }
         )
         self._admin_state_machine = AdminStateMachineAsync(
+            INITIATOR_ADMIN_TRANSITIONS,
             {
                 AdminState.DISCONNECTED: {
                     AdminEvent.CONNECTED: self._send_logon

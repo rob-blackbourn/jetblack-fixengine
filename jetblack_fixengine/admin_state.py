@@ -1,4 +1,4 @@
-"""Acceptor state"""
+"""Admin state"""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from enum import Enum, auto
 import logging
 from typing import Any, Awaitable, Callable, Mapping, Optional, cast
 
-from ..types import InvalidStateTransitionError
+from .types import InvalidStateTransitionError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -14,30 +14,37 @@ LOGGER = logging.getLogger(__name__)
 class AdminState(Enum):
     """Admin states"""
     DISCONNECTED = auto()
+    LOGON_REQUESTED = auto()
     LOGON_EXPECTED = auto()
     AUTHENTICATING = auto()
     AUTHENTICATED = auto()
     REJECT_LOGON = auto()
     LOGGED_OUT = auto()
+    ACKNOWLEDGE_LOGOUT = auto()
+    ACKNOWLEDGE_HEARTBEAT = auto()
     TEST_HEARTBEAT = auto()
-    SYNCHRONISING = auto()
-    TEST_REQUEST_REQUESTED = auto()
-    SEND_SEQUENCE_RESET = auto()
-    SEQUENCE_RESET_RECEIVED = auto()
-    SET_INCOMING_SEQNUM = auto()
     SEND_TEST_HEARTBEAT = auto()
     VALIDATE_TEST_HEARTBEAT = auto()
+    TEST_REQUEST_REQUESTED = auto()
+    SEND_SEQUENCE_RESET = auto()
+    SEQUENCE_RESET_REQUESTED = auto()
+    SEQUENCE_RESET_RECEIVED = auto()
+    SET_INCOMING_SEQNUM = auto()
 
 
 class AdminEvent(Enum):
     """Admin events"""
     CONNECTED = auto()
+    LOGON_SENT = auto()
     LOGON_RECEIVED = auto()
     LOGON_ACCEPTED = auto()
     LOGON_REJECTED = auto()
-    LOGOUT_RECEIVED = auto()
+    LOGOUT_ACKNOWLEDGED = auto()
+    REJECT_RECEIVED = auto()
     SEND_LOGOUT = auto()
+    LOGOUT_RECEIVED = auto()
     HEARTBEAT_RECEIVED = auto()
+    HEARTBEAT_ACKNOWLEDGED = auto()
     TEST_REQUEST_RECEIVED = auto()
     TEST_REQUEST_SENT = auto()
     RESEND_REQUEST_RECEIVED = auto()
@@ -48,6 +55,7 @@ class AdminEvent(Enum):
     TEST_HEARTBEAT_SENT = auto()
     TEST_HEARTBEAT_VALID = auto()
     TEST_HEARTBEAT_INVALID = auto()
+    XML_MESSAGE_RECEIVED = auto()
 
     @classmethod
     def from_msg_type(cls, msg_type: str) -> AdminEvent:
@@ -66,6 +74,8 @@ class AdminEvent(Enum):
             return cls.LOGON_RECEIVED
         elif msg_type == 'LOGOUT':
             return cls.LOGOUT_RECEIVED
+        elif msg_type == 'REJECT':
+            return cls.REJECT_RECEIVED
         elif msg_type == 'HEARTBEAT':
             return cls.HEARTBEAT_RECEIVED
         elif msg_type == 'TEST_REQUEST':
@@ -74,6 +84,8 @@ class AdminEvent(Enum):
             return cls.RESEND_REQUEST_RECEIVED
         elif msg_type == 'SEQUENCE_RESET':
             return cls.SEQUENCE_RESET_RECEIVED
+        elif msg_type == 'XML_MESSAGE':
+            return cls.XML_MESSAGE_RECEIVED
         else:
             raise ValueError(f'invalid msg_type "{msg_type}"')
 
@@ -81,47 +93,11 @@ class AdminEvent(Enum):
 class AdminStateMachine:
     """State machine for the admin messages"""
 
-    TRANSITIONS: Mapping[AdminState, Mapping[AdminEvent, AdminState]] = {
-        AdminState.DISCONNECTED: {
-            AdminEvent.CONNECTED: AdminState.LOGON_EXPECTED
-        },
-        AdminState.LOGON_EXPECTED: {
-            AdminEvent.LOGON_RECEIVED: AdminState.AUTHENTICATING
-        },
-        AdminState.AUTHENTICATING: {
-            AdminEvent.LOGON_ACCEPTED: AdminState.AUTHENTICATED,
-            AdminEvent.LOGON_REJECTED: AdminState.REJECT_LOGON
-        },
-        AdminState.REJECT_LOGON: {
-            AdminEvent.SEND_LOGOUT: AdminState.DISCONNECTED
-        },
-        AdminState.AUTHENTICATED: {
-            AdminEvent.HEARTBEAT_RECEIVED: AdminState.AUTHENTICATED,
-            AdminEvent.TEST_REQUEST_RECEIVED: AdminState.TEST_REQUEST_REQUESTED,
-            AdminEvent.RESEND_REQUEST_RECEIVED: AdminState.SEND_SEQUENCE_RESET,
-            AdminEvent.SEQUENCE_RESET_RECEIVED: AdminState.SET_INCOMING_SEQNUM,
-            AdminEvent.LOGOUT_RECEIVED: AdminState.DISCONNECTED,
-            AdminEvent.TEST_HEARTBEAT_REQUIRED: AdminState.SEND_TEST_HEARTBEAT
-        },
-        AdminState.TEST_REQUEST_REQUESTED: {
-            AdminEvent.TEST_REQUEST_SENT: AdminState.AUTHENTICATED
-        },
-        AdminState.SEND_SEQUENCE_RESET: {
-            AdminEvent.SEQUENCE_RESET_SENT: AdminState.AUTHENTICATED
-        },
-        AdminState.SET_INCOMING_SEQNUM: {
-            AdminEvent.INCOMING_SEQNUM_SET: AdminState.AUTHENTICATED
-        },
-        AdminState.SEND_TEST_HEARTBEAT: {
-            AdminEvent.TEST_HEARTBEAT_SENT: AdminState.VALIDATE_TEST_HEARTBEAT
-        },
-        AdminState.VALIDATE_TEST_HEARTBEAT: {
-            AdminEvent.TEST_HEARTBEAT_VALID: AdminState.AUTHENTICATED,
-            AdminEvent.TEST_HEARTBEAT_INVALID: AdminState.REJECT_LOGON
-        }
-    }
-
-    def __init__(self):
+    def __init__(
+            self,
+            transitions: Mapping[AdminState, Mapping[AdminEvent, AdminState]]
+    ) -> None:
+        self.transitions = transitions
         self.state = AdminState.DISCONNECTED
 
     def transition(self, event: AdminEvent) -> AdminState:
@@ -138,7 +114,7 @@ class AdminStateMachine:
         """
         LOGGER.debug('Transition from %s with %s', self.state, event)
         try:
-            self.state = self.TRANSITIONS[self.state][event]
+            self.state = self.transitions[self.state][event]
             return self.state
         except KeyError as error:
             raise InvalidStateTransitionError(
@@ -181,9 +157,10 @@ class AdminStateMachineAsync(AdminStateMachine):
 
     def __init__(
             self,
+            transitions: Mapping[AdminState, Mapping[AdminEvent, AdminState]],
             state_handlers: AdminEventHandlerMapping
     ) -> None:
-        super().__init__()
+        super().__init__(transitions)
         self._handlers = state_handlers
 
     async def process(

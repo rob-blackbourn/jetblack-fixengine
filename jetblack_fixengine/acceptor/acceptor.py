@@ -17,6 +17,12 @@ import uuid
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
+from ..admin_state import (
+    AdminState,
+    AdminEvent,
+    AdminMessage,
+    AdminStateMachineAsync,
+)
 from ..transports import (
     TransportState,
     TransportEvent,
@@ -28,12 +34,7 @@ from ..transports import (
 from ..types import Store
 from ..utils.date_utils import wait_for_time_period
 
-from .admin_state import (
-    AdminState,
-    AdminEvent,
-    AdminMessage,
-    AdminStateMachineAsync,
-)
+from .state import ACCEPTOR_ADMIN_TRANSITIONS
 from .types import AbstractAcceptor
 
 LOGGER = logging.getLogger(__name__)
@@ -88,6 +89,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         )
 
         self._admin_state_machine = AdminStateMachineAsync(
+            ACCEPTOR_ADMIN_TRANSITIONS,
             {
                 AdminState.DISCONNECTED: {
                     AdminEvent.CONNECTED: self._handle_connected
