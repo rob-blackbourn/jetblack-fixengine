@@ -6,7 +6,7 @@ from jetblack_fixengine.initiator.admin_state import (
     AdminStateMachine,
 )
 
-from jetblack_fixengine.transports.state import (
+from jetblack_fixengine.transports.transport_state import (
     TransportState,
     TransportEvent,
     TransportStateMachine

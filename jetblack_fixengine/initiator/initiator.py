@@ -9,7 +9,7 @@ from typing import Mapping, Any, Optional, cast
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from ..transports.state import (
+from ..transports import (
     TransportState,
     TransportEvent,
     TransportStateMachineAsync,
