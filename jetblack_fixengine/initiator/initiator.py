@@ -15,21 +15,21 @@ from ..admin_state import (
     AdminMessage,
     AdminStateMachineAsync,
 )
+from ..time_provider import TimeProvider, UTCTimeProvider
 from ..transports import (
     TransportState,
     TransportEvent,
+    TransportMessage,
     TransportStateMachineAsync,
     Send,
     Receive
 )
-from ..transports import TransportMessage
 from ..types import Store
 
 from .state import INITIATOR_ADMIN_TRANSITIONS
 from .types import AbstractInitiator
 
 LOGGER = logging.getLogger(__name__)
-EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
 
 
 class Initiator(AbstractInitiator, metaclass=ABCMeta):
@@ -45,7 +45,8 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
             heartbeat_timeout: int,
             cancellation_event: asyncio.Event,
             *,
-            heartbeat_threshold: int = 1
+            heartbeat_threshold: int = 1,
+            time_provider: Optional[TimeProvider] = None
     ) -> None:
         self.logon_timeout = logon_timeout
         self.heartbeat_timeout = heartbeat_timeout
@@ -56,9 +57,10 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
             sender_comp_id,
             target_comp_id
         )
+        self._time_provider = time_provider or UTCTimeProvider()
 
-        self._last_send_time_utc: datetime = EPOCH_UTC
-        self._last_receive_time_utc: datetime = EPOCH_UTC
+        self._last_send_time_utc = self._time_provider.min(timezone.utc)
+        self._last_receive_time_utc = self._time_provider.min(timezone.utc)
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Send] = None
@@ -211,7 +213,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
         msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
         await self._set_incoming_seqnum(msg_seq_num)
 
-        self._last_receive_time_utc = datetime.now(timezone.utc)
+        self._last_receive_time_utc = self._time_provider.now(timezone.utc)
 
         return TransportMessage(TransportEvent.FIX_HANDLED)
 
@@ -235,7 +237,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
         if self._admin_state_machine.state != AdminState.AUTHENTICATED:
             raise RuntimeError('Make a state for this')
 
-        now_utc = datetime.now(timezone.utc)
+        now_utc = self._time_provider.now(timezone.utc)
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc
         ).total_seconds()
@@ -280,7 +282,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
             self._timeout = self.logon_timeout
             return
 
-        now_utc = datetime.now(timezone.utc)
+        now_utc = self._time_provider.now(timezone.utc)
         seconds_since_last_send = (
             now_utc - self._last_send_time_utc
         ).total_seconds()
@@ -339,7 +341,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
             message (Optional[Mapping[str, Any]], optional): The message.
                 Defaults to None.
         """
-        send_time_utc = datetime.now(timezone.utc)
+        send_time_utc = self._time_provider.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         fix_message = self.fix_message_factory.create(
             msg_type,

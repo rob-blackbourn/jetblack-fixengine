@@ -23,6 +23,7 @@ from ..admin_state import (
     AdminMessage,
     AdminStateMachineAsync,
 )
+from ..time_provider import TimeProvider, UTCTimeProvider
 from ..transports import (
     TransportState,
     TransportEvent,
@@ -40,9 +41,6 @@ from .types import AbstractAcceptor
 LOGGER = logging.getLogger(__name__)
 
 
-EPOCH_UTC = datetime.fromtimestamp(0, timezone.utc)
-
-
 class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
     """The base class for acceptor handlers"""
 
@@ -58,7 +56,8 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
             heartbeat_threshold: int = 1,
             logon_time_range: Optional[Tuple[time, time]] = None,
             logon_timeout: Union[float, int] = 60,
-            tz: Optional[tzinfo] = None
+            tz: Optional[tzinfo] = None,
+            time_provider: Optional[TimeProvider] = None
     ) -> None:
         self.protocol = protocol
         self.sender_comp_id = sender_comp_id
@@ -69,6 +68,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         self.logon_time_range = logon_time_range
         self.logon_timeout = logon_timeout
         self.tz = tz
+        self.time_provider = time_provider or UTCTimeProvider()
         self.fix_message_factory = FixMessageFactory(
             protocol,
             sender_comp_id,
@@ -119,8 +119,8 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         )
 
         self._test_heartbeat_message: Optional[str] = None
-        self._last_send_time_utc: datetime = EPOCH_UTC
-        self._last_receive_time_utc: datetime = EPOCH_UTC
+        self._last_send_time_utc = self.time_provider.min(timezone.utc)
+        self._last_receive_time_utc = self.time_provider.min(timezone.utc)
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Send] = None
@@ -139,13 +139,13 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
                 end_time
             )
             self._logout_time = await wait_for_time_period(
-                datetime.now(tz=self.tz),
+                self.time_provider.now(self.tz or timezone.utc),
                 start_time,
                 end_time,
                 self.cancellation_event
             )
 
-        self._last_send_time_utc = datetime.now(timezone.utc)
+        self._last_send_time_utc = self.time_provider.now(timezone.utc)
         return None
 
     async def _validate_logon(
@@ -271,7 +271,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         if self._admin_state_machine.state != AdminState.AUTHENTICATED:
             raise RuntimeError('Make a state for this')
 
-        now_utc = datetime.now(timezone.utc)
+        now_utc = self.time_provider.now(timezone.utc)
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc
         ).total_seconds()
@@ -314,7 +314,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
         await self._set_incoming_seqnum(msg_seq_num)
 
-        self._last_receive_time_utc = datetime.now(timezone.utc)
+        self._last_receive_time_utc = self.time_provider.now(timezone.utc)
 
         return TransportMessage(TransportEvent.FIX_HANDLED)
 
@@ -365,7 +365,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
             return
 
         # Is it time to logout?
-        if datetime.now(tz=self.tz) >= logout_time:
+        if self.time_provider.now(self.tz or timezone.utc) >= logout_time:
             await self._admin_state_machine.process(
                 AdminMessage(AdminEvent.SEND_LOGOUT)
             )
@@ -374,7 +374,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         if self._transport_state_machine.state != TransportState.CONNECTED:
             return self.logon_timeout
 
-        now_utc = datetime.now(timezone.utc)
+        now_utc = self.time_provider.now(timezone.utc)
         seconds_since_last_send = (
             now_utc - self._last_send_time_utc
         ).total_seconds()
@@ -427,7 +427,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
             message (Optional[Mapping[str, Any]], optional): The message.
                 Defaults to None.
         """
-        send_time_utc = datetime.now(timezone.utc)
+        send_time_utc = self.time_provider.now(timezone.utc)
         msg_seq_num = await self._next_outgoing_seqnum()
         fix_message = self.fix_message_factory.create(
             msg_type,
