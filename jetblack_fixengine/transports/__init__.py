@@ -7,11 +7,12 @@ from .transport_state import (
     TransportHandler,
     TransportState,
     TransportEvent,
-    TransportStateMachineAsync,
+    AsyncTransportStateTransitioner,
     TransportMessage,
     Send,
     Receive
 )
+from .transport_state_machine import TransportStateMachine
 
 __all__ = [
     'fix_stream_processor',
@@ -20,8 +21,9 @@ __all__ = [
     'TransportHandler',
     'TransportState',
     'TransportEvent',
-    'TransportStateMachineAsync',
+    'AsyncTransportStateTransitioner',
     'TransportMessage',
     'Send',
-    'Receive'
+    'Receive',
+    'TransportStateMachine'
 ]

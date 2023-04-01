@@ -41,6 +41,7 @@
         "strftime",
         "strptime",
         "SYNCHRONISING",
+        "Transitioner",
         "tzinfo",
         "tzlocal"
     ],

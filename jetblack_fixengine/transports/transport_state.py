@@ -33,7 +33,7 @@ TransportTransitionMapping = Mapping[
 ]
 
 
-class TransportStateMachine:
+class TransportStateTransitioner:
     """The transport state machine"""
 
     TRANSITIONS: TransportTransitionMapping = {
@@ -103,7 +103,7 @@ TransportEventHandlerMapping = Mapping[
 ]
 
 
-class TransportStateMachineAsync(TransportStateMachine):
+class AsyncTransportStateTransitioner(TransportStateTransitioner):
     """A transport state machine with async bindings"""
 
     def __init__(

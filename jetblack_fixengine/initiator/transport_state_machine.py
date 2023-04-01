@@ -8,14 +8,14 @@ from ..admin_state import (
     AdminState,
     AdminEvent,
     AdminMessage,
-    AdminStateMachineAsync,
+    AdminStateMachineAsync
 )
 from ..time_provider import TimeProvider
 from ..transports import (
     TransportState,
     TransportEvent,
     TransportMessage,
-    TransportStateMachineAsync,
+    AsyncTransportStateTransitioner,
 )
 
 from .types import AbstractInitiator
@@ -23,13 +23,13 @@ from .types import AbstractInitiator
 LOGGER = logging.getLogger(__name__)
 
 
-class InitiatorTransportStateMachine(TransportStateMachineAsync):
+class InitiatorTransportStateMachine(AsyncTransportStateTransitioner):
 
     def __init__(
             self,
-            initiator: AbstractInitiator,
+            handler: AbstractInitiator,
             admin_state_machine: AdminStateMachineAsync,
-            time_provider: TimeProvider,
+            time_provider: TimeProvider
     ) -> None:
         super().__init__(
             {
@@ -43,8 +43,8 @@ class InitiatorTransportStateMachine(TransportStateMachineAsync):
                 }
             }
         )
+        self._handler = handler
         self._admin_state_machine = admin_state_machine
-        self.initiator = initiator
         self._time_provider = time_provider
         self._last_receive_time_utc = self._time_provider.min(timezone.utc)
 
@@ -62,9 +62,9 @@ class InitiatorTransportStateMachine(TransportStateMachineAsync):
             self,
             transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        await self.initiator.session.save_message(transport_message.buffer)
+        await self._handler.session.save_message(transport_message.buffer)
 
-        fix_message = self.initiator.fix_message_factory.decode(
+        fix_message = self._handler.fix_message_factory.decode(
             transport_message.buffer
         )
         LOGGER.info('Received %s', fix_message.message)
@@ -73,17 +73,21 @@ class InitiatorTransportStateMachine(TransportStateMachineAsync):
         if msgcat == 'admin':
             await self._handle_admin_message(fix_message.message)
         else:
-            await self.initiator.on_application_message(fix_message.message)
+            await self._handler.on_application_message(fix_message.message)
 
         msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
-        await self.initiator.session.set_incoming_seqnum(msg_seq_num)
+        await self._handler.session.set_incoming_seqnum(msg_seq_num)
 
         self._last_receive_time_utc = self._time_provider.now(timezone.utc)
 
         return TransportMessage(TransportEvent.FIX_HANDLED)
 
     async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
-        await self.initiator.on_admin_message(message)
+        assert 'MsgType' in message
+
+        LOGGER.info('admin message: %s', message)
+
+        await self._handler.on_admin_message(message)
 
         await self._admin_state_machine.process(
             AdminMessage(
@@ -103,15 +107,10 @@ class InitiatorTransportStateMachine(TransportStateMachineAsync):
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc
         ).total_seconds()
-        elapsed = seconds_since_last_receive - self.initiator.heartbeat_timeout
-        if elapsed > self.initiator.heartbeat_threshold:
-            # Send a test request to the acceptor to ensure the connection is
-            # still active.
-            await self.initiator.send_message(
-                'TEST_REQUEST',
-                {
-                    'TestReqID': 'TEST'
-                }
+        elapsed = seconds_since_last_receive - self._handler.heartbeat_timeout
+        if elapsed > self._handler.heartbeat_threshold:
+            await self._admin_state_machine.process(
+                AdminMessage(AdminEvent.TEST_HEARTBEAT_REQUIRED)
             )
 
         return TransportMessage(TransportEvent.TIMEOUT_HANDLED)

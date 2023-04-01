@@ -18,12 +18,12 @@ from ..transports import (
     TransportEvent,
     TransportMessage,
     Send,
-    Receive
+    Receive,
+    TransportStateMachine
 )
 from ..types import Store, Session
 
 from .admin_state_machine import InitiatorAdminStateMachine
-from .transport_state_machine import InitiatorTransportStateMachine
 from .types import AbstractInitiator
 
 LOGGER = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
         self._admin_state_machine = InitiatorAdminStateMachine(
             self,
         )
-        self._transport_state_machine = InitiatorTransportStateMachine(
+        self._transport_state_machine = TransportStateMachine(
             self,
             self._admin_state_machine,
             self._time_provider,

@@ -18,16 +18,16 @@ from ..transports import (
     AsyncTransportStateTransitioner,
 )
 
-from .types import AbstractAcceptor
+from ..types import TransportHandler
 
 LOGGER = logging.getLogger(__name__)
 
 
-class AcceptorTransportStateMachine(AsyncTransportStateTransitioner):
+class TransportStateMachine(AsyncTransportStateTransitioner):
 
     def __init__(
             self,
-            handler: AbstractAcceptor,
+            handler: TransportHandler,
             admin_state_machine: AdminStateMachineAsync,
             time_provider: TimeProvider
     ) -> None:

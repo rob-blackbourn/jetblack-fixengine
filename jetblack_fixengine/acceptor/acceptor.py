@@ -26,12 +26,12 @@ from ..transports import (
     TransportEvent,
     TransportMessage,
     Send,
-    Receive
+    Receive,
+    TransportStateMachine
 )
 from ..types import Store, Session
 
 from .admin_state_machine import AcceptorAdminStateMachine
-from .transport_state_machine import AcceptorTransportStateMachine
 from .types import AbstractAcceptor
 
 LOGGER = logging.getLogger(__name__)
@@ -83,7 +83,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
             self.time_provider,
             self.cancellation_event
         )
-        self._transport_state_machine = AcceptorTransportStateMachine(
+        self._transport_state_machine = TransportStateMachine(
             self,
             self._admin_state_machine,
             self.time_provider

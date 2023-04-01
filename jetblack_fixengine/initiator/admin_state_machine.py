@@ -2,6 +2,7 @@
 
 import logging
 from typing import Optional
+import uuid
 
 from ..admin_state import (
     AdminState,
@@ -36,11 +37,16 @@ class InitiatorAdminStateMachine(AdminStateMachineAsync):
                     AdminEvent.TEST_REQUEST_RECEIVED: self._send_test_request,
                     AdminEvent.RESEND_REQUEST_RECEIVED: self._send_sequence_reset,
                     AdminEvent.SEQUENCE_RESET_RECEIVED: self._reset_incoming_seqnum,
-                    AdminEvent.LOGOUT_RECEIVED: self._acknowledge_logout
+                    AdminEvent.LOGOUT_RECEIVED: self._acknowledge_logout,
+                    AdminEvent.TEST_HEARTBEAT_REQUIRED: self._send_test_heartbeat,
+                },
+                AdminState.SEND_TEST_HEARTBEAT: {
+                    AdminEvent.TEST_REQUEST_SENT: self._validate_test_heartbeat
                 },
             }
         )
         self.initiator = initiator
+        self._test_heartbeat_message: Optional[str] = None
 
     async def _send_logon(
             self,
@@ -115,3 +121,27 @@ class InitiatorAdminStateMachine(AdminStateMachineAsync):
         assert admin_message.fix is not None
         await self.initiator.on_logout(admin_message.fix)
         return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
+
+    async def _send_test_heartbeat(
+            self,
+            _admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        self._test_heartbeat_message = str(uuid.uuid4())
+
+        await self.initiator.send_message(
+            'TEST_REQUEST',
+            {
+                'TestReqID': self._test_heartbeat_message
+            }
+        )
+        return AdminMessage(AdminEvent.TEST_HEARTBEAT_SENT)
+
+    async def _validate_test_heartbeat(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        assert 'TestReqID' in admin_message.fix
+        if admin_message.fix['TestReqID'] == self._test_heartbeat_message:
+            return AdminMessage(AdminEvent.TEST_HEARTBEAT_VALID)
+        else:
+            return AdminMessage(AdminEvent.TEST_HEARTBEAT_INVALID)
