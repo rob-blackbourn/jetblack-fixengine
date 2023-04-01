@@ -1,9 +1,9 @@
 """Tests for initiator state"""
 
-from jetblack_fixengine.admin_state import (
+from jetblack_fixengine.admin.state_processor import (
     AdminState,
     AdminEvent,
-    AdminStateMachine,
+    AdminStateTransition,
 )
 
 from jetblack_fixengine.transports.state_processor import (
@@ -17,7 +17,7 @@ from jetblack_fixengine.initiator.state import INITIATOR_ADMIN_TRANSITIONS
 
 def test_initiator_admin_state():
     """Test initiator state"""
-    state_machine = AdminStateMachine(INITIATOR_ADMIN_TRANSITIONS)
+    state_machine = AdminStateTransition(INITIATOR_ADMIN_TRANSITIONS)
 
     assert state_machine.state == AdminState.DISCONNECTED
 

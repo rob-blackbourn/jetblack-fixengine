@@ -9,7 +9,7 @@ from typing import Mapping, Any, Optional
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from ..admin_state import (
+from ..admin import (
     AdminState,
 )
 from ..time_provider import TimeProvider, UTCTimeProvider

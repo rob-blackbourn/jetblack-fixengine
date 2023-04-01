@@ -15,7 +15,7 @@ from typing import (
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from ..admin_state import (
+from ..admin import (
     AdminState,
     AdminEvent,
     AdminMessage,

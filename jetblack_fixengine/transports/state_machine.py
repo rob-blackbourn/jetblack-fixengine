@@ -4,11 +4,11 @@ from datetime import timezone
 import logging
 from typing import Mapping, Any, Optional, cast
 
-from ..admin_state import (
+from ..admin import (
     AdminState,
     AdminEvent,
     AdminMessage,
-    AdminStateMachineAsync
+    AdminStateProcessor
 )
 from ..time_provider import TimeProvider
 
@@ -29,7 +29,7 @@ class TransportStateMachine(TransportStateProcessor):
     def __init__(
             self,
             handler: AbstractHandler,
-            admin_state_machine: AdminStateMachineAsync,
+            admin_state_machine: AdminStateProcessor,
             time_provider: TimeProvider
     ) -> None:
         super().__init__(

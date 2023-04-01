@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Mapping
 
-from ..admin_state import AdminEvent, AdminState
+from ..admin.state_processor import AdminEvent, AdminState
 
 ACCEPTOR_ADMIN_TRANSITIONS: Mapping[AdminState, Mapping[AdminEvent, AdminState]] = {
     AdminState.DISCONNECTED: {

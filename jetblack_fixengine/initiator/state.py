@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Mapping
 
-from ..admin_state import (
+from ..admin import (
     AdminEvent,
     AdminState
 )

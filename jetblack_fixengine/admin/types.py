@@ -1,14 +1,9 @@
-"""Admin state"""
+"""Admin types"""
 
 from __future__ import annotations
 
 from enum import Enum, auto
-import logging
 from typing import Any, Awaitable, Callable, Mapping, Optional, cast
-
-from .types import InvalidStateTransitionError
-
-LOGGER = logging.getLogger(__name__)
 
 
 class AdminState(Enum):
@@ -90,43 +85,6 @@ class AdminEvent(Enum):
             raise ValueError(f'invalid msg_type "{msg_type}"')
 
 
-class AdminStateMachine:
-    """State machine for the admin messages"""
-
-    def __init__(
-            self,
-            transitions: Mapping[AdminState, Mapping[AdminEvent, AdminState]]
-    ) -> None:
-        self.transitions = transitions
-        self.state = AdminState.DISCONNECTED
-
-    def transition(self, event: AdminEvent) -> AdminState:
-        """Transition to a new state.
-
-        Args:
-            event (AdminEvent): The event.
-
-        Raises:
-            InvalidStateTransitionError: If there is not valid transition.
-
-        Returns:
-            AdminState: The new state.
-        """
-        LOGGER.debug('Transition from %s with %s', self.state, event)
-        try:
-            self.state = self.transitions[self.state][event]
-            return self.state
-        except KeyError as error:
-            raise InvalidStateTransitionError(
-                f'unhandled event {self.state.name} -> {event}.',
-            ) from error
-
-    def __str__(self) -> str:
-        return f"AdminStateMachine: state={self.state}"
-
-    __repr__ = __str__
-
-
 class AdminMessage:
     """An admin message"""
 
@@ -150,35 +108,3 @@ AdminEventHandlerMapping = Mapping[
     AdminState,
     Mapping[AdminEvent, AdminEventHandler]
 ]
-
-
-class AdminStateMachineAsync(AdminStateMachine):
-    """An admin state machine with async handlers"""
-
-    def __init__(
-            self,
-            transitions: Mapping[AdminState, Mapping[AdminEvent, AdminState]],
-            state_handlers: AdminEventHandlerMapping
-    ) -> None:
-        super().__init__(transitions)
-        self._handlers = state_handlers
-
-    async def process(
-            self,
-            message: Optional[AdminMessage]
-    ) -> AdminState:
-        """Process an admin message.
-
-        Args:
-            message (Optional[AdminMessage]): The message.
-
-        Returns:
-            AdminState: The new state.
-        """
-        while message is not None:
-            handler = self._handlers.get(self.state, {}).get(message.event)
-            self.transition(message.event)
-            if handler is None:
-                break
-            message = await handler(message)
-        return self.state

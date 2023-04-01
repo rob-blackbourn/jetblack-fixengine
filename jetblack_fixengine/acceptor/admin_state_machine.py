@@ -6,11 +6,11 @@ import logging
 from typing import Optional
 import uuid
 
-from ..admin_state import (
+from ..admin import (
     AdminState,
     AdminEvent,
     AdminMessage,
-    AdminStateMachineAsync,
+    AdminStateProcessor,
 )
 from ..time_provider import TimeProvider
 from ..types import LoginError
@@ -22,7 +22,7 @@ from .types import AbstractAcceptor
 LOGGER = logging.getLogger(__name__)
 
 
-class AcceptorAdminStateMachine(AdminStateMachineAsync):
+class AcceptorAdminStateMachine(AdminStateProcessor):
 
     def __init__(
             self,

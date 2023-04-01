@@ -4,11 +4,11 @@ import logging
 from typing import Optional
 import uuid
 
-from ..admin_state import (
+from ..admin import (
     AdminState,
     AdminEvent,
     AdminMessage,
-    AdminStateMachineAsync,
+    AdminStateProcessor,
 )
 
 from .state import INITIATOR_ADMIN_TRANSITIONS
@@ -17,7 +17,7 @@ from .types import AbstractInitiator
 LOGGER = logging.getLogger(__name__)
 
 
-class InitiatorAdminStateMachine(AdminStateMachineAsync):
+class InitiatorAdminStateMachine(AdminStateProcessor):
 
     def __init__(
             self,
