@@ -15,7 +15,7 @@ from ..transports import (
     TransportState,
     TransportEvent,
     TransportMessage,
-    AsyncTransportStateTransitioner,
+    TransportStateProcessor,
 )
 
 from ..types import TransportHandler
@@ -23,7 +23,7 @@ from ..types import TransportHandler
 LOGGER = logging.getLogger(__name__)
 
 
-class TransportStateMachine(AsyncTransportStateTransitioner):
+class TransportStateMachine(TransportStateProcessor):
 
     def __init__(
             self,

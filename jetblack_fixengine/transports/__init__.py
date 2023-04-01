@@ -7,7 +7,7 @@ from .transport_state import (
     TransportHandler,
     TransportState,
     TransportEvent,
-    AsyncTransportStateTransitioner,
+    TransportStateProcessor,
     TransportMessage,
     Send,
     Receive
@@ -21,7 +21,7 @@ __all__ = [
     'TransportHandler',
     'TransportState',
     'TransportEvent',
-    'AsyncTransportStateTransitioner',
+    'TransportStateProcessor',
     'TransportMessage',
     'Send',
     'Receive',
