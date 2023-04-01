@@ -13,6 +13,7 @@ from ..admin_state import (
     AdminStateMachineAsync,
 )
 from ..time_provider import TimeProvider
+from ..types import LoginError
 from ..utils.date_utils import wait_for_time_period
 
 from .state import ACCEPTOR_ADMIN_TRANSITIONS
@@ -88,10 +89,15 @@ class AcceptorAdminStateMachine(AdminStateMachineAsync):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        if await self.acceptor.on_logon(admin_message.fix):
+        try:
+            await self.acceptor.on_logon(admin_message.fix)
             return AdminMessage(AdminEvent.LOGON_ACCEPTED)
-        else:
-            return AdminMessage(AdminEvent.LOGON_REJECTED)
+        except LoginError:
+            LOGGER.info("Logon rejected")
+        except:  # pylint: disable=bare-except
+            LOGGER.exception("Logon failed")
+
+        return AdminMessage(AdminEvent.LOGON_REJECTED)
 
     async def _send_logon(
             self,

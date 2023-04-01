@@ -56,6 +56,10 @@ class InvalidStateTransitionError(Exception):
     """An invalid state transition"""
 
 
+class LoginError(Exception):
+    """An invalid state transition"""
+
+
 class AbstractHandler(metaclass=ABCMeta):
 
     @property

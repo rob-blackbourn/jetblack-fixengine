@@ -28,9 +28,8 @@ PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 class MyAcceptor(Acceptor):
     """An instance of the acceptor"""
 
-    async def on_logon(self, _message: Mapping[str, Any]) -> bool:
+    async def on_logon(self, _message: Mapping[str, Any]):
         LOGGER.info('on_logon')
-        return True
 
     async def on_logout(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_logout')
