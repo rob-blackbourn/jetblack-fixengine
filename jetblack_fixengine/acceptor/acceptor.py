@@ -10,9 +10,7 @@ from typing import (
     Optional,
     Tuple,
     Union,
-    cast
 )
-import uuid
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 from jetblack_fixparser.meta_data import ProtocolMetaData
@@ -21,21 +19,19 @@ from ..admin_state import (
     AdminState,
     AdminEvent,
     AdminMessage,
-    AdminStateMachineAsync,
 )
 from ..time_provider import TimeProvider, UTCTimeProvider
 from ..transports import (
     TransportState,
     TransportEvent,
-    TransportStateMachineAsync,
     TransportMessage,
     Send,
     Receive
 )
-from ..types import Store
-from ..utils.date_utils import wait_for_time_period
+from ..types import Store, Session
 
-from .state import ACCEPTOR_ADMIN_TRANSITIONS
+from .admin_state_machine import AcceptorAdminStateMachine
+from .transport_state_machine import AcceptorTransportStateMachine
 from .types import AbstractAcceptor
 
 LOGGER = logging.getLogger(__name__)
@@ -62,274 +58,74 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         self.protocol = protocol
         self.sender_comp_id = sender_comp_id
         self.target_comp_id = target_comp_id
-        self.heartbeat_timeout = heartbeat_timeout
-        self.heartbeat_threshold = heartbeat_threshold
+        self._heartbeat_timeout = heartbeat_timeout
+        self._heartbeat_threshold = heartbeat_threshold
         self.cancellation_event = cancellation_event
-        self.logon_time_range = logon_time_range
+        self._logon_time_range = logon_time_range
         self.logon_timeout = logon_timeout
-        self.tz = tz
+        self._tz = tz
         self.time_provider = time_provider or UTCTimeProvider()
-        self.fix_message_factory = FixMessageFactory(
+        self._fix_message_factory = FixMessageFactory(
             protocol,
             sender_comp_id,
             target_comp_id
         )
 
-        self._transport_state_machine = TransportStateMachineAsync(
-            {
-                TransportState.DISCONNECTED: {
-                    TransportEvent.CONNECTION_RECEIVED: self._handle_transport_connected
-                },
-                TransportState.CONNECTED: {
-                    TransportEvent.FIX_RECEIVED: self._handle_fix,
-                    TransportEvent.TIMEOUT_RECEIVED: self._handle_timeout,
-                    TransportEvent.DISCONNECT_RECEIVED: self._handle_disconnect
-                }
-            }
-        )
-
-        self._admin_state_machine = AdminStateMachineAsync(
-            ACCEPTOR_ADMIN_TRANSITIONS,
-            {
-                AdminState.DISCONNECTED: {
-                    AdminEvent.CONNECTED: self._handle_connected
-                },
-                AdminState.LOGON_EXPECTED: {
-                    AdminEvent.LOGON_RECEIVED: self._validate_logon
-                },
-                AdminState.AUTHENTICATING: {
-                    AdminEvent.LOGON_ACCEPTED: self._send_logon,
-                    AdminEvent.LOGON_REJECTED: self._send_logout
-                },
-                AdminState.AUTHENTICATED: {
-                    AdminEvent.HEARTBEAT_RECEIVED: self._receive_heartbeat,
-                    AdminEvent.TEST_REQUEST_RECEIVED: self._receive_test_request,
-                    AdminEvent.RESEND_REQUEST_RECEIVED: self._send_sequence_reset,
-                    AdminEvent.SEQUENCE_RESET_RECEIVED: self._handle_sequence_reset,
-                    AdminEvent.LOGOUT_RECEIVED: self._receive_logout,
-                    AdminEvent.TEST_HEARTBEAT_REQUIRED: self._send_test_heartbeat,
-                },
-                AdminState.SEND_TEST_HEARTBEAT: {
-                    AdminEvent.TEST_REQUEST_SENT: self._validate_test_heartbeat
-                },
-                AdminState.REJECT_LOGON: {
-                    AdminEvent.SEND_LOGOUT: self._send_logout
-                }
-            }
-        )
-
-        self._test_heartbeat_message: Optional[str] = None
-        self._last_send_time_utc = self.time_provider.min(timezone.utc)
-        self._last_receive_time_utc = self.time_provider.min(timezone.utc)
+        self._last_send_time_utc: Optional[datetime] = None
         self._store = store
         self._session = self._store.get_session(sender_comp_id, target_comp_id)
         self._send: Optional[Send] = None
         self._receive: Optional[Receive] = None
         self._logout_time: Optional[datetime] = None
 
-    async def _handle_connected(
+        self._admin_state_machine = AcceptorAdminStateMachine(
             self,
-            _admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        if self.logon_time_range:
-            start_time, end_time = self.logon_time_range
-            LOGGER.info(
-                "Waiting for logging window between %s and %s",
-                start_time,
-                end_time
-            )
-            self._logout_time = await wait_for_time_period(
-                self.time_provider.now(self.tz or timezone.utc),
-                start_time,
-                end_time,
-                self.cancellation_event
-            )
-
-        self._last_send_time_utc = self.time_provider.now(timezone.utc)
-        return None
-
-    async def _validate_logon(
-            self,
-            admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        if await self.on_logon(admin_message.fix):
-            return AdminMessage(AdminEvent.LOGON_ACCEPTED)
-        else:
-            return AdminMessage(AdminEvent.LOGON_REJECTED)
-
-    async def _send_logon(
-            self,
-            _admin_message: Optional[AdminMessage]
-    ) -> Optional[AdminMessage]:
-        await self.send_message(
-            'LOGON',
-            {
-                'EncryptMethod': 'NONE',
-                'HeartBtInt': self.heartbeat_timeout
-            }
+            self.time_provider,
+            self.cancellation_event
         )
-        return None
-
-    async def _send_logout(
+        self._transport_state_machine = AcceptorTransportStateMachine(
             self,
-            admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        await self.send_message('LOGOUT')
-        await self.on_logout(admin_message.fix)
-        return None
-
-    async def _receive_heartbeat(
-            self,
-            admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        await self.on_heartbeat(admin_message.fix)
-        return None
-
-    async def _receive_test_request(
-            self,
-            admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        assert 'TestReqID' in admin_message.fix
-        test_req_id = admin_message.fix['TestReqID']
-        await self.send_message(
-            'TEST_REQUEST',
-            {
-                'TestReqID': test_req_id
-            }
+            self._admin_state_machine,
+            self.time_provider
         )
 
-        return AdminMessage(AdminEvent.TEST_REQUEST_SENT)
+    @property
+    def session(self) -> Session:
+        return self._session
 
-    async def _send_sequence_reset(
-            self,
-            _admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        new_seq_no = await self._session.get_outgoing_seqnum() + 2
-        await self.send_message(
-            'SEQUENCE_RESET',
-            {
-                'GapFillFlag': False,
-                'NewSeqNo': new_seq_no
-            }
-        )
+    @property
+    def fix_message_factory(self) -> FixMessageFactory:
+        return self._fix_message_factory
 
-        return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
+    @property
+    def heartbeat_timeout(self) -> int:
+        return self._heartbeat_timeout
 
-    async def _handle_sequence_reset(
-            self,
-            admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        assert 'NewSeqNo' in admin_message.fix
-        await self._set_incoming_seqnum(admin_message.fix['NewSeqNo'])
-        return AdminMessage(AdminEvent.INCOMING_SEQNUM_SET)
+    @property
+    def heartbeat_threshold(self) -> int:
+        return self._heartbeat_threshold
 
-    async def _receive_logout(
-            self,
-            admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        await self.on_logout(admin_message.fix)
-        return None
+    @property
+    def logon_time_range(self) -> Optional[Tuple[time, time]]:
+        return self._logon_time_range
 
-    async def _send_test_heartbeat(
-            self,
-            _admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        self._test_heartbeat_message = str(uuid.uuid4())
+    @property
+    def logout_time(self) -> Optional[datetime]:
+        return self._logout_time
 
-        await self.send_message(
-            'TEST_REQUEST',
-            {
-                'TestReqID': self._test_heartbeat_message
-            }
-        )
-        return AdminMessage(AdminEvent.TEST_HEARTBEAT_SENT)
+    @logout_time.setter
+    def logout_time(self, value: datetime) -> None:
+        self._logout_time = value
 
-    async def _validate_test_heartbeat(
-            self,
-            admin_message: AdminMessage
-    ) -> Optional[AdminMessage]:
-        assert 'TestReqID' in admin_message.fix
-        if admin_message.fix['TestReqID'] == self._test_heartbeat_message:
-            return AdminMessage(AdminEvent.TEST_HEARTBEAT_VALID)
-        else:
-            return AdminMessage(AdminEvent.TEST_HEARTBEAT_INVALID)
-
-    async def _handle_transport_connected(
-            self,
-            _transport_message: TransportMessage
-    ) -> Optional[TransportMessage]:
-        LOGGER.info('connected')
-        await self._admin_state_machine.process(
-            AdminMessage(AdminEvent.CONNECTED)
-        )
-        return None
-
-    async def _handle_timeout(
-            self,
-            _transport_message: TransportMessage
-    ) -> Optional[TransportMessage]:
-        if self._admin_state_machine.state != AdminState.AUTHENTICATED:
-            raise RuntimeError('Make a state for this')
-
-        now_utc = self.time_provider.now(timezone.utc)
-        seconds_since_last_receive = (
-            now_utc - self._last_receive_time_utc
-        ).total_seconds()
-        if seconds_since_last_receive - self.heartbeat_timeout > self.heartbeat_threshold:
-            await self._admin_state_machine.process(
-                AdminMessage(AdminEvent.TEST_HEARTBEAT_REQUIRED)
-            )
-
-        return TransportMessage(TransportEvent.TIMEOUT_HANDLED)
-
-    async def _handle_admin_message(self, message: Mapping[str, Any]) -> None:
-        assert 'MsgType' in message
-
-        LOGGER.info('admin message: %s', message)
-
-        await self.on_admin_message(message)
-
-        await self._admin_state_machine.process(
-            AdminMessage(
-                AdminEvent.from_msg_type(message['MsgType']),
-                message
-            )
-        )
-
-    async def _handle_fix(
-            self,
-            transport_message: TransportMessage
-    ) -> Optional[TransportMessage]:
-        await self._session.save_message(transport_message.buffer)
-
-        fix_message = self.fix_message_factory.decode(transport_message.buffer)
-        LOGGER.info('Received %s', fix_message.message)
-
-        msgcat = cast(str, fix_message.meta_data.msgcat)
-        if msgcat == 'admin':
-            await self._handle_admin_message(fix_message.message)
-        else:
-            await self.on_application_message(fix_message.message)
-
-        msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
-        await self._set_incoming_seqnum(msg_seq_num)
-
-        self._last_receive_time_utc = self.time_provider.now(timezone.utc)
-
-        return TransportMessage(TransportEvent.FIX_HANDLED)
+    @property
+    def tz(self) -> Optional[tzinfo]:
+        return self._tz
 
     async def _handle_error(
             self,
             transport_message: TransportMessage
     ) -> None:
         LOGGER.warning('error: %s', transport_message)
-
-    async def _handle_disconnect(
-            self,
-            _transport_message: Optional[TransportMessage]
-    ) -> Optional[TransportMessage]:
-        LOGGER.info('Disconnected')
-        return None
 
     async def _next_transport_message(
             self,
@@ -365,13 +161,16 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
             return
 
         # Is it time to logout?
-        if self.time_provider.now(self.tz or timezone.utc) >= logout_time:
+        if self.time_provider.now(self._tz or timezone.utc) >= logout_time:
             await self._admin_state_machine.process(
                 AdminMessage(AdminEvent.SEND_LOGOUT)
             )
 
     async def _send_heartbeat_if_required(self) -> float:
-        if self._transport_state_machine.state != TransportState.CONNECTED:
+        if (
+                self._transport_state_machine.state != TransportState.CONNECTED
+                or self._last_send_time_utc is None
+        ):
             return self.logon_timeout
 
         now_utc = self.time_provider.now(timezone.utc)
@@ -379,13 +178,13 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
             now_utc - self._last_send_time_utc
         ).total_seconds()
         if (
-                seconds_since_last_send >= self.heartbeat_timeout and
+                seconds_since_last_send >= self._heartbeat_timeout and
                 self._admin_state_machine.state == AdminState.AUTHENTICATED
         ):
             await self.send_message('HEARTBEAT')
             seconds_since_last_send = 0
 
-        seconds_till_next_heartbeat = self.heartbeat_timeout - seconds_since_last_send
+        seconds_till_next_heartbeat = self._heartbeat_timeout - seconds_since_last_send
 
         return seconds_till_next_heartbeat
 
@@ -401,9 +200,6 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
             incoming_seqnum: int
     ) -> None:
         await self._session.set_seqnums(outgoing_seqnum, incoming_seqnum)
-
-    async def _set_incoming_seqnum(self, seqnum: int) -> None:
-        await self._session.set_incoming_seqnum(seqnum)
 
     async def _send_transport_message(
             self,
