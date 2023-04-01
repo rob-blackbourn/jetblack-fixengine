@@ -14,7 +14,7 @@ from ..transports import (
     fix_stream_processor,
     FixReadBuffer,
     fix_read_async,
-    TransportHandler
+    AbstractHandler
 )
 from ..types import Store
 from ..utils.cancellation import register_cancellation_event
@@ -23,11 +23,11 @@ from .acceptor import Acceptor
 
 LOGGER = logging.getLogger(__name__)
 
-ClientFactory = Callable[[], TransportHandler]
+ClientFactory = Callable[[], AbstractHandler]
 
 AcceptorFactory = Callable[
     [ProtocolMetaData, str, str, Store, int, asyncio.Event],
-    TransportHandler
+    AbstractHandler
 ]
 
 

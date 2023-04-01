@@ -2,8 +2,8 @@
 
 from abc import ABCMeta
 
-from ..types import TransportHandler
+from ..types import AbstractHandler
 
 
-class AbstractInitiator(TransportHandler, metaclass=ABCMeta):
+class AbstractInitiator(AbstractHandler, metaclass=ABCMeta):
     """The interface for an initiator"""

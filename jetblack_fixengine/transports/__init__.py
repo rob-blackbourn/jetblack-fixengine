@@ -4,7 +4,7 @@ from .fix_transport import fix_stream_processor
 from .fix_read_buffer import FixReadBuffer
 from .fix_reader_async import fix_read_async
 from .transport_state import (
-    TransportHandler,
+    AbstractHandler,
     TransportState,
     TransportEvent,
     TransportStateProcessor,
@@ -18,7 +18,7 @@ __all__ = [
     'fix_stream_processor',
     'FixReadBuffer',
     'fix_read_async',
-    'TransportHandler',
+    'AbstractHandler',
     'TransportState',
     'TransportEvent',
     'TransportStateProcessor',

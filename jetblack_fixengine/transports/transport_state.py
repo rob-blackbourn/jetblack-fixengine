@@ -129,4 +129,4 @@ class TransportStateProcessor:
 
 Send = Callable[[TransportMessage], Awaitable[None]]
 Receive = Callable[[], Awaitable[TransportMessage]]
-TransportHandler = Callable[[Send, Receive], Awaitable[None]]
+AbstractHandler = Callable[[Send, Receive], Awaitable[None]]

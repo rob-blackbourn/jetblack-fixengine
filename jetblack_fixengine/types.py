@@ -56,7 +56,7 @@ class InvalidStateTransitionError(Exception):
     """An invalid state transition"""
 
 
-class TransportHandler(metaclass=ABCMeta):
+class AbstractHandler(metaclass=ABCMeta):
 
     @property
     @abstractmethod

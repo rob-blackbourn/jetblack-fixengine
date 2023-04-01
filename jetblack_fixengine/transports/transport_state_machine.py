@@ -18,7 +18,7 @@ from ..transports import (
     TransportStateProcessor,
 )
 
-from ..types import TransportHandler
+from ..types import AbstractHandler
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class TransportStateMachine(TransportStateProcessor):
 
     def __init__(
             self,
-            handler: TransportHandler,
+            handler: AbstractHandler,
             admin_state_machine: AdminStateMachineAsync,
             time_provider: TimeProvider
     ) -> None:
