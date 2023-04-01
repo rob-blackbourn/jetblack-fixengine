@@ -9,7 +9,8 @@ from typing import AsyncIterator, Set, cast
 from jetblack_fixparser.fix_message import SOH
 
 from ..utils.cancellation import cancel_await
-from ..transport_state import TransportHandler, TransportMessage, TransportEvent
+from .types import TransportMessage, TransportEvent
+from .state_processor import TransportHandler
 
 LOGGER = logging.getLogger(__name__)
 

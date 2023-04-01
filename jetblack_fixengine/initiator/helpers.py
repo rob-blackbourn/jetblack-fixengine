@@ -8,7 +8,7 @@ from typing import Optional, Callable, Type
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
-from ..transport_state import TransportHandler
+from ..transports import TransportHandler
 from ..types import Store
 from ..utils.cancellation import register_cancellation_event
 
