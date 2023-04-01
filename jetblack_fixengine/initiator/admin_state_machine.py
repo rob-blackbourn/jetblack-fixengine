@@ -1,0 +1,117 @@
+"""The Initiator admin state machine"""
+
+import logging
+from typing import Optional
+
+from ..admin_state import (
+    AdminState,
+    AdminEvent,
+    AdminMessage,
+    AdminStateMachineAsync,
+)
+
+from .state import INITIATOR_ADMIN_TRANSITIONS
+from .types import AbstractInitiator
+
+LOGGER = logging.getLogger(__name__)
+
+
+class InitiatorAdminStateMachine(AdminStateMachineAsync):
+
+    def __init__(
+            self,
+            initiator: AbstractInitiator,
+    ) -> None:
+        super().__init__(
+            INITIATOR_ADMIN_TRANSITIONS,
+            {
+                AdminState.DISCONNECTED: {
+                    AdminEvent.CONNECTED: self._send_logon
+                },
+                AdminState.LOGON_EXPECTED: {
+                    AdminEvent.LOGON_RECEIVED: self._logon_received
+                },
+                AdminState.AUTHENTICATED: {
+                    AdminEvent.HEARTBEAT_RECEIVED: self._acknowledge_heartbeat,
+                    AdminEvent.TEST_REQUEST_RECEIVED: self._send_test_request,
+                    AdminEvent.RESEND_REQUEST_RECEIVED: self._send_sequence_reset,
+                    AdminEvent.SEQUENCE_RESET_RECEIVED: self._reset_incoming_seqnum,
+                    AdminEvent.LOGOUT_RECEIVED: self._acknowledge_logout
+                },
+            }
+        )
+        self.initiator = initiator
+
+    async def _send_logon(
+            self,
+            _admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        """Send a logon message"""
+        await self.initiator.send_message(
+            'LOGON',
+            {
+                'EncryptMethod': 'NONE',
+                'HeartBtInt': self.initiator.heartbeat_timeout
+            }
+        )
+        return AdminMessage(AdminEvent.LOGON_SENT)
+
+    async def _logon_received(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        await self.initiator.on_logon(admin_message.fix)
+        return None
+
+    async def _acknowledge_heartbeat(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        await self.initiator.on_heartbeat(admin_message.fix)
+        return AdminMessage(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
+
+    async def _send_test_request(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        assert 'TestReqID' in admin_message.fix, "expected TestReqID"
+
+        # Respond to the server with the token it sent.
+        await self.initiator.send_message(
+            'TEST_REQUEST',
+            {
+                'TestReqID': admin_message.fix['TestReqID']
+            }
+        )
+        return AdminMessage(AdminEvent.TEST_REQUEST_SENT)
+
+    async def _send_sequence_reset(
+            self,
+            _admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        new_seq_no = await self.initiator.session.get_outgoing_seqnum() + 2
+        await self.initiator.send_message(
+            'SEQUENCE_RESET',
+            {
+                'GapFillFlag': False,
+                'NewSeqNo': new_seq_no
+            }
+        )
+        return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
+
+    async def _reset_incoming_seqnum(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        assert 'NewSeqNo' in admin_message.fix, "expected NewSeqNo"
+        seqnum = admin_message.fix['NewSeqNo']
+        await self.initiator.session.set_incoming_seqnum(seqnum)
+        return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
+
+    async def _acknowledge_logout(
+            self,
+            admin_message: AdminMessage
+    ) -> Optional[AdminMessage]:
+        assert admin_message.fix is not None
+        await self.initiator.on_logout(admin_message.fix)
+        return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
