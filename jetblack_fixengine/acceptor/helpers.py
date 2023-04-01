@@ -14,8 +14,8 @@ from ..transports import (
     fix_stream_processor,
     FixReadBuffer,
     fix_read_async,
-    TransportHandler
 )
+from ..transport_state import TransportHandler
 from ..types import Store
 from ..utils.cancellation import register_cancellation_event
 

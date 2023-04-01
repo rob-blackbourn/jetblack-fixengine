@@ -4,7 +4,7 @@ from enum import Enum, auto
 import logging
 from typing import Callable, Awaitable, Mapping, Optional
 
-from ..types import InvalidStateTransitionError
+from .types import InvalidStateTransitionError
 
 LOGGER = logging.getLogger(__name__)
 

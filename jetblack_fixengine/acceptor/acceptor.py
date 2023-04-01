@@ -21,14 +21,14 @@ from ..admin_state import (
     AdminMessage,
 )
 from ..time_provider import TimeProvider, UTCTimeProvider
-from ..transports import (
+from ..transport_state import (
     TransportState,
     TransportEvent,
     TransportMessage,
     Send,
     Receive,
-    TransportStateMachine
 )
+from ..transport_state_machine import TransportStateMachine
 from ..types import Store, Session
 
 from .admin_state_machine import AcceptorAdminStateMachine
