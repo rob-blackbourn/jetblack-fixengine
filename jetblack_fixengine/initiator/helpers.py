@@ -8,7 +8,7 @@ from typing import Optional, Callable, Type
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
-from ..transports import AbstractHandler
+from ..transports import TransportHandler
 from ..types import Store
 from ..utils.cancellation import register_cancellation_event
 
@@ -19,14 +19,14 @@ LOGGER = logging.getLogger(__name__)
 
 InitiatorFactory = Callable[
     [ProtocolMetaData, str, str, Store, int, asyncio.Event],
-    AbstractHandler
+    TransportHandler
 ]
 
 
 async def initiate(
         host: str,
         port: int,
-        handler: AbstractHandler,
+        handler: TransportHandler,
         cancellation_event: asyncio.Event,
         *,
         ssl: Optional[SSLContext] = None,
