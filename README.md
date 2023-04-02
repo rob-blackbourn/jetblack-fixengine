@@ -30,7 +30,7 @@ await send_message({
 ### FIX Protocols
 
 The FIX protocol is a combination of *well known* messages (like `LOGON`)
-and *custom* messages (like an order to buy or sell trades). The protocol
+and *custom* messages (like an order to buy or sell). The protocol
 has evolved through a number of different versions providing new features.
 
 Because of this the protocols are provided by config files. Historically
