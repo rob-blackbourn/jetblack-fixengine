@@ -53,22 +53,7 @@ from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine import FileStore
 from jetblack_fixengine import start_initiator, Initiator
 
-logging.basicConfig(level=logging.DEBUG)
-
 LOGGER = logging.getLogger(__name__)
-
-root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-etc = os.path.join(root, 'etc')
-
-STORE = FileStore(os.path.join(root, 'store'))
-HOST = '127.0.0.1'
-PORT = 9801
-SENDER_COMP_ID = 'INITIATOR1'
-TARGET_COMP_ID = 'ACCEPTOR'
-LOGON_TIMEOUT = 60
-HEARTBEAT_TIMEOUT = 30
-PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
-
 
 class MyInitiator(Initiator):
     """An instance of the initiator"""
@@ -82,6 +67,19 @@ class MyInitiator(Initiator):
     async def on_application_message(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_application_message')
 
+root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+etc = os.path.join(root, 'etc')
+
+STORE = FileStore(os.path.join(root, 'store'))
+HOST = '127.0.0.1'
+PORT = 9801
+SENDER_COMP_ID = 'INITIATOR1'
+TARGET_COMP_ID = 'ACCEPTOR'
+LOGON_TIMEOUT = 60
+HEARTBEAT_TIMEOUT = 30
+PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
+
+logging.basicConfig(level=logging.DEBUG)
 
 start_initiator(
     MyInitiator,
@@ -110,22 +108,7 @@ from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine import FileStore
 from jetblack_fixengine.acceptor.helpers import start_acceptor, Acceptor
 
-logging.basicConfig(level=logging.DEBUG)
-
 LOGGER = logging.getLogger(__name__)
-
-root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-etc = os.path.join(root, 'etc')
-
-STORE = FileStore(os.path.join(root, 'store'))
-HOST = '0.0.0.0'
-PORT = 9801
-SENDER_COMP_ID = 'ACCEPTOR'
-TARGET_COMP_ID = 'INITIATOR1'
-LOGON_TIMEOUT = 60
-HEARTBEAT_TIMEOUT = 30
-PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
-
 
 class MyAcceptor(Acceptor):
     """An instance of the acceptor"""
@@ -139,6 +122,19 @@ class MyAcceptor(Acceptor):
     async def on_application_message(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_application_message')
 
+root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+etc = os.path.join(root, 'etc')
+
+STORE = FileStore(os.path.join(root, 'store'))
+HOST = '0.0.0.0'
+PORT = 9801
+SENDER_COMP_ID = 'ACCEPTOR'
+TARGET_COMP_ID = 'INITIATOR1'
+LOGON_TIMEOUT = 60
+HEARTBEAT_TIMEOUT = 30
+PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
+
+logging.basicConfig(level=logging.DEBUG)
 
 start_acceptor(
     MyAcceptor,
