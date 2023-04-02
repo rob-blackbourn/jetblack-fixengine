@@ -4,10 +4,10 @@ from abc import abstractmethod, ABCMeta
 from datetime import datetime, time, tzinfo
 from typing import Optional, Tuple
 
-from ..types import AbstractHandler
+from ..types import FIXApplication
 
 
-class AbstractAcceptor(AbstractHandler, metaclass=ABCMeta):
+class AbstractAcceptor(FIXApplication, metaclass=ABCMeta):
     """The interface for an acceptor"""
 
     @property

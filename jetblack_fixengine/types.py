@@ -60,7 +60,8 @@ class LoginError(Exception):
     """An invalid state transition"""
 
 
-class AbstractHandler(metaclass=ABCMeta):
+class FIXApplication(metaclass=ABCMeta):
+    """Abstract base class for FIX applications"""
 
     @property
     @abstractmethod

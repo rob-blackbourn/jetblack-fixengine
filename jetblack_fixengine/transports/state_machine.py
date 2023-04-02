@@ -19,7 +19,7 @@ from .types import (
 )
 from .state_processor import TransportStateProcessor
 
-from ..types import AbstractHandler
+from ..types import FIXApplication
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class TransportStateMachine(TransportStateProcessor):
 
     def __init__(
             self,
-            handler: AbstractHandler,
+            app: FIXApplication,
             admin_state_machine: AdminStateProcessor,
             time_provider: TimeProvider
     ) -> None:
@@ -44,7 +44,7 @@ class TransportStateMachine(TransportStateProcessor):
                 }
             }
         )
-        self._handler = handler
+        self._app = app
         self._admin_state_machine = admin_state_machine
         self._time_provider = time_provider
         self._last_receive_time_utc = self._time_provider.min(timezone.utc)
@@ -63,9 +63,9 @@ class TransportStateMachine(TransportStateProcessor):
             self,
             transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        await self._handler.session.save_message(transport_message.buffer)
+        await self._app.session.save_message(transport_message.buffer)
 
-        fix_message = self._handler.fix_message_factory.decode(
+        fix_message = self._app.fix_message_factory.decode(
             transport_message.buffer
         )
         LOGGER.info('Received %s', fix_message.message)
@@ -74,10 +74,10 @@ class TransportStateMachine(TransportStateProcessor):
         if msgcat == 'admin':
             await self._handle_admin_message(fix_message.message)
         else:
-            await self._handler.on_application_message(fix_message.message)
+            await self._app.on_application_message(fix_message.message)
 
         msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
-        await self._handler.session.set_incoming_seqnum(msg_seq_num)
+        await self._app.session.set_incoming_seqnum(msg_seq_num)
 
         self._last_receive_time_utc = self._time_provider.now(timezone.utc)
 
@@ -88,7 +88,7 @@ class TransportStateMachine(TransportStateProcessor):
 
         LOGGER.info('admin message: %s', message)
 
-        await self._handler.on_admin_message(message)
+        await self._app.on_admin_message(message)
 
         await self._admin_state_machine.process(
             AdminMessage(
@@ -108,8 +108,8 @@ class TransportStateMachine(TransportStateProcessor):
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc
         ).total_seconds()
-        elapsed = seconds_since_last_receive - self._handler.heartbeat_timeout
-        if elapsed > self._handler.heartbeat_threshold:
+        elapsed = seconds_since_last_receive - self._app.heartbeat_timeout
+        if elapsed > self._app.heartbeat_threshold:
             await self._admin_state_machine.process(
                 AdminMessage(AdminEvent.TEST_HEARTBEAT_REQUIRED)
             )
