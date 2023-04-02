@@ -1,5 +1,6 @@
 """A simple Initiator"""
 
+import asyncio
 import logging
 import os.path
 from typing import Mapping, Any
@@ -38,15 +39,17 @@ PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 logging.basicConfig(level=logging.DEBUG)
 
-start_initiator(
-    MyInitiator,
-    HOST,
-    PORT,
-    PROTOCOL,
-    SENDER_COMP_ID,
-    TARGET_COMP_ID,
-    STORE,
-    LOGON_TIMEOUT,
-    HEARTBEAT_TIMEOUT,
-    shutdown_timeout=10
+asyncio.run(
+    start_initiator(
+        MyInitiator,
+        HOST,
+        PORT,
+        PROTOCOL,
+        SENDER_COMP_ID,
+        TARGET_COMP_ID,
+        STORE,
+        LOGON_TIMEOUT,
+        HEARTBEAT_TIMEOUT,
+        shutdown_timeout=10
+    )
 )

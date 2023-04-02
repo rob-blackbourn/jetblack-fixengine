@@ -1,6 +1,7 @@
 """Initiator helpers"""
 
 import asyncio
+from asyncio import Event
 import logging
 from ssl import SSLContext
 from typing import Optional, Callable, Type
@@ -86,7 +87,7 @@ def create_initiator(
     return handler
 
 
-def start_initiator(
+async def start_initiator(
         klass: Type[Initiator],
         host: str,
         port: int,
@@ -101,7 +102,7 @@ def start_initiator(
         shutdown_timeout: float = 10.0,
         heartbeat_threshold: int = 1
 ) -> None:
-    cancellation_event = asyncio.Event()
+    cancellation_event = Event()
     loop = asyncio.get_event_loop()
     register_cancellation_event(cancellation_event, loop)
 
@@ -117,13 +118,11 @@ def start_initiator(
         heartbeat_threshold=heartbeat_threshold
     )
 
-    loop.run_until_complete(
-        initiate(
-            host,
-            port,
-            handler,
-            cancellation_event,
-            ssl=ssl,
-            shutdown_timeout=shutdown_timeout
-        )
+    await initiate(
+        host,
+        port,
+        handler,
+        cancellation_event,
+        ssl=ssl,
+        shutdown_timeout=shutdown_timeout
     )

@@ -1,7 +1,7 @@
 """Acceptor helpers"""
 
 import asyncio
-from asyncio import StreamReader, StreamWriter
+from asyncio import StreamReader, StreamWriter, Event
 from datetime import time, tzinfo
 import logging
 from typing import Callable, Optional, Tuple, Type
@@ -58,7 +58,7 @@ def create_acceptor(
     return handler
 
 
-def start_acceptor(
+async def start_acceptor(
         klass: Type[Acceptor],
         host: str,
         port: int,
@@ -77,7 +77,7 @@ def start_acceptor(
         logon_time_range: Optional[Tuple[time, time]] = None,
         tz: Optional[tzinfo] = None
 ) -> None:
-    cancellation_event = asyncio.Event()
+    cancellation_event = Event()
 
     async def accept(reader: StreamReader, writer: StreamWriter) -> None:
         LOGGER.info("Accepting initiator")
@@ -115,19 +115,10 @@ def start_acceptor(
         " using SSL" if ssl is not None else ""
     )
 
-    factory = asyncio.start_server(accept, host, port, ssl=ssl)
-
     loop = asyncio.get_event_loop()
     register_cancellation_event(cancellation_event, loop)
-    server = loop.run_until_complete(factory)
 
-    try:
-        loop.run_forever()
-    except asyncio.CancelledError:
-        pass
-    finally:
-        LOGGER.debug('Closing server')
-        server.close()
-        loop.run_until_complete(server.wait_closed())
-        LOGGER.debug('closing event loop')
-        loop.close()
+    server = await asyncio.start_server(accept, host, port, ssl=ssl)
+
+    async with server:
+        await server.serve_forever()

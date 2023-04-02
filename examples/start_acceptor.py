@@ -1,5 +1,6 @@
 """Start an acceptor"""
 
+import asyncio
 import logging
 import os.path
 from typing import Mapping, Any
@@ -39,14 +40,16 @@ PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 logging.basicConfig(level=logging.DEBUG)
 
-start_acceptor(
-    MyAcceptor,
-    HOST,
-    PORT,
-    PROTOCOL,
-    SENDER_COMP_ID,
-    TARGET_COMP_ID,
-    STORE,
-    HEARTBEAT_TIMEOUT,
-    client_shutdown_timeout=10
+asyncio.run(
+    start_acceptor(
+        MyAcceptor,
+        HOST,
+        PORT,
+        PROTOCOL,
+        SENDER_COMP_ID,
+        TARGET_COMP_ID,
+        STORE,
+        HEARTBEAT_TIMEOUT,
+        client_shutdown_timeout=10
+    )
 )
