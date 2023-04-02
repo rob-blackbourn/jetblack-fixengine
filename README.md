@@ -1,6 +1,6 @@
 # jetblack-fixengine
 
-A pure python asyncio FIX engine implemented as a state machine.
+A pure python asyncio FIX engine.
 
 ## Status
 
