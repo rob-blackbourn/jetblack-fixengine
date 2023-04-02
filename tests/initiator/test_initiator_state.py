@@ -6,10 +6,10 @@ from jetblack_fixengine.admin.state_processor import (
     AdminStateTransition,
 )
 
-from jetblack_fixengine.transports.state_processor import (
+from jetblack_fixengine.transports.state_transitions import (
     TransportState,
     TransportEvent,
-    TransportStateTransitioner
+    TransportStateTransitions
 )
 
 from jetblack_fixengine.initiator.state import INITIATOR_ADMIN_TRANSITIONS
@@ -62,7 +62,7 @@ def test_initiator_admin_state():
 
 
 def test_initiator_connection_state():
-    state_machine = TransportStateTransitioner()
+    state_machine = TransportStateTransitions()
 
     assert state_machine.state == TransportState.DISCONNECTED
 

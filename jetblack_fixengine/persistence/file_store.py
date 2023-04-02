@@ -112,7 +112,11 @@ class FileStore(Store):
         if key in self._sessions:
             return self._sessions[key]
 
-        session = FileSession(self.directory, sender_comp_id,
-                              target_comp_id, message_style=self.message_style)
+        session = FileSession(
+            self.directory,
+            sender_comp_id,
+            target_comp_id,
+            message_style=self.message_style
+        )
         self._sessions[key] = session
         return session
