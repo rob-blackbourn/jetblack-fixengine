@@ -45,6 +45,7 @@ An initiator is a class which inherits from `Initiator`, and implements a
 few methods, and has access to `send_message`. Here is an example.
 
 ```python
+import asyncio
 import logging
 import os.path
 from typing import Mapping, Any
@@ -54,6 +55,7 @@ from jetblack_fixengine import FileStore
 from jetblack_fixengine import start_initiator, Initiator
 
 LOGGER = logging.getLogger(__name__)
+
 
 class MyInitiator(Initiator):
     """An instance of the initiator"""
@@ -66,6 +68,7 @@ class MyInitiator(Initiator):
 
     async def on_application_message(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_application_message')
+
 
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 etc = os.path.join(root, 'etc')
@@ -81,17 +84,19 @@ PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 logging.basicConfig(level=logging.DEBUG)
 
-start_initiator(
-    MyInitiator,
-    HOST,
-    PORT,
-    PROTOCOL,
-    SENDER_COMP_ID,
-    TARGET_COMP_ID,
-    STORE,
-    LOGON_TIMEOUT,
-    HEARTBEAT_TIMEOUT,
-    shutdown_timeout=10
+asyncio.run(
+    start_initiator(
+        MyInitiator,
+        HOST,
+        PORT,
+        PROTOCOL,
+        SENDER_COMP_ID,
+        TARGET_COMP_ID,
+        STORE,
+        LOGON_TIMEOUT,
+        HEARTBEAT_TIMEOUT,
+        shutdown_timeout=10
+    )
 )
 ```
 
@@ -100,6 +105,7 @@ start_initiator(
 The acceptor works in the same way as the initiator. Here is an example:
 
 ```python
+import asyncio
 import logging
 import os.path
 from typing import Mapping, Any
@@ -108,7 +114,9 @@ from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine import FileStore
 from jetblack_fixengine.acceptor.helpers import start_acceptor, Acceptor
 
+
 LOGGER = logging.getLogger(__name__)
+
 
 class MyAcceptor(Acceptor):
     """An instance of the acceptor"""
@@ -121,6 +129,7 @@ class MyAcceptor(Acceptor):
 
     async def on_application_message(self, _message: Mapping[str, Any]) -> None:
         LOGGER.info('on_application_message')
+
 
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 etc = os.path.join(root, 'etc')
@@ -136,16 +145,18 @@ PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 logging.basicConfig(level=logging.DEBUG)
 
-start_acceptor(
-    MyAcceptor,
-    HOST,
-    PORT,
-    PROTOCOL,
-    SENDER_COMP_ID,
-    TARGET_COMP_ID,
-    STORE,
-    HEARTBEAT_TIMEOUT,
-    client_shutdown_timeout=10
+asyncio.run(
+    start_acceptor(
+        MyAcceptor,
+        HOST,
+        PORT,
+        PROTOCOL,
+        SENDER_COMP_ID,
+        TARGET_COMP_ID,
+        STORE,
+        HEARTBEAT_TIMEOUT,
+        client_shutdown_timeout=10
+    )
 )
 ```
 
