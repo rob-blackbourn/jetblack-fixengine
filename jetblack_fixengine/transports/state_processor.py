@@ -1,4 +1,4 @@
-"""Connection State"""
+"""A transport state processor"""
 
 import logging
 from typing import Callable, Awaitable, Optional
@@ -14,7 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TransportStateProcessor(TransportStateTransitions):
-    """A transport state machine with async bindings"""
+    """A transport state processor with async bindings"""
 
     def __init__(
             self,

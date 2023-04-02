@@ -1,4 +1,4 @@
-"""Connection State"""
+"""Transport state transitions"""
 
 import logging
 
@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TransportStateTransitions:
+    """A class to manage state transitions for the transport"""
 
     TRANSITIONS: TransportTransitionMapping = {
         TransportState.DISCONNECTED:  {

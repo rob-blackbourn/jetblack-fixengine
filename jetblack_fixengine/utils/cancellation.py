@@ -1,7 +1,7 @@
 """Utilities for handling cancellation"""
 
 import asyncio
-from asyncio import Task
+from asyncio import AbstractEventLoop, Event, Task
 import logging
 import signal
 from typing import Callable, Optional
@@ -9,7 +9,11 @@ from typing import Callable, Optional
 LOGGER = logging.getLogger(__name__)
 
 
-def _cancel(signame: str, signum: int, cancellation_event: asyncio.Event) -> None:
+def _cancel(
+        signame: str,
+        signum: int,
+        cancellation_event: Event
+) -> None:
     msg = f'received signal {signame}'
     if signum == signal.SIGINT:
         LOGGER.info(msg)
@@ -18,7 +22,10 @@ def _cancel(signame: str, signum: int, cancellation_event: asyncio.Event) -> Non
     cancellation_event.set()
 
 
-def register_cancellation_event(cancellation_event: asyncio.Event, loop: asyncio.AbstractEventLoop):
+def register_cancellation_event(
+        cancellation_event: Event,
+        loop: AbstractEventLoop
+) -> None:
     for signame in ('SIGHUP', 'SIGINT', 'SIGTERM'):
         signum = getattr(signal, signame)
         loop.add_signal_handler(

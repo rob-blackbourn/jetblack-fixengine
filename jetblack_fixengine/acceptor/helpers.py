@@ -1,4 +1,4 @@
-"""Acceptor helpers"""
+"""Helper functions"""
 
 import asyncio
 from asyncio import StreamReader, StreamWriter, Event
@@ -31,7 +31,7 @@ AcceptorFactory = Callable[
 ]
 
 
-def create_acceptor(
+def _create_acceptor(
         klass: Type[Acceptor],
         protocol: ProtocolMetaData,
         sender_comp_id: str,
@@ -88,7 +88,7 @@ async def start_acceptor(
             validate
         )
         buffered_reader = fix_read_async(read_buffer, reader, 1024)
-        handler = create_acceptor(
+        handler = _create_acceptor(
             klass,
             protocol,
             sender_comp_id,

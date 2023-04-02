@@ -1,4 +1,4 @@
-"""The initiator manager"""
+"""An initiator manager"""
 
 import asyncio
 import calendar
@@ -8,18 +8,17 @@ from ssl import SSLContext
 from typing import Callable, Optional, Tuple, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
-from ..initiator import Initiator, create_initiator
+
+from ..initiator import Initiator, create_initiator, initiate
 from ..types import Store
-from ..initiator import initiate
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_event
 
 LOGGER = logging.getLogger(__name__)
 
-WEEKDAYS = ['Monday', 'Tuesday']
-
 
 class InitiatorManager:
+    """A class to manage an initiator lifecycle"""
 
     def __init__(
             self,

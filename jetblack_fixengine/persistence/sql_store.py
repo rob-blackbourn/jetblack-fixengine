@@ -1,4 +1,4 @@
-"""A sqlite2 store"""
+"""A sqlite3 store"""
 
 import sqlite3
 from typing import Any, List, Mapping, MutableMapping, Tuple
@@ -66,6 +66,7 @@ VALUES ( ?, ?, ?, ?, ?)
 
 
 class SqlSession(Session):
+    """A persistent session backed by sqlite"""
 
     def __init__(
             self,
@@ -86,7 +87,9 @@ class SqlSession(Session):
             self._outgoing_seqnum, self._incoming_seqnum = result
         else:
             cursor.execute(
-                SEQNUM_INSERT, (sender_comp_id, target_comp_id, 0, 0))
+                SEQNUM_INSERT,
+                (sender_comp_id, target_comp_id, 0, 0)
+            )
             conn.commit()
             self._outgoing_seqnum, self._incoming_seqnum = 0, 0
 
@@ -109,8 +112,12 @@ class SqlSession(Session):
         async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
             await db.execute(
                 SEQNUM_UPDATE,
-                (self._outgoing_seqnum, self._incoming_seqnum,
-                 self.sender_comp_id, self.target_comp_id)
+                (
+                    self._outgoing_seqnum,
+                    self._incoming_seqnum,
+                    self.sender_comp_id,
+                    self.target_comp_id
+                )
             )
             await db.commit()
 
@@ -122,7 +129,11 @@ class SqlSession(Session):
         async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
             await db.execute(
                 SEQNUM_UPDATE_OUTGOING,
-                (self._outgoing_seqnum, self.sender_comp_id, self.target_comp_id)
+                (
+                    self._outgoing_seqnum,
+                    self.sender_comp_id,
+                    self.target_comp_id
+                )
             )
             await db.commit()
 
@@ -134,7 +145,11 @@ class SqlSession(Session):
         async with aiosqlite.connect(*self.conn_args, **self.conn_kwargs) as db:
             await db.execute(
                 SEQNUM_UPDATE_INCOMING,
-                (self._incoming_seqnum, self.sender_comp_id, self.target_comp_id)
+                (
+                    self._incoming_seqnum,
+                    self.sender_comp_id,
+                    self.target_comp_id
+                )
             )
             await db.commit()
 
@@ -143,13 +158,19 @@ class SqlSession(Session):
             message = buf.decode('ascii')
             await db.execute(
                 MESSAGE_INSERT,
-                (self.sender_comp_id, self.target_comp_id,
-                 self._outgoing_seqnum, self._incoming_seqnum, message)
+                (
+                    self.sender_comp_id,
+                    self.target_comp_id,
+                    self._outgoing_seqnum,
+                    self._incoming_seqnum,
+                    message
+                )
             )
             await db.commit()
 
 
 class SqlStore(Store):
+    """A session store back by sqlite"""
 
     def __init__(
             self,
@@ -170,7 +191,11 @@ class SqlStore(Store):
         if key in self._sessions:
             return self._sessions[key]
 
-        session = SqlSession(self.conn_args, self.conn_kwargs,
-                             sender_comp_id, target_comp_id)
+        session = SqlSession(
+            self.conn_args,
+            self.conn_kwargs,
+            sender_comp_id,
+            target_comp_id
+        )
         self._sessions[key] = session
         return session

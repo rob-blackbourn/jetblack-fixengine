@@ -1,4 +1,4 @@
-"""The Initiator handler class"""
+"""An Initiator"""
 
 from abc import ABCMeta
 import asyncio
@@ -12,7 +12,7 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 from ..admin import (
     AdminState,
 )
-from ..time_provider import TimeProvider, UTCTimeProvider
+from ..time_provider import TimeProvider, DefaultTimeProvider
 from ..transports import (
     TransportState,
     TransportEvent,
@@ -54,7 +54,7 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
             sender_comp_id,
             target_comp_id
         )
-        self._time_provider = time_provider or UTCTimeProvider()
+        self._time_provider = time_provider or DefaultTimeProvider()
 
         self._last_send_time_utc = self._time_provider.min(timezone.utc)
         self._session = store.get_session(sender_comp_id, target_comp_id)

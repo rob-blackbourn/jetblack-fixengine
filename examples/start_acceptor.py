@@ -5,9 +5,9 @@ import logging
 import os.path
 from typing import Mapping, Any
 
-from jetblack_fixparser.loader import load_yaml_protocol
+from jetblack_fixparser import load_yaml_protocol
 from jetblack_fixengine import FileStore
-from jetblack_fixengine.acceptor.helpers import start_acceptor, Acceptor
+from jetblack_fixengine import start_acceptor, Acceptor
 
 
 LOGGER = logging.getLogger(__name__)

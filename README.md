@@ -50,7 +50,7 @@ import logging
 import os.path
 from typing import Mapping, Any
 
-from jetblack_fixparser.loader import load_yaml_protocol
+from jetblack_fixparser import load_yaml_protocol
 from jetblack_fixengine import FileStore
 from jetblack_fixengine import start_initiator, Initiator
 
@@ -110,9 +110,9 @@ import logging
 import os.path
 from typing import Mapping, Any
 
-from jetblack_fixparser.loader import load_yaml_protocol
+from jetblack_fixparser import load_yaml_protocol
 from jetblack_fixengine import FileStore
-from jetblack_fixengine.acceptor.helpers import start_acceptor, Acceptor
+from jetblack_fixengine import start_acceptor, Acceptor
 
 
 LOGGER = logging.getLogger(__name__)
@@ -166,7 +166,7 @@ the logon request.
 ### Stores
 
 The engines need to store their state. Two stores are currently provided:
-a file store and sqlite.
+a file store (`FileStore`) and sqlite (`SqlStore`).
 
 ## Implementation
 

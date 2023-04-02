@@ -1,4 +1,4 @@
-"""The Initiator admin state machine"""
+"""Admin state machine"""
 
 import logging
 from typing import Optional

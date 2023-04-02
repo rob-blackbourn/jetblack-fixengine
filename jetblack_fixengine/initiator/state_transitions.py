@@ -1,6 +1,4 @@
-"""Initiator state management"""
-
-from __future__ import annotations
+"""Admin state transitions"""
 
 from typing import Mapping
 

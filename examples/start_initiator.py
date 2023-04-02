@@ -5,7 +5,7 @@ import logging
 import os.path
 from typing import Mapping, Any
 
-from jetblack_fixparser.loader import load_yaml_protocol
+from jetblack_fixparser import load_yaml_protocol
 from jetblack_fixengine import FileStore
 from jetblack_fixengine import start_initiator, Initiator
 

@@ -1,4 +1,4 @@
-"""Acceptor handler"""
+"""An acceptor"""
 
 from abc import ABCMeta
 import asyncio
@@ -20,7 +20,7 @@ from ..admin import (
     AdminEvent,
     AdminMessage,
 )
-from ..time_provider import TimeProvider, UTCTimeProvider
+from ..time_provider import TimeProvider, DefaultTimeProvider
 from ..transports import (
     TransportState,
     TransportEvent,
@@ -64,7 +64,7 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
         self._logon_time_range = logon_time_range
         self.logon_timeout = logon_timeout
         self._tz = tz
-        self.time_provider = time_provider or UTCTimeProvider()
+        self.time_provider = time_provider or DefaultTimeProvider()
         self._fix_message_factory = FixMessageFactory(
             protocol,
             sender_comp_id,

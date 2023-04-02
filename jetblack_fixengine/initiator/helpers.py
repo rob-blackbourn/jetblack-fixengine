@@ -1,4 +1,4 @@
-"""Initiator helpers"""
+"""Helper functions"""
 
 import asyncio
 from asyncio import Event
@@ -14,6 +14,7 @@ from ..types import Store
 from ..utils.cancellation import register_cancellation_event
 
 from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
+
 from .initiator import Initiator
 
 LOGGER = logging.getLogger(__name__)

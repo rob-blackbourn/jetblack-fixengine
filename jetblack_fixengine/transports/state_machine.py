@@ -1,4 +1,4 @@
-"""Acceptor handler"""
+"""Transport state machine"""
 
 from datetime import timezone
 import logging
@@ -25,6 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TransportStateMachine(TransportStateProcessor):
+    """A state machine for the transport layer"""
 
     def __init__(
             self,

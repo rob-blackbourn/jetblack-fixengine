@@ -7,49 +7,89 @@ from jetblack_fixparser.fix_message import FixMessageFactory
 
 
 class Session(metaclass=ABCMeta):
+    """A FIX session"""
 
     @property
     @abstractmethod
     def sender_comp_id(self) -> str:
-        raise NotImplementedError
+        """The sender comp id."""
 
     @property
+    @abstractmethod
     def target_comp_id(self) -> str:
-        raise NotImplementedError
+        """The target comp id."""
 
     @abstractmethod
     async def get_seqnums(self) -> Tuple[int, int]:
-        raise NotImplementedError
+        """Get both seqnums.
+
+        Returns:
+            Tuple[int, int]: A tuple of the outgoing and incoming seqnums
+        """
 
     @abstractmethod
     async def set_seqnums(self, outgoing_seqnum: int, incoming_seqnum: int) -> None:
-        raise NotImplementedError
+        """Set both seqnums
+
+        Args:
+            outgoing_seqnum (int): The outgoing seqnum.
+            incoming_seqnum (int): The incoming seqnum.
+        """
 
     @abstractmethod
     async def get_outgoing_seqnum(self) -> int:
-        raise NotImplementedError
+        """Get the outgoing seqnum.
+
+        Returns:
+            int: The outgoing seqnum.
+        """
 
     @abstractmethod
     async def set_outgoing_seqnum(self, seqnum: int) -> None:
-        raise NotImplementedError
+        """Set the outgoing seqnum.
+
+        Args:
+            seqnum (int): The outgoing seqnum.
+        """
 
     @abstractmethod
     async def get_incoming_seqnum(self) -> int:
-        raise NotImplementedError
+        """Get the incoming seqnum.
+
+        Returns:
+            int: The seqnum.
+        """
 
     @abstractmethod
     async def set_incoming_seqnum(self, seqnum: int) -> None:
-        raise NotImplementedError
+        """Set the incoming seqnum.
+
+        Args:
+            seqnum (int): The seqnum.
+        """
 
     @abstractmethod
     async def save_message(self, buf: bytes) -> None:
-        raise NotImplementedError
+        """Save a message
+
+        Args:
+            buf (bytes): The message.
+        """
 
 
 class Store(metaclass=ABCMeta):
 
+    @abstractmethod
     def get_session(self, sender_comp_id: str, target_comp_id: str) -> Session:
-        raise NotImplementedError
+        """Get a session.
+
+        Args:
+            sender_comp_id (str): The sender comp id.
+            target_comp_id (str): The target comp id.
+
+        Returns:
+            Session: A session for the sender and target.
+        """
 
 
 class InvalidStateTransitionError(Exception):

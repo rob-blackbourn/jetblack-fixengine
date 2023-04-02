@@ -1,4 +1,4 @@
-"""Acceptor admin state machine"""
+"""Admin state machine"""
 
 import asyncio
 from datetime import timezone
