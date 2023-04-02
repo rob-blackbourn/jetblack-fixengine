@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jetblack-fixengine"
-version = "1.0.0-alpha.2"
+version = "1.0.0-alpha.3"
 description = "A pure Python implementation of the FIX protocol"
 authors = ["Rob Blackbourn <rob.blackbourn@googlemail.com>"]
 license = "Apache-2.0"
@@ -17,7 +17,7 @@ aiofiles = "^23.1"
 aiosqlite = "^0.18.0"
 pytz = "^2022.7"
 tzlocal = "^4.3"
-jetblack-fixparser = "^2.3"
+jetblack-fixparser = "^2.4"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^2.0"

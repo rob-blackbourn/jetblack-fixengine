@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-import os.path
+from pathlib import Path
 from typing import Mapping, Any
 
 from jetblack_fixparser import load_yaml_protocol
@@ -25,17 +25,14 @@ class MyInitiator(Initiator):
         LOGGER.info('on_application_message')
 
 
-root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-etc = os.path.join(root, 'etc')
-
-STORE = FileStore(os.path.join(root, 'store'))
+PROTOCOL = load_yaml_protocol(Path('etc') / 'FIX44.yaml')
+STORE = FileStore(Path('store'))
 HOST = '127.0.0.1'
 PORT = 9801
 SENDER_COMP_ID = 'INITIATOR1'
 TARGET_COMP_ID = 'ACCEPTOR'
 LOGON_TIMEOUT = 60
 HEARTBEAT_TIMEOUT = 30
-PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 logging.basicConfig(level=logging.DEBUG)
 

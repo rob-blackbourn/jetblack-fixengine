@@ -6,6 +6,14 @@ A pure python asyncio FIX engine implemented as a state machine.
 
 This is work in progress.
 
+## Installation
+
+The package can be install from the pie store.
+
+```bash
+pip install jetblack-fixengine
+```
+
 ## Overview
 
 This project provides a pure Python, asyncio implementation of
@@ -35,7 +43,9 @@ has evolved through a number of different versions providing new features.
 
 Because of this the protocols are provided by config files. Historically
 `XML` was used. While this is supported, `yaml` is preferred and some
-example protocols are provided in the [etc](etc) folder.
+example protocols are provided in the
+[etc](https://github.com/rob-blackbourn/jetblack-fixengine/tree/master/etc)
+folder.
 
 Currently supported versions are 4.0, 4.1, 4.2, 4.3, 4.4.
 
@@ -47,7 +57,7 @@ few methods, and has access to `send_message`. Here is an example.
 ```python
 import asyncio
 import logging
-import os.path
+from pathlib import Path
 from typing import Mapping, Any
 
 from jetblack_fixparser import load_yaml_protocol
@@ -70,17 +80,14 @@ class MyInitiator(Initiator):
         LOGGER.info('on_application_message')
 
 
-root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-etc = os.path.join(root, 'etc')
-
-STORE = FileStore(os.path.join(root, 'store'))
+PROTOCOL = load_yaml_protocol(Path('etc') / 'FIX44.yaml')
+STORE = FileStore(Path("store"))
 HOST = '127.0.0.1'
 PORT = 9801
 SENDER_COMP_ID = 'INITIATOR1'
 TARGET_COMP_ID = 'ACCEPTOR'
 LOGON_TIMEOUT = 60
 HEARTBEAT_TIMEOUT = 30
-PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -107,7 +114,7 @@ The acceptor works in the same way as the initiator. Here is an example:
 ```python
 import asyncio
 import logging
-import os.path
+from pathlib import Path
 from typing import Mapping, Any
 
 from jetblack_fixparser import load_yaml_protocol
@@ -131,17 +138,14 @@ class MyAcceptor(Acceptor):
         LOGGER.info('on_application_message')
 
 
-root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-etc = os.path.join(root, 'etc')
-
-STORE = FileStore(os.path.join(root, 'store'))
+PROTOCOL = load_yaml_protocol(Path('etc') / 'FIX44.yaml')
+STORE = FileStore(Path("store"))
 HOST = '0.0.0.0'
 PORT = 9801
 SENDER_COMP_ID = 'ACCEPTOR'
 TARGET_COMP_ID = 'INITIATOR1'
 LOGON_TIMEOUT = 60
 HEARTBEAT_TIMEOUT = 30
-PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 logging.basicConfig(level=logging.DEBUG)
 
