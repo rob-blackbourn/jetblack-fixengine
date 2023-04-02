@@ -10,6 +10,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/examples/start_initiator.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Start Acceptor",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/start_acceptor.py",
+            "console": "integratedTerminal"
         }
     ]
 }

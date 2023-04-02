@@ -7,7 +7,7 @@ import os.path
 import pytz
 from typing import Optional, Mapping, Any
 
-from jetblack_fixengine.transports import InitiatorHandler
+from jetblack_fixengine.initiator import Initiator
 from jetblack_fixengine.persistence import FileStore
 from jetblack_fixengine.managers import start_initiator_manager
 from jetblack_fixparser.loader import load_yaml_protocol
@@ -25,25 +25,24 @@ PORT = 10101
 SENDER_COMP_ID = 'CLIENT'
 TARGET_COMP_ID = 'SERVER'
 PROTOCOL = load_yaml_protocol(os.path.join(etc, 'FIX44.yaml'))
+LOGON_TIMEOUT = 10
 HEARTBEAT_TIMEOUT = 30
 TZ = pytz.timezone('Europe/London')
 
 
-class MyInitiatorHandler(InitiatorHandler):
+class MyInitiatorHandler(Initiator):
 
-    async def on_logon(self) -> None:
-        logger.info('on_logon')
+    async def on_logon(self, message: Mapping[str, Any]) -> None:
+        logger.info('on_logon %s', message)
 
-    async def on_logout(self) -> None:
-        logger.info('on_logout')
+    async def on_logout(self, message: Mapping[str, Any]) -> None:
+        logger.info('on_logout %s', message)
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> Optional[bool]:
+    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         logger.info('on_admin_message %s', message)
-        return None
 
-    async def on_application_message(self, message: Mapping[str, Any]) -> bool:
+    async def on_application_message(self, message: Mapping[str, Any]) -> None:
         logger.info('on_application_message %s', message)
-        return True
 
 
 start_initiator_manager(
@@ -54,6 +53,7 @@ start_initiator_manager(
     SENDER_COMP_ID,
     TARGET_COMP_ID,
     STORE,
+    LOGON_TIMEOUT,
     HEARTBEAT_TIMEOUT,
     tz=TZ,
     # session_dow_range=(calendar.MONDAY, calendar.FRIDAY),

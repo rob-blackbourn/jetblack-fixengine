@@ -1,34 +1,32 @@
-"""Initiator transport"""
+"""Initiator helpers"""
 
 import asyncio
-from datetime import tzinfo, time
 import logging
 from ssl import SSLContext
-from typing import Optional, Callable, Type, Tuple
+from typing import Optional, Callable, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
-from ..types import Handler, Store
+from ..transports import TransportHandler
+from ..types import Store
 from ..utils.cancellation import register_cancellation_event
 
-from .fix_transport import fix_stream_processor
-from .fix_read_buffer import FixReadBuffer
-from .fix_reader_async import fix_read_async
-from .initiator_handler import InitiatorHandler
+from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
+from .initiator import Initiator
 
 LOGGER = logging.getLogger(__name__)
 
 InitiatorFactory = Callable[
     [ProtocolMetaData, str, str, Store, int, asyncio.Event],
-    Handler
+    TransportHandler
 ]
 
 
 async def initiate(
         host: str,
         port: int,
-        handler: Handler,
+        handler: TransportHandler,
         cancellation_event: asyncio.Event,
         *,
         ssl: Optional[SSLContext] = None,
@@ -64,48 +62,44 @@ async def initiate(
 
 
 def create_initiator(
-        klass: Type[InitiatorHandler],
+        klass: Type[Initiator],
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
         store: Store,
+        logon_timeout: int,
         heartbeat_timeout: int,
         cancellation_event: asyncio.Event,
         *,
-        heartbeat_threshold: int = 1,
-        logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: Optional[tzinfo] = None
-) -> InitiatorHandler:
+        heartbeat_threshold: int = 1
+) -> Initiator:
     handler = klass(
         protocol,
         sender_comp_id,
         target_comp_id,
         store,
+        logon_timeout,
         heartbeat_timeout,
         cancellation_event,
-        heartbeat_threshold=heartbeat_threshold,
-        logon_time_range=logon_time_range,
-        tz=tz
+        heartbeat_threshold=heartbeat_threshold
     )
     return handler
 
 
 def start_initiator(
-        klass: Type[InitiatorHandler],
+        klass: Type[Initiator],
         host: str,
         port: int,
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
         store: Store,
+        logon_timeout: int,
         heartbeat_timeout: int,
         *,
         ssl: Optional[SSLContext] = None,
         shutdown_timeout: float = 10.0,
-        heartbeat_threshold: int = 1,
-        logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: Optional[tzinfo] = None
-
+        heartbeat_threshold: int = 1
 ) -> None:
     cancellation_event = asyncio.Event()
     loop = asyncio.get_event_loop()
@@ -117,11 +111,10 @@ def start_initiator(
         sender_comp_id,
         target_comp_id,
         store,
+        logon_timeout,
         heartbeat_timeout,
         cancellation_event,
-        heartbeat_threshold=heartbeat_threshold,
-        logon_time_range=logon_time_range,
-        tz=tz
+        heartbeat_threshold=heartbeat_threshold
     )
 
     loop.run_until_complete(

@@ -8,9 +8,9 @@ from ssl import SSLContext
 from typing import Callable, Optional, Tuple, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
-from ..transports import InitiatorHandler, create_initiator
+from ..initiator import Initiator, create_initiator
 from ..types import Store
-from ..transports import initiate
+from ..initiator import initiate
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_event
 
@@ -23,7 +23,7 @@ class InitiatorManager:
 
     def __init__(
             self,
-            handler_factory: Callable[[], InitiatorHandler],
+            handler_factory: Callable[[], Initiator],
             host: str,
             port: int,
             cancellation_event: asyncio.Event,
@@ -98,12 +98,12 @@ class InitiatorManager:
                 )
             except asyncio.TimeoutError:
                 # After logout we should disconnect.
-                await handler.send_logout()
+                await handler.logout()
 
                 try:
                     await asyncio.wait(
                         [
-                            handler.wait_closed(),
+                            handler.wait_stopped(),
                             self.cancellation_event.wait()
                         ],
                         timeout=10,
@@ -114,13 +114,14 @@ class InitiatorManager:
 
 
 def start_initiator_manager(
-        klass: Type[InitiatorHandler],
+        klass: Type[Initiator],
         host: str,
         port: int,
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
         store: Store,
+        logon_timeout: int,
         heartbeat_timeout: int,
         *,
         ssl: Optional[SSLContext] = None,
@@ -133,18 +134,17 @@ def start_initiator_manager(
 ) -> None:
     cancellation_event = asyncio.Event()
 
-    def initiator_factory() -> InitiatorHandler:
+    def initiator_factory() -> Initiator:
         return create_initiator(
             klass,
             protocol,
             sender_comp_id,
             target_comp_id,
             store,
+            logon_timeout,
             heartbeat_timeout,
             cancellation_event,
-            heartbeat_threshold=heartbeat_threshold,
-            logon_time_range=logon_time_range,
-            tz=tz
+            heartbeat_threshold=heartbeat_threshold
         )
 
     manager = InitiatorManager(

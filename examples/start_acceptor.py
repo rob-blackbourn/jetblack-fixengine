@@ -1,4 +1,4 @@
-"""A simple Initiator"""
+"""Start an acceptor"""
 
 import logging
 import os.path
@@ -6,7 +6,7 @@ from typing import Mapping, Any
 
 from jetblack_fixparser.loader import load_yaml_protocol
 from jetblack_fixengine import FileStore
-from jetblack_fixengine import start_initiator, Initiator
+from jetblack_fixengine.acceptor.helpers import start_acceptor, Acceptor
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -16,19 +16,19 @@ root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 etc = os.path.join(root, 'etc')
 
 STORE = FileStore(os.path.join(root, 'store'))
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORT = 9801
-SENDER_COMP_ID = 'INITIATOR1'
-TARGET_COMP_ID = 'ACCEPTOR'
+SENDER_COMP_ID = 'ACCEPTOR'
+TARGET_COMP_ID = 'INITIATOR1'
 LOGON_TIMEOUT = 60
 HEARTBEAT_TIMEOUT = 30
 PROTOCOL = load_yaml_protocol('etc/FIX44.yaml')
 
 
-class MyInitiator(Initiator):
-    """An instance of the initiator"""
+class MyAcceptor(Acceptor):
+    """An instance of the acceptor"""
 
-    async def on_logon(self, _message: Mapping[str, Any]) -> None:
+    async def on_logon(self, _message: Mapping[str, Any]):
         LOGGER.info('on_logon')
 
     async def on_logout(self, _message: Mapping[str, Any]) -> None:
@@ -38,15 +38,14 @@ class MyInitiator(Initiator):
         LOGGER.info('on_application_message')
 
 
-start_initiator(
-    MyInitiator,
+start_acceptor(
+    MyAcceptor,
     HOST,
     PORT,
     PROTOCOL,
     SENDER_COMP_ID,
     TARGET_COMP_ID,
     STORE,
-    LOGON_TIMEOUT,
     HEARTBEAT_TIMEOUT,
-    shutdown_timeout=10
+    client_shutdown_timeout=10
 )
