@@ -16,7 +16,7 @@ from ..time_provider import TimeProvider
 from ..types import LoginError
 from ..utils.date_utils import wait_for_time_period
 
-from .state import ACCEPTOR_ADMIN_TRANSITIONS
+from .state_transitions import ACCEPTOR_ADMIN_TRANSITIONS
 from .types import AbstractAcceptor
 
 LOGGER = logging.getLogger(__name__)

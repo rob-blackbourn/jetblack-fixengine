@@ -31,7 +31,7 @@ from ..transports import (
 )
 from ..types import Store, Session
 
-from .admin_state_machine import AcceptorAdminStateMachine
+from .state_machine import AcceptorAdminStateMachine
 from .types import AbstractAcceptor
 
 LOGGER = logging.getLogger(__name__)

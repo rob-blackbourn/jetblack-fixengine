@@ -23,7 +23,7 @@ from ..transports import (
 )
 from ..types import Store, Session
 
-from .admin_state_machine import InitiatorAdminStateMachine
+from .state_machine import InitiatorAdminStateMachine
 from .types import AbstractInitiator
 
 LOGGER = logging.getLogger(__name__)

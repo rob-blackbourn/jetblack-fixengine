@@ -11,7 +11,7 @@ from ..admin import (
     AdminStateProcessor,
 )
 
-from .state import INITIATOR_ADMIN_TRANSITIONS
+from .state_transitions import INITIATOR_ADMIN_TRANSITIONS
 from .types import AbstractInitiator
 
 LOGGER = logging.getLogger(__name__)

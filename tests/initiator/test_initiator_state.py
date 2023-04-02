@@ -21,8 +21,8 @@ from jetblack_fixengine.transports.state_transitions import (
     TransportStateTransitions
 )
 
-from jetblack_fixengine.initiator.admin_state_machine import InitiatorAdminStateMachine
-from jetblack_fixengine.initiator.state import INITIATOR_ADMIN_TRANSITIONS
+from jetblack_fixengine.initiator.state_machine import InitiatorAdminStateMachine
+from jetblack_fixengine.initiator.state_transitions import INITIATOR_ADMIN_TRANSITIONS
 
 from ..mocks import MockSession
 from .mocks import MockInitiatorApp
