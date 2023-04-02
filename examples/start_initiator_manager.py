@@ -25,11 +25,12 @@ PORT = 10101
 SENDER_COMP_ID = 'CLIENT'
 TARGET_COMP_ID = 'SERVER'
 PROTOCOL = load_yaml_protocol(os.path.join(etc, 'FIX44.yaml'))
+LOGON_TIMEOUT = 10
 HEARTBEAT_TIMEOUT = 30
 TZ = pytz.timezone('Europe/London')
 
 
-class MyInitatorHandler(Initiator):
+class MyInitiatorHandler(Initiator):
 
     async def on_logon(self, message: Mapping[str, Any]) -> None:
         logger.info('on_logon %s', message)
@@ -52,6 +53,7 @@ start_initiator_manager(
     SENDER_COMP_ID,
     TARGET_COMP_ID,
     STORE,
+    LOGON_TIMEOUT,
     HEARTBEAT_TIMEOUT,
     tz=TZ,
     # session_dow_range=(calendar.MONDAY, calendar.FRIDAY),
