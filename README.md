@@ -163,6 +163,11 @@ asyncio.run(
 Note that throwing the exception `LogonError` from `on_logon` will reject
 the logon request.
 
+### Stores
+
+The engines need to store their state. Two stores are currently provided:
+a file store and sqlite.
+
 ## Implementation
 
 The engines are implemented as state machines. This means they can be
