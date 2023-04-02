@@ -1,8 +1,10 @@
 """Mocks"""
 
+from datetime import datetime, tzinfo
 from typing import Tuple
 
 from jetblack_fixengine import Session, Store
+from jetblack_fixengine.time_provider import TimeProvider
 
 
 class MockSession(Session):
@@ -56,3 +58,16 @@ class MockStore(Store):
 
     def get_session(self, sender_comp_id: str, target_comp_id: str) -> Session:
         return MockSession(sender_comp_id, target_comp_id, 1, 1)
+
+
+class MockTimeProvider(TimeProvider):
+
+    def __init__(self, timestamp: datetime) -> None:
+        super().__init__()
+        self.timestamp = timestamp
+
+    def now(self, tz: tzinfo) -> datetime:
+        return self.timestamp
+
+    def min(self, tz: tzinfo) -> datetime:
+        return datetime.fromtimestamp(0, tz)

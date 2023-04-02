@@ -24,16 +24,18 @@ from jetblack_fixengine.transports.state_transitions import (
 from jetblack_fixengine.initiator.state_machine import InitiatorAdminStateMachine
 from jetblack_fixengine.initiator.state_transitions import INITIATOR_ADMIN_TRANSITIONS
 
-from ..mocks import MockSession
+from ..mocks import MockSession, MockTimeProvider
 from .mocks import MockInitiatorApp
 
 
 @pytest.mark.asyncio
 async def test_logon() -> None:
-    """Test for login"""
+    """Test for logon"""
     sender_comp_id = "INITIATOR"
     target_comp_id = "ACCEPTOR"
+    time_provider = MockTimeProvider(datetime(2000, 1, 1, tzinfo=timezone.utc))
     session = MockSession(sender_comp_id, target_comp_id, 0, 0)
+
     protocol = load_yaml_protocol('etc/FIX44.yaml')
     fix_message_factory = FixMessageFactory(
         protocol,
@@ -47,12 +49,16 @@ async def test_logon() -> None:
             msg_type: str,
             message: Optional[Mapping[str, Any]]
     ) -> None:
+        seqnum = await session.get_outgoing_seqnum()
+        seqnum += 1
+        await session.set_outgoing_seqnum(seqnum)
         messages.append((msg_type, message))
 
+    heartbeat_timeout = 30
     initiator = MockInitiatorApp(
         session,
         fix_message_factory,
-        30,
+        heartbeat_timeout,
         1,
         send_message
     )
@@ -61,20 +67,40 @@ async def test_logon() -> None:
 
     state = await state_machine.process(AdminMessage(AdminEvent.CONNECTED))
     assert state == AdminState.LOGON_EXPECTED
+    msg_type, message = messages[-1]
+    assert msg_type == 'LOGON'
+    assert message is not None
+    assert message['HeartBtInt'] == heartbeat_timeout
 
-    state = await state_machine.process(AdminMessage(
-        AdminEvent.LOGON_RECEIVED,
-        {
-            'MsgType': 'LOGON',
-            'MsgSeqNum': 0,
-            'SenderCompID': sender_comp_id,
-            'TargetCompID': target_comp_id,
-            'SendingTime': datetime(2000, 1, 1, tzinfo=timezone.utc),
-            'EncryptMethod': "NONE",
-            'HeartBtInt': 30
-        }
-    ))
+    state = await state_machine.process(
+        AdminMessage(
+            AdminEvent.LOGON_RECEIVED,
+            {
+                'MsgType': 'LOGON',
+                'MsgSeqNum': 0,
+                'SenderCompID': sender_comp_id,
+                'TargetCompID': target_comp_id,
+                'SendingTime': time_provider.now(timezone.utc),
+                'EncryptMethod': "NONE",
+                'HeartBtInt': heartbeat_timeout
+            }
+        )
+    )
     assert state == AdminState.AUTHENTICATED
+
+    state = await state_machine.process(
+        AdminMessage(
+            AdminEvent.LOGOUT_RECEIVED,
+            {
+                'MsgType': 'LOGOUT',
+                'MsgSeqNum': 0,
+                'SenderCompID': sender_comp_id,
+                'TargetCompID': target_comp_id,
+                'SendingTime': time_provider.now(timezone.utc),
+            }
+        )
+    )
+    assert state == AdminState.DISCONNECTED
 
 
 def test_initiator_admin_state():
