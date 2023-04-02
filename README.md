@@ -99,7 +99,7 @@ start_initiator(
 
 ### Acceptor
 
-The acceptor works in the same was as the initiator. Here is an example:
+The acceptor works in the same way as the initiator. Here is an example:
 
 ```python
 import logging
