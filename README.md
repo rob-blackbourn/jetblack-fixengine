@@ -8,10 +8,10 @@ This is work in progress.
 
 ## Overview
 
-This project provides pur Python, asyncio implementations of
+This project provides a pure Python, asyncio implementation of
 a FIX engine, supporting both initiators and acceptors.
 
-The engines use the [jetblack-fixparser](https://github.com/rob-blackbourn/jetblack-fixparser)
+The engine uses the [jetblack-fixparser](https://github.com/rob-blackbourn/jetblack-fixparser)
 package to present the FIX messages a plain Python objects. For example, a `LOGON` message
 can be sent as follows:
 
@@ -45,8 +45,6 @@ An initiator is a class which inherits from `Initiator`, and implements a
 few methods, and has access to `send_message`. Here is an example.
 
 ```python
-"""A simple Initiator"""
-
 import logging
 import os.path
 from typing import Mapping, Any
@@ -104,8 +102,6 @@ start_initiator(
 The acceptor works in the same was as the initiator. Here is an example:
 
 ```python
-"""Start an acceptor"""
-
 import logging
 import os.path
 from typing import Mapping, Any
