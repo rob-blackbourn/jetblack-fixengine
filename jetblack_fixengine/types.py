@@ -1,7 +1,7 @@
 """Types"""
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Mapping, Optional, Tuple
+from typing import Any, Awaitable, Callable, Mapping, Optional, Tuple
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 
@@ -149,39 +149,64 @@ class FIXEngine(metaclass=ABCMeta):
 class FIXApplication:
     """The FIX application"""
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
+    async def on_admin_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         """Called when an admin message is received.
 
         Args:
             message (Mapping[str, Any]): The admin message that was sent by the
                 acceptor.
+            fix_engine (FIXEngine): The FIX engine.
         """
 
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
+    async def on_heartbeat(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         """Called when a heartbeat is received.
 
         Args:
             message (Mapping[str, Any]): The message sent by the acceptor.
+            fix_engine (FIXEngine): The FIX engine.
         """
 
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
+    async def on_application_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         """Called when an application message is received.
 
         Args:
             message (Mapping[str, Any]): The application message sent by the
                 acceptor.
+            fix_engine (FIXEngine): The FIX engine.
         """
 
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
+    async def on_logon(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         """Called when a logon message is received.
 
         Args:
             message (Mapping[str, Any]): The message sent by the acceptor.
+            fix_engine (FIXEngine): The FIX engine.
         """
 
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
+    async def on_logout(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         """Called when a logout message is received.
 
         Args:
             message (Mapping[str, Any]): The message sent by the acceptor.
+            fix_engine (FIXEngine): The FIX engine.
         """

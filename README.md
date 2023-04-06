@@ -51,8 +51,8 @@ Currently supported versions are 4.0, 4.1, 4.2, 4.3, 4.4.
 
 ### Initiators
 
-An initiator is a class which inherits from `Initiator`, and implements a
-few methods, and has access to `send_message`. Here is an example.
+An initiator is a class which inherits from `FIXApplication`, and implements a
+few methods, and has access to `send_message` from the `fix_engine`. Here is an example.
 
 ```python
 import asyncio
@@ -61,27 +61,43 @@ from pathlib import Path
 from typing import Mapping, Any
 
 from jetblack_fixparser import load_yaml_protocol
-from jetblack_fixengine import FileStore
-from jetblack_fixengine import start_initiator, Initiator
+from jetblack_fixengine import (
+    FileStore,
+    start_initiator,
+    FIXApplication,
+    FIXEngine
+)
 
 LOGGER = logging.getLogger(__name__)
 
 
-class MyInitiator(Initiator):
+class MyInitiator(FIXApplication):
     """An instance of the initiator"""
 
-    async def on_logon(self, _message: Mapping[str, Any]) -> None:
+    async def on_logon(
+            self,
+            _message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_logon')
 
-    async def on_logout(self, _message: Mapping[str, Any]) -> None:
+    async def on_logout(
+            self,
+            _message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_logout')
 
-    async def on_application_message(self, _message: Mapping[str, Any]) -> None:
+    async def on_application_message(
+            self,
+            _message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_application_message')
 
 
 PROTOCOL = load_yaml_protocol(Path('etc') / 'FIX44.yaml')
-STORE = FileStore(Path("store"))
+STORE = FileStore(Path('store'))
 HOST = '127.0.0.1'
 PORT = 9801
 SENDER_COMP_ID = 'INITIATOR1'
@@ -93,7 +109,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 asyncio.run(
     start_initiator(
-        MyInitiator,
+        MyInitiator(),
         HOST,
         PORT,
         PROTOCOL,
@@ -118,23 +134,39 @@ from pathlib import Path
 from typing import Mapping, Any
 
 from jetblack_fixparser import load_yaml_protocol
-from jetblack_fixengine import FileStore
-from jetblack_fixengine import start_acceptor, Acceptor
+from jetblack_fixengine import (
+    FileStore,
+    start_acceptor,
+    FIXApplication,
+    FIXEngine
+)
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class MyAcceptor(Acceptor):
+class MyAcceptor(FIXApplication):
     """An instance of the acceptor"""
 
-    async def on_logon(self, _message: Mapping[str, Any]):
+    async def on_logon(
+            self,
+            _message: Mapping[str, Any],
+            _fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_logon')
 
-    async def on_logout(self, _message: Mapping[str, Any]) -> None:
+    async def on_logout(
+            self,
+            _message: Mapping[str, Any],
+            _fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_logout')
 
-    async def on_application_message(self, _message: Mapping[str, Any]) -> None:
+    async def on_application_message(
+            self,
+            _message: Mapping[str, Any],
+            _fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_application_message')
 
 
@@ -151,7 +183,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 asyncio.run(
     start_acceptor(
-        MyAcceptor,
+        MyAcceptor(),
         HOST,
         PORT,
         PROTOCOL,

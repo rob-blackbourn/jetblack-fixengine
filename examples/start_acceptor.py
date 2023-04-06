@@ -6,7 +6,12 @@ from pathlib import Path
 from typing import Mapping, Any
 
 from jetblack_fixparser import load_yaml_protocol
-from jetblack_fixengine import FileStore, start_acceptor, FIXApplication
+from jetblack_fixengine import (
+    FileStore,
+    start_acceptor,
+    FIXApplication,
+    FIXEngine
+)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -15,13 +20,25 @@ LOGGER = logging.getLogger(__name__)
 class MyAcceptor(FIXApplication):
     """An instance of the acceptor"""
 
-    async def on_logon(self, _message: Mapping[str, Any]):
+    async def on_logon(
+            self,
+            _message: Mapping[str, Any],
+            _fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_logon')
 
-    async def on_logout(self, _message: Mapping[str, Any]) -> None:
+    async def on_logout(
+            self,
+            _message: Mapping[str, Any],
+            _fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_logout')
 
-    async def on_application_message(self, _message: Mapping[str, Any]) -> None:
+    async def on_application_message(
+            self,
+            _message: Mapping[str, Any],
+            _fix_engine: FIXEngine
+    ) -> None:
         LOGGER.info('on_application_message')
 
 

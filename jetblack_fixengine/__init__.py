@@ -3,7 +3,7 @@
 from .acceptor import start_acceptor
 from .initiator import start_initiator
 from .persistence import FileStore, SqlStore
-from .types import Session, Store, FIXApplication
+from .types import Session, Store, FIXApplication, FIXEngine
 
 __all__ = [
     'start_acceptor',
@@ -15,5 +15,6 @@ __all__ = [
 
     'Session',
     'Store',
-    'FIXApplication'
+    'FIXApplication',
+    'FIXEngine'
 ]
