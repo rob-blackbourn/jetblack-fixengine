@@ -5,9 +5,11 @@ from .helpers import (
     start_initiator,
 )
 from .initiator import InitiatorEngine
+from .types import InitiatorConfig
 
 __all__ = [
     'initiate',
     'start_initiator',
     'InitiatorEngine',
+    'InitiatorConfig'
 ]
