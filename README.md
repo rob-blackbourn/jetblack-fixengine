@@ -8,7 +8,7 @@ This is work in progress.
 
 ## Installation
 
-The package can be install from the pie store.
+The package can be installed from the pie store.
 
 ```bash
 pip install jetblack-fixengine
