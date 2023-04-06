@@ -6,7 +6,7 @@ from jetblack_fixparser.fix_message import FixMessageFactory
 
 from jetblack_fixengine import Session
 from jetblack_fixengine.initiator.types import AbstractInitiatorEngine
-from jetblack_fixengine.types import FIXApplication
+from jetblack_fixengine.types import FIXApplication, FIXEngine
 
 SendMessage = Callable[[str, Optional[Mapping[str, Any]]], Awaitable[None]]
 
@@ -54,17 +54,37 @@ class MockInitiator(AbstractInitiatorEngine):
 
 class MockInitiatorApp(FIXApplication):
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
+    async def on_admin_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         pass
 
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
+    async def on_heartbeat(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         pass
 
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
+    async def on_application_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         pass
 
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
+    async def on_logon(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         pass
 
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
+    async def on_logout(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
         pass
