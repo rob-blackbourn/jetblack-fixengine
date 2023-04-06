@@ -63,32 +63,6 @@ async def initiate(
     )
 
 
-def create_initiator(
-        app: FIXApplication,
-        protocol: ProtocolMetaData,
-        sender_comp_id: str,
-        target_comp_id: str,
-        store: Store,
-        logon_timeout: int,
-        heartbeat_timeout: int,
-        cancellation_event: asyncio.Event,
-        *,
-        heartbeat_threshold: int = 1
-) -> InitiatorEngine:
-    handler = InitiatorEngine(
-        app,
-        protocol,
-        sender_comp_id,
-        target_comp_id,
-        store,
-        logon_timeout,
-        heartbeat_timeout,
-        cancellation_event,
-        heartbeat_threshold=heartbeat_threshold
-    )
-    return handler
-
-
 async def start_initiator(
         app: FIXApplication,
         host: str,
@@ -108,7 +82,7 @@ async def start_initiator(
     loop = asyncio.get_event_loop()
     register_cancellation_event(cancellation_event, loop)
 
-    handler = create_initiator(
+    engine = InitiatorEngine(
         app,
         protocol,
         sender_comp_id,
@@ -123,7 +97,7 @@ async def start_initiator(
     await initiate(
         host,
         port,
-        handler,
+        engine,
         cancellation_event,
         ssl=ssl,
         shutdown_timeout=shutdown_timeout

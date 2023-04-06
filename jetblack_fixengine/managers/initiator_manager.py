@@ -5,11 +5,11 @@ import calendar
 from datetime import datetime, time, tzinfo
 import logging
 from ssl import SSLContext
-from typing import Callable, Optional, Tuple, Type
+from typing import Callable, Optional, Tuple
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from ..initiator import InitiatorEngine, create_initiator, initiate
+from ..initiator import InitiatorEngine, initiate
 from ..types import Store, FIXApplication
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_event
@@ -134,7 +134,7 @@ def start_initiator_manager(
     cancellation_event = asyncio.Event()
 
     def initiator_factory() -> InitiatorEngine:
-        return create_initiator(
+        return InitiatorEngine(
             app,
             protocol,
             sender_comp_id,

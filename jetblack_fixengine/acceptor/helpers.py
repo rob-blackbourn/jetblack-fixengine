@@ -4,7 +4,7 @@ import asyncio
 from asyncio import StreamReader, StreamWriter, Event
 from datetime import time, tzinfo
 import logging
-from typing import Callable, Optional, Tuple, Type
+from typing import Callable, Optional, Tuple
 from ssl import SSLContext
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
@@ -29,34 +29,6 @@ AcceptorFactory = Callable[
     [ProtocolMetaData, str, str, Store, int, asyncio.Event],
     TransportHandler
 ]
-
-
-def _create_acceptor(
-        app: FIXApplication,
-        protocol: ProtocolMetaData,
-        sender_comp_id: str,
-        target_comp_id: str,
-        store: Store,
-        heartbeat_timeout: int,
-        cancellation_event: asyncio.Event,
-        *,
-        heartbeat_threshold: int = 1,
-        logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: Optional[tzinfo] = None
-) -> AcceptorEngine:
-    handler = AcceptorEngine(
-        app,
-        protocol,
-        sender_comp_id,
-        target_comp_id,
-        store,
-        heartbeat_timeout,
-        cancellation_event,
-        heartbeat_threshold=heartbeat_threshold,
-        logon_time_range=logon_time_range,
-        tz=tz
-    )
-    return handler
 
 
 async def start_acceptor(
@@ -89,7 +61,7 @@ async def start_acceptor(
             validate
         )
         buffered_reader = fix_read_async(read_buffer, reader, 1024)
-        handler = _create_acceptor(
+        handler = AcceptorEngine(
             app,
             protocol,
             sender_comp_id,
