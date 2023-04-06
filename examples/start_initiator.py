@@ -6,14 +6,12 @@ from pathlib import Path
 from typing import Mapping, Any
 
 from jetblack_fixparser import load_yaml_protocol
-from jetblack_fixengine import FileStore
-from jetblack_fixengine import start_initiator, Initiator
-from jetblack_fixengine.types import FIXApp
+from jetblack_fixengine import FileStore, start_initiator, FIXApplication
 
 LOGGER = logging.getLogger(__name__)
 
 
-class MyInitiator(FIXApp):
+class MyInitiator(FIXApplication):
     """An instance of the initiator"""
 
     async def on_logon(self, _message: Mapping[str, Any]) -> None:

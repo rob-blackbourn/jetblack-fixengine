@@ -100,7 +100,7 @@ class LoginError(Exception):
     """An invalid state transition"""
 
 
-class FIXWorker(metaclass=ABCMeta):
+class FIXEngine(metaclass=ABCMeta):
     """Abstract base class for FIX applications"""
 
     @property
@@ -146,7 +146,8 @@ class FIXWorker(metaclass=ABCMeta):
         """
 
 
-class FIXApp:
+class FIXApplication:
+    """The FIX application"""
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         """Called when an admin message is received.

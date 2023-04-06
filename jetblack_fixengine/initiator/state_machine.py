@@ -10,10 +10,10 @@ from ..admin import (
     AdminMessage,
     AdminStateProcessor,
 )
-from ..types import FIXApp
+from ..types import FIXApplication
 
 from .state_transitions import INITIATOR_ADMIN_TRANSITIONS
-from .types import AbstractInitiator
+from .types import AbstractInitiatorEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -22,8 +22,8 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
 
     def __init__(
             self,
-            initiator: AbstractInitiator,
-            app: FIXApp
+            initiator: AbstractInitiatorEngine,
+            app: FIXApplication
     ) -> None:
         super().__init__(
             INITIATOR_ADMIN_TRANSITIONS,

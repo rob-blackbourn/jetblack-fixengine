@@ -13,11 +13,11 @@ from ..admin import (
     AdminStateProcessor,
 )
 from ..time_provider import TimeProvider
-from ..types import LoginError, FIXApp
+from ..types import LoginError, FIXApplication
 from ..utils.date_utils import wait_for_time_period
 
 from .state_transitions import ACCEPTOR_ADMIN_TRANSITIONS
-from .types import AbstractAcceptor
+from .types import AbstractAcceptorEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,8 +26,8 @@ class AcceptorAdminStateMachine(AdminStateProcessor):
 
     def __init__(
             self,
-            acceptor: AbstractAcceptor,
-            app: FIXApp,
+            acceptor: AbstractAcceptorEngine,
+            app: FIXApplication,
             time_provider: TimeProvider,
             cancellation_event: asyncio.Event
     ) -> None:

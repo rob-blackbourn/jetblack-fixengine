@@ -20,20 +20,20 @@ from ..transports import (
     Send,
     Receive,
 )
-from ..types import Store, Session, FIXApp
+from ..types import Store, Session, FIXApplication
 
 from .state_machine import InitiatorAdminStateMachine
-from .types import AbstractInitiator
+from .types import AbstractInitiatorEngine
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Initiator(AbstractInitiator):
+class InitiatorEngine(AbstractInitiatorEngine):
     """The base class for initiator handlers"""
 
     def __init__(
             self,
-            app: FIXApp,
+            app: FIXApplication,
             protocol: ProtocolMetaData,
             sender_comp_id: str,
             target_comp_id: str,

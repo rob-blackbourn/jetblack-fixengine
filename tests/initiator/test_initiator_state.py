@@ -25,7 +25,7 @@ from jetblack_fixengine.initiator.state_machine import InitiatorAdminStateMachin
 from jetblack_fixengine.initiator.state_transitions import INITIATOR_ADMIN_TRANSITIONS
 
 from ..mocks import MockSession, MockTimeProvider
-from .mocks import MockInitiator, InitiatorApp
+from .mocks import MockInitiator, MockInitiatorApp
 
 
 @pytest.mark.asyncio
@@ -65,7 +65,7 @@ async def test_logon() -> None:
 
     state_machine = InitiatorAdminStateMachine(
         initiator,
-        InitiatorApp()
+        MockInitiatorApp()
     )
 
     state = await state_machine.process(AdminMessage(AdminEvent.CONNECTED))

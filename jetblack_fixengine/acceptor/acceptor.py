@@ -28,20 +28,20 @@ from ..transports import (
     Send,
     Receive
 )
-from ..types import Store, Session, FIXApp
+from ..types import Store, Session, FIXApplication
 
 from .state_machine import AcceptorAdminStateMachine
-from .types import AbstractAcceptor
+from .types import AbstractAcceptorEngine
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Acceptor(AbstractAcceptor):
+class AcceptorEngine(AbstractAcceptorEngine):
     """The base class for acceptor handlers"""
 
     def __init__(
             self,
-            app: FIXApp,
+            app: FIXApplication,
             protocol: ProtocolMetaData,
             sender_comp_id: str,
             target_comp_id: str,

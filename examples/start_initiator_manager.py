@@ -7,10 +7,8 @@ import os.path
 import pytz
 from typing import Optional, Mapping, Any
 
-from jetblack_fixengine.initiator import Initiator
-from jetblack_fixengine.persistence import FileStore
+from jetblack_fixengine import FileStore, FIXApplication
 from jetblack_fixengine.managers import start_initiator_manager
-from jetblack_fixengine.types import FIXApp
 from jetblack_fixparser.loader import load_yaml_protocol
 
 logging.basicConfig(level=logging.DEBUG)
@@ -31,7 +29,7 @@ HEARTBEAT_TIMEOUT = 30
 TZ = pytz.timezone('Europe/London')
 
 
-class MyInitiatorHandler(FIXApp):
+class MyInitiatorHandler(FIXApplication):
 
     async def on_logon(self, message: Mapping[str, Any]) -> None:
         logger.info('on_logon %s', message)

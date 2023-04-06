@@ -19,7 +19,7 @@ from .types import (
 )
 from .state_processor import TransportStateProcessor
 
-from ..types import FIXWorker, FIXApp
+from ..types import FIXEngine, FIXApplication
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,8 +29,8 @@ class TransportStateMachine(TransportStateProcessor):
 
     def __init__(
             self,
-            worker: FIXWorker,
-            app: FIXApp,
+            worker: FIXEngine,
+            app: FIXApplication,
             admin_state_machine: AdminStateProcessor,
             time_provider: TimeProvider
     ) -> None:

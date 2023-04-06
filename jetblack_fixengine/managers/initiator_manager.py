@@ -9,8 +9,8 @@ from typing import Callable, Optional, Tuple, Type
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
-from ..initiator import Initiator, create_initiator, initiate
-from ..types import Store, FIXApp
+from ..initiator import InitiatorEngine, create_initiator, initiate
+from ..types import Store, FIXApplication
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_event
 
@@ -22,7 +22,7 @@ class InitiatorManager:
 
     def __init__(
             self,
-            handler_factory: Callable[[], Initiator],
+            handler_factory: Callable[[], InitiatorEngine],
             host: str,
             port: int,
             cancellation_event: asyncio.Event,
@@ -113,7 +113,7 @@ class InitiatorManager:
 
 
 def start_initiator_manager(
-        app: FIXApp,
+        app: FIXApplication,
         host: str,
         port: int,
         protocol: ProtocolMetaData,
@@ -133,7 +133,7 @@ def start_initiator_manager(
 ) -> None:
     cancellation_event = asyncio.Event()
 
-    def initiator_factory() -> Initiator:
+    def initiator_factory() -> InitiatorEngine:
         return create_initiator(
             app,
             protocol,

@@ -16,10 +16,10 @@ from ..transports import (
     fix_read_async,
     TransportHandler,
 )
-from ..types import Store, FIXApp
+from ..types import Store, FIXApplication
 from ..utils.cancellation import register_cancellation_event
 
-from .acceptor import Acceptor
+from .acceptor import AcceptorEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ AcceptorFactory = Callable[
 
 
 def _create_acceptor(
-        app: FIXApp,
+        app: FIXApplication,
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
@@ -43,8 +43,8 @@ def _create_acceptor(
         heartbeat_threshold: int = 1,
         logon_time_range: Optional[Tuple[time, time]] = None,
         tz: Optional[tzinfo] = None
-) -> Acceptor:
-    handler = Acceptor(
+) -> AcceptorEngine:
+    handler = AcceptorEngine(
         app,
         protocol,
         sender_comp_id,
@@ -60,7 +60,7 @@ def _create_acceptor(
 
 
 async def start_acceptor(
-        app: FIXApp,
+        app: FIXApplication,
         host: str,
         port: int,
         protocol: ProtocolMetaData,

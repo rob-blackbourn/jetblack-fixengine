@@ -5,13 +5,13 @@ from typing import Any, Awaitable, Callable, Mapping, Optional
 from jetblack_fixparser.fix_message import FixMessageFactory
 
 from jetblack_fixengine import Session
-from jetblack_fixengine.initiator.types import AbstractInitiator
-from jetblack_fixengine.types import FIXApp
+from jetblack_fixengine.initiator.types import AbstractInitiatorEngine
+from jetblack_fixengine.types import FIXApplication
 
 SendMessage = Callable[[str, Optional[Mapping[str, Any]]], Awaitable[None]]
 
 
-class MockInitiator(AbstractInitiator):
+class MockInitiator(AbstractInitiatorEngine):
 
     def __init__(
             self,
@@ -52,7 +52,7 @@ class MockInitiator(AbstractInitiator):
         await self._send_message(msg_type, message)
 
 
-class InitiatorApp(FIXApp):
+class MockInitiatorApp(FIXApplication):
 
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         pass

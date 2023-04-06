@@ -4,18 +4,18 @@ import asyncio
 from asyncio import Event
 import logging
 from ssl import SSLContext
-from typing import Optional, Callable, Type
+from typing import Optional, Callable
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
 from ..transports import TransportHandler
-from ..types import Store, FIXApp
+from ..types import Store, FIXApplication
 from ..utils.cancellation import register_cancellation_event
 
 from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
 
-from .initiator import Initiator
+from .initiator import InitiatorEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ async def initiate(
 
 
 def create_initiator(
-        app: FIXApp,
+        app: FIXApplication,
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
@@ -74,8 +74,8 @@ def create_initiator(
         cancellation_event: asyncio.Event,
         *,
         heartbeat_threshold: int = 1
-) -> Initiator:
-    handler = Initiator(
+) -> InitiatorEngine:
+    handler = InitiatorEngine(
         app,
         protocol,
         sender_comp_id,
@@ -90,7 +90,7 @@ def create_initiator(
 
 
 async def start_initiator(
-        app: FIXApp,
+        app: FIXApplication,
         host: str,
         port: int,
         protocol: ProtocolMetaData,
