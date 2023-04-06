@@ -48,9 +48,11 @@ The received message might look as follows:
 
 ### FIX Protocols
 
-The FIX protocol is a combination of *well known* messages (like `LOGON`)
-and *custom* messages (like an order to buy or sell). The protocol
-has evolved through a number of different versions providing new features.
+The FIX protocol consists of *admin* and *application* messages. The
+admin messages are used for authentication and maintaining the session,
+and are generally of a well known structure. While the application messages
+are in the standard, they are often customized to include information not
+specified in the standard.
 
 Because of this the protocols are provided by config files. Historically
 `XML` was used. While this is supported, `yaml` is preferred and some
