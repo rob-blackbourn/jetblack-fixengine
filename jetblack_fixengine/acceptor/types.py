@@ -1,12 +1,12 @@
 """Types"""
 
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta, abstractmethod
 from datetime import datetime, time, tzinfo
 from ssl import SSLContext
 from typing import Optional, Tuple
 
-from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
+from jetblack_fixparser.meta_data import ProtocolMetaData
 
 from ..types import FIXEngine, Store
 

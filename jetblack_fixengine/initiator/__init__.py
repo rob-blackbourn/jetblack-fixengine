@@ -10,6 +10,8 @@ from .types import InitiatorConfig
 __all__ = [
     'initiate',
     'start_initiator',
+
     'InitiatorEngine',
+
     'InitiatorConfig'
 ]

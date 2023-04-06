@@ -3,30 +3,19 @@
 import asyncio
 from asyncio import StreamReader, StreamWriter, Event
 import logging
-from typing import Callable
-
-from jetblack_fixparser.meta_data import ProtocolMetaData
 
 from ..transports import (
-    fix_stream_processor,
     FixReadBuffer,
     fix_read_async,
-    TransportHandler,
+    fix_stream_processor,
 )
-from ..types import Store, FIXApplication
+from ..types import FIXApplication
 from ..utils.cancellation import register_cancellation_event
 
 from .acceptor import AcceptorEngine
 from .types import AcceptorConfig
 
 LOGGER = logging.getLogger(__name__)
-
-ClientFactory = Callable[[], TransportHandler]
-
-AcceptorFactory = Callable[
-    [ProtocolMetaData, str, str, Store, int, asyncio.Event],
-    TransportHandler
-]
 
 
 async def start_acceptor(
