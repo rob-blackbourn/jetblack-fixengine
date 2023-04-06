@@ -2,13 +2,10 @@
 
 import asyncio
 from asyncio import StreamReader, StreamWriter, Event
-from datetime import time, tzinfo
 import logging
-from typing import Callable, Optional, Tuple
-from ssl import SSLContext
+from typing import Callable
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
-from jetblack_fixparser.fix_message import SOH
 
 from ..transports import (
     fix_stream_processor,
@@ -20,6 +17,7 @@ from ..types import Store, FIXApplication
 from ..utils.cancellation import register_cancellation_event
 
 from .acceptor import AcceptorEngine
+from .types import AcceptorConfig
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,22 +31,7 @@ AcceptorFactory = Callable[
 
 async def start_acceptor(
         app: FIXApplication,
-        host: str,
-        port: int,
-        protocol: ProtocolMetaData,
-        sender_comp_id: str,
-        target_comp_id: str,
-        store: Store,
-        heartbeat_timeout: int,
-        *,
-        ssl: Optional[SSLContext] = None,
-        client_shutdown_timeout: float = 10.0,
-        sep: bytes = SOH,
-        convert_sep_to_soh_for_checksum: bool = False,
-        validate: bool = True,
-        heartbeat_threshold: int = 1,
-        logon_time_range: Optional[Tuple[time, time]] = None,
-        tz: Optional[tzinfo] = None
+        config: AcceptorConfig
 ) -> None:
     cancellation_event = Event()
 
@@ -56,26 +39,26 @@ async def start_acceptor(
         LOGGER.info("Accepting initiator")
 
         read_buffer = FixReadBuffer(
-            sep,
-            convert_sep_to_soh_for_checksum,
-            validate
+            config.sep,
+            config.convert_sep_to_soh_for_checksum,
+            config.validate
         )
         buffered_reader = fix_read_async(read_buffer, reader, 1024)
         handler = AcceptorEngine(
             app,
-            protocol,
-            sender_comp_id,
-            target_comp_id,
-            store,
-            heartbeat_timeout,
+            config.protocol,
+            config.sender_comp_id,
+            config.target_comp_id,
+            config.store,
+            config.heartbeat_timeout,
             cancellation_event,
-            heartbeat_threshold=heartbeat_threshold,
-            logon_time_range=logon_time_range,
-            tz=tz
+            heartbeat_threshold=config.heartbeat_threshold,
+            logon_time_range=config.logon_time_range,
+            tz=config.tz
         )
         await fix_stream_processor(
             handler,
-            client_shutdown_timeout,
+            config.client_shutdown_timeout,
             buffered_reader,
             writer,
             cancellation_event
@@ -83,15 +66,20 @@ async def start_acceptor(
 
     LOGGER.info(
         "Starting acceptor on %s:%s%s",
-        host,
-        port,
-        " using SSL" if ssl is not None else ""
+        config.host,
+        config.port,
+        " using SSL" if config.ssl is not None else ""
     )
 
     loop = asyncio.get_event_loop()
     register_cancellation_event(cancellation_event, loop)
 
-    server = await asyncio.start_server(accept, host, port, ssl=ssl)
+    server = await asyncio.start_server(
+        accept,
+        config.host,
+        config.port,
+        ssl=config.ssl
+    )
 
     async with server:
         await server.serve_forever()

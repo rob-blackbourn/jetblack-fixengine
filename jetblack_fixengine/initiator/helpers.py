@@ -16,6 +16,7 @@ from ..utils.cancellation import register_cancellation_event
 from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
 
 from .initiator import InitiatorEngine
+from .types import InitiatorConfig
 
 LOGGER = logging.getLogger(__name__)
 
@@ -65,18 +66,7 @@ async def initiate(
 
 async def start_initiator(
         app: FIXApplication,
-        host: str,
-        port: int,
-        protocol: ProtocolMetaData,
-        sender_comp_id: str,
-        target_comp_id: str,
-        store: Store,
-        logon_timeout: int,
-        heartbeat_timeout: int,
-        *,
-        ssl: Optional[SSLContext] = None,
-        shutdown_timeout: float = 10.0,
-        heartbeat_threshold: int = 1
+        config: InitiatorConfig,
 ) -> None:
     cancellation_event = Event()
     loop = asyncio.get_event_loop()
@@ -84,21 +74,21 @@ async def start_initiator(
 
     engine = InitiatorEngine(
         app,
-        protocol,
-        sender_comp_id,
-        target_comp_id,
-        store,
-        logon_timeout,
-        heartbeat_timeout,
+        config.protocol,
+        config.sender_comp_id,
+        config.target_comp_id,
+        config.store,
+        config.logon_timeout,
+        config.heartbeat_timeout,
         cancellation_event,
-        heartbeat_threshold=heartbeat_threshold
+        heartbeat_threshold=config.heartbeat_threshold
     )
 
     await initiate(
-        host,
-        port,
+        config.host,
+        config.port,
         engine,
         cancellation_event,
-        ssl=ssl,
-        shutdown_timeout=shutdown_timeout
+        ssl=config.ssl,
+        shutdown_timeout=config.shutdown_timeout
     )
