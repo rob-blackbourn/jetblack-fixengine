@@ -3,15 +3,16 @@
 import asyncio
 import logging
 from pathlib import Path
-from typing import Mapping, Any
+from typing import Any, Mapping
 
 from jetblack_fixparser import load_yaml_protocol
+
 from jetblack_fixengine import (
-    FileStore,
-    start_acceptor,
     AcceptorConfig,
+    FileStore,
     FIXApplication,
-    FIXEngine
+    FIXEngine,
+    start_acceptor
 )
 
 
