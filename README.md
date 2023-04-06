@@ -19,8 +19,10 @@ pip install jetblack-fixengine
 This project provides a pure Python, asyncio implementation of
 a FIX engine, supporting both initiators and acceptors.
 
-The engines use the [jetblack-fixparser](https://github.com/rob-blackbourn/jetblack-fixparser)
-package to pass the FIX messages as plain Python objects. For example, a `LOGON` message could be sent as follows:
+The engines use the
+[jetblack-fixparser](https://github.com/rob-blackbourn/jetblack-fixparser)
+package to pass the FIX messages as plain Python objects. For example, a
+`LOGON` message could be sent as follows:
 
 ```python
 await send_message(
@@ -32,7 +34,8 @@ await send_message(
 )
 ```
 
-The received message might look as follows:
+The `send_message` function adds the header fields for the session. The
+received message might look as follows:
 
 ```python
 {
