@@ -5,12 +5,13 @@ from typing import Any, Awaitable, Callable, Mapping, Optional
 from jetblack_fixparser.fix_message import FixMessageFactory
 
 from jetblack_fixengine import Session
-from jetblack_fixengine.initiator.types import AbstractInitiator
+from jetblack_fixengine.initiator.types import AbstractInitiatorEngine
+from jetblack_fixengine.types import FIXApplication, FIXEngine
 
 SendMessage = Callable[[str, Optional[Mapping[str, Any]]], Awaitable[None]]
 
 
-class MockInitiatorApp(AbstractInitiator):
+class MockInitiator(AbstractInitiatorEngine):
 
     def __init__(
             self,
@@ -43,24 +44,47 @@ class MockInitiatorApp(AbstractInitiator):
     def heartbeat_threshold(self) -> int:
         return self._heartbeat_threshold
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
-        pass
-
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
-        pass
-
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
-        pass
-
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
-        pass
-
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
-        pass
-
     async def send_message(
             self,
             msg_type: str,
             message: Optional[Mapping[str, Any]] = None
     ) -> None:
         await self._send_message(msg_type, message)
+
+
+class MockInitiatorApp(FIXApplication):
+
+    async def on_admin_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        pass
+
+    async def on_heartbeat(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        pass
+
+    async def on_application_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        pass
+
+    async def on_logon(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        pass
+
+    async def on_logout(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        pass

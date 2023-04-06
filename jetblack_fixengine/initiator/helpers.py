@@ -4,18 +4,18 @@ import asyncio
 from asyncio import Event
 import logging
 from ssl import SSLContext
-from typing import Optional, Callable, Type
+from typing import Optional, Callable
 
 from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
 from ..transports import TransportHandler
-from ..types import Store
+from ..types import Store, FIXApplication
 from ..utils.cancellation import register_cancellation_event
 
 from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
 
-from .initiator import Initiator
+from .initiator import InitiatorEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -63,33 +63,8 @@ async def initiate(
     )
 
 
-def create_initiator(
-        klass: Type[Initiator],
-        protocol: ProtocolMetaData,
-        sender_comp_id: str,
-        target_comp_id: str,
-        store: Store,
-        logon_timeout: int,
-        heartbeat_timeout: int,
-        cancellation_event: asyncio.Event,
-        *,
-        heartbeat_threshold: int = 1
-) -> Initiator:
-    handler = klass(
-        protocol,
-        sender_comp_id,
-        target_comp_id,
-        store,
-        logon_timeout,
-        heartbeat_timeout,
-        cancellation_event,
-        heartbeat_threshold=heartbeat_threshold
-    )
-    return handler
-
-
 async def start_initiator(
-        klass: Type[Initiator],
+        app: FIXApplication,
         host: str,
         port: int,
         protocol: ProtocolMetaData,
@@ -107,8 +82,8 @@ async def start_initiator(
     loop = asyncio.get_event_loop()
     register_cancellation_event(cancellation_event, loop)
 
-    handler = create_initiator(
-        klass,
+    engine = InitiatorEngine(
+        app,
         protocol,
         sender_comp_id,
         target_comp_id,
@@ -122,7 +97,7 @@ async def start_initiator(
     await initiate(
         host,
         port,
-        handler,
+        engine,
         cancellation_event,
         ssl=ssl,
         shutdown_timeout=shutdown_timeout

@@ -10,9 +10,10 @@ from ..admin import (
     AdminMessage,
     AdminStateProcessor,
 )
+from ..types import FIXApplication
 
 from .state_transitions import INITIATOR_ADMIN_TRANSITIONS
-from .types import AbstractInitiator
+from .types import AbstractInitiatorEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +22,8 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
 
     def __init__(
             self,
-            initiator: AbstractInitiator,
+            engine: AbstractInitiatorEngine,
+            app: FIXApplication
     ) -> None:
         super().__init__(
             INITIATOR_ADMIN_TRANSITIONS,
@@ -45,7 +47,8 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
                 },
             }
         )
-        self.initiator = initiator
+        self._engine = engine
+        self._app = app
         self._test_heartbeat_message: Optional[str] = None
 
     async def _send_logon(
@@ -53,11 +56,11 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
             _admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         """Send a logon message"""
-        await self.initiator.send_message(
+        await self._engine.send_message(
             'LOGON',
             {
                 'EncryptMethod': 'NONE',
-                'HeartBtInt': self.initiator.heartbeat_timeout
+                'HeartBtInt': self._engine.heartbeat_timeout
             }
         )
         return AdminMessage(AdminEvent.LOGON_SENT)
@@ -66,14 +69,14 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.initiator.on_logon(admin_message.fix)
+        await self._app.on_logon(admin_message.fix, self._engine)
         return None
 
     async def _acknowledge_heartbeat(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.initiator.on_heartbeat(admin_message.fix)
+        await self._app.on_heartbeat(admin_message.fix, self._engine)
         return AdminMessage(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
 
     async def _send_test_request(
@@ -83,7 +86,7 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
         assert 'TestReqID' in admin_message.fix, "expected TestReqID"
 
         # Respond to the server with the token it sent.
-        await self.initiator.send_message(
+        await self._engine.send_message(
             'TEST_REQUEST',
             {
                 'TestReqID': admin_message.fix['TestReqID']
@@ -95,8 +98,8 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
             self,
             _admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        new_seq_no = await self.initiator.session.get_outgoing_seqnum() + 2
-        await self.initiator.send_message(
+        new_seq_no = await self._engine.session.get_outgoing_seqnum() + 2
+        await self._engine.send_message(
             'SEQUENCE_RESET',
             {
                 'GapFillFlag': False,
@@ -111,7 +114,7 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
     ) -> Optional[AdminMessage]:
         assert 'NewSeqNo' in admin_message.fix, "expected NewSeqNo"
         seqnum = admin_message.fix['NewSeqNo']
-        await self.initiator.session.set_incoming_seqnum(seqnum)
+        await self._engine.session.set_incoming_seqnum(seqnum)
         return AdminMessage(AdminEvent.SEQUENCE_RESET_SENT)
 
     async def _acknowledge_logout(
@@ -119,7 +122,7 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         assert admin_message.fix is not None
-        await self.initiator.on_logout(admin_message.fix)
+        await self._app.on_logout(admin_message.fix, self._engine)
         return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
 
     async def _send_test_heartbeat(
@@ -128,7 +131,7 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
     ) -> Optional[AdminMessage]:
         self._test_heartbeat_message = str(uuid.uuid4())
 
-        await self.initiator.send_message(
+        await self._engine.send_message(
             'TEST_REQUEST',
             {
                 'TestReqID': self._test_heartbeat_message

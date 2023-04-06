@@ -1,6 +1,5 @@
 """An Initiator"""
 
-from abc import ABCMeta
 import asyncio
 from datetime import datetime, timezone
 import logging
@@ -21,19 +20,20 @@ from ..transports import (
     Send,
     Receive,
 )
-from ..types import Store, Session
+from ..types import Store, Session, FIXApplication
 
 from .state_machine import InitiatorAdminStateMachine
-from .types import AbstractInitiator
+from .types import AbstractInitiatorEngine
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Initiator(AbstractInitiator, metaclass=ABCMeta):
+class InitiatorEngine(AbstractInitiatorEngine):
     """The base class for initiator handlers"""
 
     def __init__(
             self,
+            app: FIXApplication,
             protocol: ProtocolMetaData,
             sender_comp_id: str,
             target_comp_id: str,
@@ -64,9 +64,11 @@ class Initiator(AbstractInitiator, metaclass=ABCMeta):
 
         self._admin_state_machine = InitiatorAdminStateMachine(
             self,
+            app,
         )
         self._transport_state_machine = TransportStateMachine(
             self,
+            app,
             self._admin_state_machine,
             self._time_provider,
         )

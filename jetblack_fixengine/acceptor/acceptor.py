@@ -1,6 +1,5 @@
 """An acceptor"""
 
-from abc import ABCMeta
 import asyncio
 from datetime import datetime, time, tzinfo, timezone
 import logging
@@ -29,19 +28,20 @@ from ..transports import (
     Send,
     Receive
 )
-from ..types import Store, Session
+from ..types import Store, Session, FIXApplication
 
 from .state_machine import AcceptorAdminStateMachine
-from .types import AbstractAcceptor
+from .types import AbstractAcceptorEngine
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
+class AcceptorEngine(AbstractAcceptorEngine):
     """The base class for acceptor handlers"""
 
     def __init__(
             self,
+            app: FIXApplication,
             protocol: ProtocolMetaData,
             sender_comp_id: str,
             target_comp_id: str,
@@ -80,11 +80,13 @@ class Acceptor(AbstractAcceptor, metaclass=ABCMeta):
 
         self._admin_state_machine = AcceptorAdminStateMachine(
             self,
+            app,
             self.time_provider,
             self.cancellation_event
         )
         self._transport_state_machine = TransportStateMachine(
             self,
+            app,
             self._admin_state_machine,
             self.time_provider
         )

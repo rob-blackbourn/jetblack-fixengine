@@ -25,7 +25,7 @@ from jetblack_fixengine.initiator.state_machine import InitiatorAdminStateMachin
 from jetblack_fixengine.initiator.state_transitions import INITIATOR_ADMIN_TRANSITIONS
 
 from ..mocks import MockSession, MockTimeProvider
-from .mocks import MockInitiatorApp
+from .mocks import MockInitiator, MockInitiatorApp
 
 
 @pytest.mark.asyncio
@@ -55,7 +55,7 @@ async def test_logon() -> None:
         messages.append((msg_type, message))
 
     heartbeat_timeout = 30
-    initiator = MockInitiatorApp(
+    initiator = MockInitiator(
         session,
         fix_message_factory,
         heartbeat_timeout,
@@ -63,7 +63,10 @@ async def test_logon() -> None:
         send_message
     )
 
-    state_machine = InitiatorAdminStateMachine(initiator)
+    state_machine = InitiatorAdminStateMachine(
+        initiator,
+        MockInitiatorApp()
+    )
 
     state = await state_machine.process(AdminMessage(AdminEvent.CONNECTED))
     assert state == AdminState.LOGON_EXPECTED

@@ -1,20 +1,20 @@
 """jetblack_fixengine"""
 
-from .acceptor import start_acceptor, Acceptor
-from .initiator import start_initiator, Initiator
+from .acceptor import start_acceptor
+from .initiator import start_initiator
 from .persistence import FileStore, SqlStore
-from .types import Session, Store
+from .types import Session, Store, FIXApplication, FIXEngine
 
 __all__ = [
     'start_acceptor',
-    'Acceptor',
 
     'start_initiator',
-    'Initiator',
 
     'FileStore',
     'SqlStore',
 
     'Session',
     'Store',
+    'FIXApplication',
+    'FIXEngine'
 ]

@@ -1,7 +1,7 @@
 """Types"""
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Mapping, Optional, Tuple
+from typing import Any, Awaitable, Callable, Mapping, Optional, Tuple
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 
@@ -100,7 +100,7 @@ class LoginError(Exception):
     """An invalid state transition"""
 
 
-class FIXApplication(metaclass=ABCMeta):
+class FIXEngine(metaclass=ABCMeta):
     """Abstract base class for FIX applications"""
 
     @property
@@ -131,46 +131,6 @@ class FIXApplication(metaclass=ABCMeta):
     def heartbeat_threshold(self) -> int:
         """The heartbeat threshold"""
 
-    async def on_admin_message(self, message: Mapping[str, Any]) -> None:
-        """Called when an admin message is received.
-
-        Args:
-            message (Mapping[str, Any]): The admin message that was sent by the
-                acceptor.
-        """
-
-    async def on_heartbeat(self, message: Mapping[str, Any]) -> None:
-        """Called when a heartbeat is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
-    @abstractmethod
-    async def on_application_message(self, message: Mapping[str, Any]) -> None:
-        """Called when an application message is received.
-
-        Args:
-            message (Mapping[str, Any]): The application message sent by the
-                acceptor.
-        """
-
-    @abstractmethod
-    async def on_logon(self, message: Mapping[str, Any]) -> None:
-        """Called when a logon message is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
-    @abstractmethod
-    async def on_logout(self, message: Mapping[str, Any]) -> None:
-        """Called when a logout message is received.
-
-        Args:
-            message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
     @abstractmethod
     async def send_message(
             self,
@@ -183,4 +143,70 @@ class FIXApplication(metaclass=ABCMeta):
             msg_type (str): The message type.
             message (Optional[Mapping[str, Any]], optional): The message.
                 Defaults to None.
+        """
+
+
+class FIXApplication:
+    """The FIX application"""
+
+    async def on_admin_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        """Called when an admin message is received.
+
+        Args:
+            message (Mapping[str, Any]): The admin message that was sent by the
+                acceptor.
+            fix_engine (FIXEngine): The FIX engine.
+        """
+
+    async def on_heartbeat(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        """Called when a heartbeat is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
+            fix_engine (FIXEngine): The FIX engine.
+        """
+
+    async def on_application_message(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        """Called when an application message is received.
+
+        Args:
+            message (Mapping[str, Any]): The application message sent by the
+                acceptor.
+            fix_engine (FIXEngine): The FIX engine.
+        """
+
+    async def on_logon(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        """Called when a logon message is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
+            fix_engine (FIXEngine): The FIX engine.
+        """
+
+    async def on_logout(
+            self,
+            message: Mapping[str, Any],
+            fix_engine: FIXEngine
+    ) -> None:
+        """Called when a logout message is received.
+
+        Args:
+            message (Mapping[str, Any]): The message sent by the acceptor.
+            fix_engine (FIXEngine): The FIX engine.
         """
