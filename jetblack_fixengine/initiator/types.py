@@ -2,8 +2,8 @@
 
 from abc import ABCMeta
 
-from ..types import FIXApplication
+from ..types import FIXWorker
 
 
-class AbstractInitiator(FIXApplication, metaclass=ABCMeta):
+class AbstractInitiator(FIXWorker, metaclass=ABCMeta):
     """The interface for an initiator"""

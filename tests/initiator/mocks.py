@@ -6,11 +6,12 @@ from jetblack_fixparser.fix_message import FixMessageFactory
 
 from jetblack_fixengine import Session
 from jetblack_fixengine.initiator.types import AbstractInitiator
+from jetblack_fixengine.types import FIXApp
 
 SendMessage = Callable[[str, Optional[Mapping[str, Any]]], Awaitable[None]]
 
 
-class MockInitiatorApp(AbstractInitiator):
+class MockInitiator(AbstractInitiator):
 
     def __init__(
             self,
@@ -43,6 +44,16 @@ class MockInitiatorApp(AbstractInitiator):
     def heartbeat_threshold(self) -> int:
         return self._heartbeat_threshold
 
+    async def send_message(
+            self,
+            msg_type: str,
+            message: Optional[Mapping[str, Any]] = None
+    ) -> None:
+        await self._send_message(msg_type, message)
+
+
+class InitiatorApp(FIXApp):
+
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         pass
 
@@ -57,10 +68,3 @@ class MockInitiatorApp(AbstractInitiator):
 
     async def on_logout(self, message: Mapping[str, Any]) -> None:
         pass
-
-    async def send_message(
-            self,
-            msg_type: str,
-            message: Optional[Mapping[str, Any]] = None
-    ) -> None:
-        await self._send_message(msg_type, message)

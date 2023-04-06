@@ -10,7 +10,7 @@ from jetblack_fixparser.meta_data import ProtocolMetaData
 from jetblack_fixparser.fix_message import SOH
 
 from ..transports import TransportHandler
-from ..types import Store
+from ..types import Store, FIXApp
 from ..utils.cancellation import register_cancellation_event
 
 from ..transports import fix_stream_processor,  FixReadBuffer, fix_read_async
@@ -64,7 +64,7 @@ async def initiate(
 
 
 def create_initiator(
-        klass: Type[Initiator],
+        app: FIXApp,
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
@@ -75,7 +75,8 @@ def create_initiator(
         *,
         heartbeat_threshold: int = 1
 ) -> Initiator:
-    handler = klass(
+    handler = Initiator(
+        app,
         protocol,
         sender_comp_id,
         target_comp_id,
@@ -89,7 +90,7 @@ def create_initiator(
 
 
 async def start_initiator(
-        klass: Type[Initiator],
+        app: FIXApp,
         host: str,
         port: int,
         protocol: ProtocolMetaData,
@@ -108,7 +109,7 @@ async def start_initiator(
     register_cancellation_event(cancellation_event, loop)
 
     handler = create_initiator(
-        klass,
+        app,
         protocol,
         sender_comp_id,
         target_comp_id,

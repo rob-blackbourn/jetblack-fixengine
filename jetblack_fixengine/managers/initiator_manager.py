@@ -10,7 +10,7 @@ from typing import Callable, Optional, Tuple, Type
 from jetblack_fixparser.meta_data import ProtocolMetaData
 
 from ..initiator import Initiator, create_initiator, initiate
-from ..types import Store
+from ..types import Store, FIXApp
 from ..utils.date_utils import wait_for_day_of_week, wait_for_time_period
 from ..utils.cancellation import register_cancellation_event
 
@@ -113,7 +113,7 @@ class InitiatorManager:
 
 
 def start_initiator_manager(
-        klass: Type[Initiator],
+        app: FIXApp,
         host: str,
         port: int,
         protocol: ProtocolMetaData,
@@ -135,7 +135,7 @@ def start_initiator_manager(
 
     def initiator_factory() -> Initiator:
         return create_initiator(
-            klass,
+            app,
             protocol,
             sender_comp_id,
             target_comp_id,

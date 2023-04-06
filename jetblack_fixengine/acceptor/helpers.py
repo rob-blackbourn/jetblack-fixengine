@@ -16,7 +16,7 @@ from ..transports import (
     fix_read_async,
     TransportHandler,
 )
-from ..types import Store
+from ..types import Store, FIXApp
 from ..utils.cancellation import register_cancellation_event
 
 from .acceptor import Acceptor
@@ -32,7 +32,7 @@ AcceptorFactory = Callable[
 
 
 def _create_acceptor(
-        klass: Type[Acceptor],
+        app: FIXApp,
         protocol: ProtocolMetaData,
         sender_comp_id: str,
         target_comp_id: str,
@@ -44,7 +44,8 @@ def _create_acceptor(
         logon_time_range: Optional[Tuple[time, time]] = None,
         tz: Optional[tzinfo] = None
 ) -> Acceptor:
-    handler = klass(
+    handler = Acceptor(
+        app,
         protocol,
         sender_comp_id,
         target_comp_id,
@@ -59,7 +60,7 @@ def _create_acceptor(
 
 
 async def start_acceptor(
-        klass: Type[Acceptor],
+        app: FIXApp,
         host: str,
         port: int,
         protocol: ProtocolMetaData,
@@ -89,7 +90,7 @@ async def start_acceptor(
         )
         buffered_reader = fix_read_async(read_buffer, reader, 1024)
         handler = _create_acceptor(
-            klass,
+            app,
             protocol,
             sender_comp_id,
             target_comp_id,

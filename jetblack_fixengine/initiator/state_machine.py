@@ -10,6 +10,7 @@ from ..admin import (
     AdminMessage,
     AdminStateProcessor,
 )
+from ..types import FIXApp
 
 from .state_transitions import INITIATOR_ADMIN_TRANSITIONS
 from .types import AbstractInitiator
@@ -22,6 +23,7 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
     def __init__(
             self,
             initiator: AbstractInitiator,
+            app: FIXApp
     ) -> None:
         super().__init__(
             INITIATOR_ADMIN_TRANSITIONS,
@@ -46,6 +48,7 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
             }
         )
         self.initiator = initiator
+        self.app = app
         self._test_heartbeat_message: Optional[str] = None
 
     async def _send_logon(
@@ -66,14 +69,14 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.initiator.on_logon(admin_message.fix)
+        await self.app.on_logon(admin_message.fix)
         return None
 
     async def _acknowledge_heartbeat(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.initiator.on_heartbeat(admin_message.fix)
+        await self.app.on_heartbeat(admin_message.fix)
         return AdminMessage(AdminEvent.HEARTBEAT_ACKNOWLEDGED)
 
     async def _send_test_request(
@@ -119,7 +122,7 @@ class InitiatorAdminStateMachine(AdminStateProcessor):
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         assert admin_message.fix is not None
-        await self.initiator.on_logout(admin_message.fix)
+        await self.app.on_logout(admin_message.fix)
         return AdminMessage(AdminEvent.LOGOUT_ACKNOWLEDGED)
 
     async def _send_test_heartbeat(

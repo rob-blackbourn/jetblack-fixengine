@@ -13,7 +13,7 @@ from ..admin import (
     AdminStateProcessor,
 )
 from ..time_provider import TimeProvider
-from ..types import LoginError
+from ..types import LoginError, FIXApp
 from ..utils.date_utils import wait_for_time_period
 
 from .state_transitions import ACCEPTOR_ADMIN_TRANSITIONS
@@ -27,6 +27,7 @@ class AcceptorAdminStateMachine(AdminStateProcessor):
     def __init__(
             self,
             acceptor: AbstractAcceptor,
+            app: FIXApp,
             time_provider: TimeProvider,
             cancellation_event: asyncio.Event
     ) -> None:
@@ -61,6 +62,7 @@ class AcceptorAdminStateMachine(AdminStateProcessor):
         )
 
         self.acceptor = acceptor
+        self.app = app
         self.time_provider = time_provider
         self.cancellation_event = cancellation_event
         self._test_heartbeat_message: Optional[str] = None
@@ -90,7 +92,7 @@ class AcceptorAdminStateMachine(AdminStateProcessor):
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         try:
-            await self.acceptor.on_logon(admin_message.fix)
+            await self.app.on_logon(admin_message.fix)
             return AdminMessage(AdminEvent.LOGON_ACCEPTED)
         except LoginError:
             LOGGER.info("Logon rejected")
@@ -117,14 +119,14 @@ class AcceptorAdminStateMachine(AdminStateProcessor):
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
         await self.acceptor.send_message('LOGOUT')
-        await self.acceptor.on_logout(admin_message.fix)
+        await self.app.on_logout(admin_message.fix)
         return None
 
     async def _receive_heartbeat(
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.acceptor.on_heartbeat(admin_message.fix)
+        await self.app.on_heartbeat(admin_message.fix)
         return None
 
     async def _receive_test_request(
@@ -170,7 +172,7 @@ class AcceptorAdminStateMachine(AdminStateProcessor):
             self,
             admin_message: AdminMessage
     ) -> Optional[AdminMessage]:
-        await self.acceptor.on_logout(admin_message.fix)
+        await self.app.on_logout(admin_message.fix)
         return None
 
     async def _send_test_heartbeat(

@@ -8,12 +8,13 @@ from typing import Mapping, Any
 from jetblack_fixparser import load_yaml_protocol
 from jetblack_fixengine import FileStore
 from jetblack_fixengine import start_acceptor, Acceptor
+from jetblack_fixengine.types import FIXApp
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class MyAcceptor(Acceptor):
+class MyAcceptor(FIXApp):
     """An instance of the acceptor"""
 
     async def on_logon(self, _message: Mapping[str, Any]):
@@ -39,7 +40,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 asyncio.run(
     start_acceptor(
-        MyAcceptor,
+        MyAcceptor(),
         HOST,
         PORT,
         PROTOCOL,

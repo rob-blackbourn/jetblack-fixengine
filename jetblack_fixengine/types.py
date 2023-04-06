@@ -100,7 +100,7 @@ class LoginError(Exception):
     """An invalid state transition"""
 
 
-class FIXApplication(metaclass=ABCMeta):
+class FIXWorker(metaclass=ABCMeta):
     """Abstract base class for FIX applications"""
 
     @property
@@ -131,6 +131,23 @@ class FIXApplication(metaclass=ABCMeta):
     def heartbeat_threshold(self) -> int:
         """The heartbeat threshold"""
 
+    @abstractmethod
+    async def send_message(
+            self,
+            msg_type: str,
+            message: Optional[Mapping[str, Any]] = None
+    ) -> None:
+        """Send a FIX message
+
+        Args:
+            msg_type (str): The message type.
+            message (Optional[Mapping[str, Any]], optional): The message.
+                Defaults to None.
+        """
+
+
+class FIXApp:
+
     async def on_admin_message(self, message: Mapping[str, Any]) -> None:
         """Called when an admin message is received.
 
@@ -146,7 +163,6 @@ class FIXApplication(metaclass=ABCMeta):
             message (Mapping[str, Any]): The message sent by the acceptor.
         """
 
-    @abstractmethod
     async def on_application_message(self, message: Mapping[str, Any]) -> None:
         """Called when an application message is received.
 
@@ -155,7 +171,6 @@ class FIXApplication(metaclass=ABCMeta):
                 acceptor.
         """
 
-    @abstractmethod
     async def on_logon(self, message: Mapping[str, Any]) -> None:
         """Called when a logon message is received.
 
@@ -163,24 +178,9 @@ class FIXApplication(metaclass=ABCMeta):
             message (Mapping[str, Any]): The message sent by the acceptor.
         """
 
-    @abstractmethod
     async def on_logout(self, message: Mapping[str, Any]) -> None:
         """Called when a logout message is received.
 
         Args:
             message (Mapping[str, Any]): The message sent by the acceptor.
-        """
-
-    @abstractmethod
-    async def send_message(
-            self,
-            msg_type: str,
-            message: Optional[Mapping[str, Any]] = None
-    ) -> None:
-        """Send a FIX message
-
-        Args:
-            msg_type (str): The message type.
-            message (Optional[Mapping[str, Any]], optional): The message.
-                Defaults to None.
         """

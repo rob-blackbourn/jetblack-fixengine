@@ -19,7 +19,7 @@ from .types import (
 )
 from .state_processor import TransportStateProcessor
 
-from ..types import FIXApplication
+from ..types import FIXWorker, FIXApp
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +29,8 @@ class TransportStateMachine(TransportStateProcessor):
 
     def __init__(
             self,
-            app: FIXApplication,
+            worker: FIXWorker,
+            app: FIXApp,
             admin_state_machine: AdminStateProcessor,
             time_provider: TimeProvider
     ) -> None:
@@ -45,6 +46,7 @@ class TransportStateMachine(TransportStateProcessor):
                 }
             }
         )
+        self._worker = worker
         self._app = app
         self._admin_state_machine = admin_state_machine
         self._time_provider = time_provider
@@ -64,9 +66,9 @@ class TransportStateMachine(TransportStateProcessor):
             self,
             transport_message: TransportMessage
     ) -> Optional[TransportMessage]:
-        await self._app.session.save_message(transport_message.buffer)
+        await self._worker.session.save_message(transport_message.buffer)
 
-        fix_message = self._app.fix_message_factory.decode(
+        fix_message = self._worker.fix_message_factory.decode(
             transport_message.buffer
         )
         LOGGER.info('Received %s', fix_message.message)
@@ -78,7 +80,7 @@ class TransportStateMachine(TransportStateProcessor):
             await self._app.on_application_message(fix_message.message)
 
         msg_seq_num: int = cast(int, fix_message.message['MsgSeqNum'])
-        await self._app.session.set_incoming_seqnum(msg_seq_num)
+        await self._worker.session.set_incoming_seqnum(msg_seq_num)
 
         self._last_receive_time_utc = self._time_provider.now(timezone.utc)
 
@@ -109,8 +111,8 @@ class TransportStateMachine(TransportStateProcessor):
         seconds_since_last_receive = (
             now_utc - self._last_receive_time_utc
         ).total_seconds()
-        elapsed = seconds_since_last_receive - self._app.heartbeat_timeout
-        if elapsed > self._app.heartbeat_threshold:
+        elapsed = seconds_since_last_receive - self._worker.heartbeat_timeout
+        if elapsed > self._worker.heartbeat_threshold:
             await self._admin_state_machine.process(
                 AdminMessage(AdminEvent.TEST_HEARTBEAT_REQUIRED)
             )
