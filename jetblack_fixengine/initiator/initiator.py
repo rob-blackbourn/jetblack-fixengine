@@ -161,6 +161,7 @@ class InitiatorEngine(AbstractInitiatorEngine):
         self._stop_event.set()
 
     async def wait_stopped(self) -> None:
+        """Wait for the engine to be stopped"""
         await self._stop_event.wait()
 
     async def send_message(

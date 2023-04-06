@@ -35,6 +35,7 @@ class AbstractAcceptorEngine(FIXEngine, metaclass=ABCMeta):
 
 
 class AcceptorConfig:
+    """The acceptor configuration"""
 
     def __init__(
             self,

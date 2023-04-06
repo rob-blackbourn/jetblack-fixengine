@@ -1,7 +1,7 @@
 """Types"""
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Awaitable, Callable, Mapping, Optional, Tuple
+from typing import Any, Mapping, Optional, Tuple
 
 from jetblack_fixparser.fix_message import FixMessageFactory
 
@@ -78,6 +78,7 @@ class Session(metaclass=ABCMeta):
 
 
 class Store(metaclass=ABCMeta):
+    """The abstract class for stores"""
 
     @abstractmethod
     def get_session(self, sender_comp_id: str, target_comp_id: str) -> Session:

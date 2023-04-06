@@ -62,6 +62,12 @@ async def start_initiator(
         app: FIXApplication,
         config: InitiatorConfig,
 ) -> None:
+    """Start the initiator.
+
+    Args:
+        app (FIXApplication): The FIX application.
+        config (InitiatorConfig): The initiator configuration.
+    """
     cancellation_event = Event()
     loop = asyncio.get_event_loop()
     register_cancellation_event(cancellation_event, loop)

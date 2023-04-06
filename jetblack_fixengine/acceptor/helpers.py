@@ -22,6 +22,12 @@ async def start_acceptor(
         app: FIXApplication,
         config: AcceptorConfig
 ) -> None:
+    """Start an acceptor.
+
+    Args:
+        app (FIXApplication): The FIX application.
+        config (AcceptorConfig): The acceptor configuration.
+    """
     cancellation_event = Event()
 
     async def accept(reader: StreamReader, writer: StreamWriter) -> None:

@@ -19,6 +19,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class InitiatorAdminStateMachine(AdminStateProcessor):
+    """The admin state machine for an initiator"""
 
     def __init__(
             self,

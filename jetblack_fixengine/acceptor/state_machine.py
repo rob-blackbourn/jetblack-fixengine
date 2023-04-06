@@ -23,6 +23,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AcceptorAdminStateMachine(AdminStateProcessor):
+    """The admin state machine for an acceptor"""
 
     def __init__(
             self,

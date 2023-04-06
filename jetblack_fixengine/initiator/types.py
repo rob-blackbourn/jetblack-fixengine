@@ -14,6 +14,7 @@ class AbstractInitiatorEngine(FIXEngine, metaclass=ABCMeta):
 
 
 class InitiatorConfig:
+    """The initiator configuration"""
 
     def __init__(
             self,
