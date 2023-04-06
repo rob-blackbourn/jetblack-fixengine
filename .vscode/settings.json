@@ -29,6 +29,7 @@
         "msgcat",
         "mypy",
         "NUMINGROUP",
+        "pathlib",
         "popleft",
         "pylint",
         "pytest",

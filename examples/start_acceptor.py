@@ -9,6 +9,7 @@ from jetblack_fixparser import load_yaml_protocol
 from jetblack_fixengine import (
     FileStore,
     start_acceptor,
+    AcceptorConfig,
     FIXApplication,
     FIXEngine
 )
@@ -42,27 +43,21 @@ class MyAcceptor(FIXApplication):
         LOGGER.info('on_application_message')
 
 
-PROTOCOL = load_yaml_protocol(Path('etc') / 'FIX44.yaml')
-STORE = FileStore(Path("store"))
-HOST = '0.0.0.0'
-PORT = 9801
-SENDER_COMP_ID = 'ACCEPTOR'
-TARGET_COMP_ID = 'INITIATOR1'
-LOGON_TIMEOUT = 60
-HEARTBEAT_TIMEOUT = 30
-
 logging.basicConfig(level=logging.DEBUG)
+
+app = MyAcceptor()
+config = AcceptorConfig(
+    '0.0.0.0',
+    9801,
+    load_yaml_protocol(Path('etc') / 'FIX44.yaml'),
+    'ACCEPTOR',
+    'INITIATOR1',
+    FileStore(Path("store"))
+)
 
 asyncio.run(
     start_acceptor(
-        MyAcceptor(),
-        HOST,
-        PORT,
-        PROTOCOL,
-        SENDER_COMP_ID,
-        TARGET_COMP_ID,
-        STORE,
-        HEARTBEAT_TIMEOUT,
-        client_shutdown_timeout=10
+        app,
+        config
     )
 )
