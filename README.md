@@ -59,7 +59,7 @@ specified in the standard.
 
 Because of this the protocols are provided by config files. Historically
 `XML` was used. While this is supported, `yaml` is preferred and some
-example protocols are provided in the
+examples are provided in the
 [etc](https://github.com/rob-blackbourn/jetblack-fixengine/tree/master/etc)
 folder.
 
@@ -93,10 +93,15 @@ class MyInitiator(FIXApplication):
 
     async def on_logon(
             self,
-            _message: Mapping[str, Any],
+            message: Mapping[str, Any],
             fix_engine: FIXEngine
     ) -> None:
-        LOGGER.info('on_logon')
+        LOGGER.info(
+            'on_logon[%s] %s/%s',
+            message['MsgSeqNum'],
+            message['SenderCompID'],
+            message['TargetCompID'],
+        )
 
     async def on_logout(
             self,

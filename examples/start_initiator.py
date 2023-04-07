@@ -22,10 +22,15 @@ class MyInitiator(FIXApplication):
 
     async def on_logon(
             self,
-            _message: Mapping[str, Any],
+            message: Mapping[str, Any],
             fix_engine: FIXEngine
     ) -> None:
-        LOGGER.info('on_logon')
+        LOGGER.info(
+            'on_logon[%s] %s/%s',
+            message['MsgSeqNum'],
+            message['SenderCompID'],
+            message['TargetCompID'],
+        )
 
     async def on_logout(
             self,
